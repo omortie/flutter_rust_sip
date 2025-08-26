@@ -12,6 +12,23 @@ use std::convert::TryInto;
 // GLOBAL VARS
 static REALM_GLOBAL: &'static str = "asterisk";
 
+pub fn ensure_pj_thread_registered() {
+    thread_local! {
+        static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
+    }
+    REGISTERED.with(|reg| {
+        if !reg.get() {
+            let mut thread_desc = [0i64; 64]; // PJ_THREAD_DESC_SIZE is usually 64, type must match pj_thread_desc
+            let mut thread = std::ptr::null_mut();
+            let thread_name = CString::new("rustffi").unwrap();
+            unsafe {
+                pj::pj_thread_register(thread_name.as_ptr(), thread_desc.as_mut_ptr(), &mut thread);
+            }
+            reg.set(true);
+        }
+    });
+}
+
 pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode) -> Result<i8,TelephonyError> {
 
     // INIT

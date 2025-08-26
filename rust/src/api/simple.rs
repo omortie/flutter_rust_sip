@@ -11,6 +11,7 @@ pub fn init_app() {
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 {
+    ensure_pj_thread_registered();
     accountSetup(username, uri, password);
     return 1;
 }
