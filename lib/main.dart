@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_rust_sip/src/rust/api/lib.dart';
-import 'package:flutter_rust_sip/src/rust/frb_generated.dart';
+import 'package:flutter_rust_sip/flutter_rust_sip.dart';
 
 Future<void> main() async {
   await RustLib.init();
