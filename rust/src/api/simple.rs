@@ -16,6 +16,15 @@ pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 
     return 1;
 }
 
+// make call ffi
+#[flutter_rust_bridge::frb(sync)]
+pub fn ffi_make_call(phone_number: String, domain: String) -> i8 {
+    println!("making call to {}@{}", phone_number, domain);
+    ensure_pj_thread_registered();
+    make_call(&phone_number, &domain);
+    return 1;
+}
+
 // #[no_mangle]
 // pub extern "C" fn ffi_make_call(phone_number: *const c_char, domain: *const c_char) -> c_int {
 //     let phone_number = unsafe { CStr::from_ptr(phone_number) }.to_string_lossy().to_string();

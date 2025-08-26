@@ -16,6 +16,12 @@ class MyApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final name = useState('');
     final result = useState('');
+    const domain = "127.0.0.1";
+
+    useEffect(() {
+      ffiAccountSetup(username: 'mortie', uri: domain, password: 'mortie');
+      return null;
+    }, []);
 
     return MaterialApp(
       home: Scaffold(
@@ -26,13 +32,18 @@ class MyApp extends HookConsumerWidget {
               TextField(
                 onChanged: (value) async {
                   name.value = value;
-                  if (name.value.isNotEmpty) {
-                    ffiAccountSetup(username: 'user1', uri: '127.0.0.1', password: 'user1');
-                  }
                 },
               ),
               Text(
                 'Action: Call Rust `greet("${name.value}")`\nResult: `${result.value}`',
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (name.value.isNotEmpty) {
+                    ffiMakeCall(phoneNumber: name.value, domain: domain);
+                  }
+                },
+                child: const Text('Call Rust'),
               ),
             ],
           ),

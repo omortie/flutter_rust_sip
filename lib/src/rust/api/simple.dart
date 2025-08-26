@@ -15,3 +15,9 @@ int ffiAccountSetup({
   uri: uri,
   password: password,
 );
+
+int ffiMakeCall({required String phoneNumber, required String domain}) =>
+    RustLib.instance.api.crateApiSimpleFfiMakeCall(
+      phoneNumber: phoneNumber,
+      domain: domain,
+    );

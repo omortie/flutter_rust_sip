@@ -66,7 +66,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 46975417;
+  int get rustContentHash => -209785244;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -81,6 +81,11 @@ abstract class RustLibApi extends BaseApi {
     required String username,
     required String uri,
     required String password,
+  });
+
+  int crateApiSimpleFfiMakeCall({
+    required String phoneNumber,
+    required String domain,
   });
 
   Future<void> crateApiSimpleInitApp();
@@ -127,6 +132,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  int crateApiSimpleFfiMakeCall({
+    required String phoneNumber,
+    required String domain,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(phoneNumber, serializer);
+          sse_encode_String(domain, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_i_8,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSimpleFfiMakeCallConstMeta,
+        argValues: [phoneNumber, domain],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSimpleFfiMakeCallConstMeta => const TaskConstMeta(
+    debugName: "ffi_make_call",
+    argNames: ["phoneNumber", "domain"],
+  );
+
+  @override
   Future<void> crateApiSimpleInitApp() {
     return handler.executeNormal(
       NormalTask(
@@ -135,7 +169,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
