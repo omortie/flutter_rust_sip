@@ -262,7 +262,6 @@ pub fn accountSetup(username : String, uri : String, password : String) -> Resul
         error_exit("Error Adding Account");
         return Err(TelephonyError::AccountCreationError("Error Adding Account".to_string()));
     }
-    println!("successfully added account : 0");
     return Ok(0);
 }
 

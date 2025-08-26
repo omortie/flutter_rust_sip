@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:my_app/src/rust/api/simple.dart';
-import 'package:my_app/src/rust/frb_generated.dart';
+import 'package:flutter_rust_sip/src/rust/api/simple.dart';
+import 'package:flutter_rust_sip/src/rust/frb_generated.dart';
 
 Future<void> main() async {
   await RustLib.init();
@@ -35,7 +35,7 @@ class MyApp extends HookConsumerWidget {
             spacing: 16,
             children: [
               Text(
-                'Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
+                'Initialization Result: `${result.value}` Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
               ),
               TextField(
                 decoration: const InputDecoration(hintText: 'Phone Number'),
@@ -44,7 +44,7 @@ class MyApp extends HookConsumerWidget {
                 },
               ),
               Text(
-                'Action: Call Rust `greet("${name.value}")`\nResult: `${result.value}`',
+                'Action: Call `("${name.value}")`',
               ),
               ElevatedButton(
                 onPressed:

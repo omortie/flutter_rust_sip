@@ -18,7 +18,6 @@ pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 
 // make call ffi
 #[flutter_rust_bridge::frb(sync)]
 pub fn ffi_make_call(phone_number: String, domain: String) -> i8 {
-    println!("making call to {}@{}", phone_number, domain);
     ensure_pj_thread_registered();
     return make_call(&phone_number, &domain).unwrap_or(1);
 }
