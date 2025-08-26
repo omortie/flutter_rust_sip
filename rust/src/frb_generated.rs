@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -209785244;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1652452333;
 
 // Section: executor
 
@@ -45,7 +45,7 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
-fn wire__crate__api__simple__ffi_account_setup_impl(
+fn wire__crate__api__lib__ffi_account_setup_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
     data_len_: i32,
@@ -71,7 +71,7 @@ fn wire__crate__api__simple__ffi_account_setup_impl(
             let api_password = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(crate::api::simple::ffi_account_setup(
+                let output_ok = Result::<_, ()>::Ok(crate::api::lib::ffi_account_setup(
                     api_username,
                     api_uri,
                     api_password,
@@ -81,16 +81,17 @@ fn wire__crate__api__simple__ffi_account_setup_impl(
         },
     )
 }
-fn wire__crate__api__simple__ffi_make_call_impl(
+fn wire__crate__api__lib__ffi_make_call_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
     data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "ffi_make_call",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
             let message = unsafe {
@@ -105,17 +106,21 @@ fn wire__crate__api__simple__ffi_make_call_impl(
             let api_phone_number = <String>::sse_decode(&mut deserializer);
             let api_domain = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(crate::api::simple::ffi_make_call(
-                    api_phone_number,
-                    api_domain,
-                ))?;
-                Ok(output_ok)
-            })())
+            move |context| async move {
+                transform_result_sse::<_, ()>(
+                    (move || async move {
+                        let output_ok = Result::<_, ()>::Ok(
+                            crate::api::lib::ffi_make_call(api_phone_number, api_domain).await,
+                        )?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
         },
     )
 }
-fn wire__crate__api__simple__init_app_impl(
+fn wire__crate__api__lib__init_app_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -141,7 +146,7 @@ fn wire__crate__api__simple__init_app_impl(
             move |context| {
                 transform_result_sse::<_, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok({
-                        crate::api::simple::init_app();
+                        crate::api::lib::init_app();
                     })?;
                     Ok(output_ok)
                 })())
@@ -214,7 +219,8 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        3 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__lib__ffi_make_call_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__lib__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -227,8 +233,7 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__simple__ffi_account_setup_impl(ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__simple__ffi_make_call_impl(ptr, rust_vec_len, data_len),
+        1 => wire__crate__api__lib__ffi_account_setup_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

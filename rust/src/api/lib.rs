@@ -1,7 +1,8 @@
+use flutter_rust_bridge::{frb};
 // FFI-safe wrappers for telephony functions
 use telephony::*;
 
-#[flutter_rust_bridge::frb(init)]
+#[frb(init)]
 pub fn init_app() {
     // Default utilities - feel free to customize
     flutter_rust_bridge::setup_default_user_utils();
@@ -9,15 +10,14 @@ pub fn init_app() {
     initialize_telephony(4,OnIncommingCall::AutoAnswer,5070,TransportMode::UDP);
 }
 
-#[flutter_rust_bridge::frb(sync)]
+#[frb(sync)]
 pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 {
     ensure_pj_thread_registered();
     return accountSetup(username, uri, password).unwrap_or(1);
 }
 
 // make call ffi
-#[flutter_rust_bridge::frb(sync)]
-pub fn ffi_make_call(phone_number: String, domain: String) -> i8 {
+pub async fn ffi_make_call(phone_number: String, domain: String) -> i8 {
     ensure_pj_thread_registered();
     return make_call(&phone_number, &domain).unwrap_or(1);
 }

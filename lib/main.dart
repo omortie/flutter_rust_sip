@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_rust_sip/src/rust/api/simple.dart';
+import 'package:flutter_rust_sip/src/rust/api/lib.dart';
 import 'package:flutter_rust_sip/src/rust/frb_generated.dart';
 
 Future<void> main() async {
@@ -35,7 +35,7 @@ class MyApp extends HookConsumerWidget {
             spacing: 16,
             children: [
               Text(
-                'Initialization Result: `${result.value}` Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
+                'Result: `${result.value}` Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
               ),
               TextField(
                 decoration: const InputDecoration(hintText: 'Phone Number'),
@@ -52,7 +52,10 @@ class MyApp extends HookConsumerWidget {
                         ? null
                         : () async {
                   if (name.value.isNotEmpty) {
-                    ffiMakeCall(phoneNumber: name.value, domain: domain);
+                            result.value = await ffiMakeCall(
+                              phoneNumber: name.value,
+                              domain: domain,
+                            );
                   }
                 },
                 child: Text('Call ${name.value}'),

@@ -3,7 +3,7 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
-import 'api/simple.dart';
+import 'api/lib.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -55,7 +55,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   @override
   Future<void> executeRustInitializers() async {
-    await api.crateApiSimpleInitApp();
+    await api.crateApiLibInitApp();
   }
 
   @override
@@ -66,7 +66,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -209785244;
+  int get rustContentHash => 1652452333;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -77,18 +77,18 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  int crateApiSimpleFfiAccountSetup({
+  int crateApiLibFfiAccountSetup({
     required String username,
     required String uri,
     required String password,
   });
 
-  int crateApiSimpleFfiMakeCall({
+  Future<int> crateApiLibFfiMakeCall({
     required String phoneNumber,
     required String domain,
   });
 
-  Future<void> crateApiSimpleInitApp();
+  Future<void> crateApiLibInitApp();
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -100,7 +100,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  int crateApiSimpleFfiAccountSetup({
+  int crateApiLibFfiAccountSetup({
     required String username,
     required String uri,
     required String password,
@@ -118,50 +118,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_i_8,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleFfiAccountSetupConstMeta,
+        constMeta: kCrateApiLibFfiAccountSetupConstMeta,
         argValues: [username, uri, password],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleFfiAccountSetupConstMeta =>
-      const TaskConstMeta(
-        debugName: "ffi_account_setup",
-        argNames: ["username", "uri", "password"],
-      );
+  TaskConstMeta get kCrateApiLibFfiAccountSetupConstMeta => const TaskConstMeta(
+    debugName: "ffi_account_setup",
+    argNames: ["username", "uri", "password"],
+  );
 
   @override
-  int crateApiSimpleFfiMakeCall({
+  Future<int> crateApiLibFfiMakeCall({
     required String phoneNumber,
     required String domain,
   }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(phoneNumber, serializer);
           sse_encode_String(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_8,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleFfiMakeCallConstMeta,
+        constMeta: kCrateApiLibFfiMakeCallConstMeta,
         argValues: [phoneNumber, domain],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleFfiMakeCallConstMeta => const TaskConstMeta(
+  TaskConstMeta get kCrateApiLibFfiMakeCallConstMeta => const TaskConstMeta(
     debugName: "ffi_make_call",
     argNames: ["phoneNumber", "domain"],
   );
 
   @override
-  Future<void> crateApiSimpleInitApp() {
+  Future<void> crateApiLibInitApp() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -177,14 +181,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleInitAppConstMeta,
+        constMeta: kCrateApiLibInitAppConstMeta,
         argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleInitAppConstMeta =>
+  TaskConstMeta get kCrateApiLibInitAppConstMeta =>
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @protected

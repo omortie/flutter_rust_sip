@@ -10,14 +10,16 @@ int ffiAccountSetup({
   required String username,
   required String uri,
   required String password,
-}) => RustLib.instance.api.crateApiSimpleFfiAccountSetup(
+}) => RustLib.instance.api.crateApiLibFfiAccountSetup(
   username: username,
   uri: uri,
   password: password,
 );
 
-int ffiMakeCall({required String phoneNumber, required String domain}) =>
-    RustLib.instance.api.crateApiSimpleFfiMakeCall(
-      phoneNumber: phoneNumber,
-      domain: domain,
-    );
+Future<int> ffiMakeCall({
+  required String phoneNumber,
+  required String domain,
+}) => RustLib.instance.api.crateApiLibFfiMakeCall(
+  phoneNumber: phoneNumber,
+  domain: domain,
+);
