@@ -15,11 +15,15 @@ class MyApp extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = useState('');
-    final result = useState('');
+    final result = useState(1);
     const domain = "127.0.0.1";
 
     useEffect(() {
-      ffiAccountSetup(username: 'mortie', uri: domain, password: 'mortie');
+      result.value = ffiAccountSetup(
+        username: 'user1',
+        uri: domain,
+        password: 'user1',
+      );
       return null;
     }, []);
 
@@ -28,8 +32,13 @@ class MyApp extends HookConsumerWidget {
         appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
         body: Center(
           child: Column(
+            spacing: 16,
             children: [
+              Text(
+                'Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
+              ),
               TextField(
+                decoration: const InputDecoration(hintText: 'Phone Number'),
                 onChanged: (value) async {
                   name.value = value;
                 },
@@ -38,12 +47,15 @@ class MyApp extends HookConsumerWidget {
                 'Action: Call Rust `greet("${name.value}")`\nResult: `${result.value}`',
               ),
               ElevatedButton(
-                onPressed: () async {
+                onPressed:
+                    name.value.isEmpty
+                        ? null
+                        : () async {
                   if (name.value.isNotEmpty) {
                     ffiMakeCall(phoneNumber: name.value, domain: domain);
                   }
                 },
-                child: const Text('Call Rust'),
+                child: Text('Call ${name.value}'),
               ),
             ],
           ),

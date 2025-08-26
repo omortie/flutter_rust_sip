@@ -262,6 +262,7 @@ pub fn accountSetup(username : String, uri : String, password : String) -> Resul
         error_exit("Error Adding Account");
         return Err(TelephonyError::AccountCreationError("Error Adding Account".to_string()));
     }
+    println!("successfully added account : 0");
     return Ok(0);
 }
 
@@ -273,18 +274,7 @@ pub fn accountSetup(username : String, uri : String, password : String) -> Resul
 //  |_|  |_| \___||_|| .__/  \___||_|   
 //                   | |                
 //                   |_|                
-    
-pub fn make_pj_str_t_OLD(input : String ) -> pj::pj_str_t {
-    // TODO: See about getting Rust Strings to work, 
-    //       Currently failing at runtime
-    // println!("-----------------------------------");
-    let len = input.len() as ::std::os::raw::c_long;
-    let bytes = input.clone().into_bytes();
-    let mut cchars: Vec<c_char> = bytes.into_iter().map(|b| b as c_char).collect();
-    let slice = cchars.as_mut_slice();
-    let input_ptr: *mut c_char = slice.as_mut_ptr();
-    pj::pj_str_t{ slen: len, ptr: input_ptr}
-}
+
 
 pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,TelephonyError> {
     let len = input.len() as ::std::os::raw::c_long;

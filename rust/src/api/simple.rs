@@ -12,8 +12,7 @@ pub fn init_app() {
 #[flutter_rust_bridge::frb(sync)]
 pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 {
     ensure_pj_thread_registered();
-    accountSetup(username, uri, password);
-    return 1;
+    return accountSetup(username, uri, password).unwrap_or(1);
 }
 
 // make call ffi
@@ -21,8 +20,7 @@ pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 
 pub fn ffi_make_call(phone_number: String, domain: String) -> i8 {
     println!("making call to {}@{}", phone_number, domain);
     ensure_pj_thread_registered();
-    make_call(&phone_number, &domain);
-    return 1;
+    return make_call(&phone_number, &domain).unwrap_or(1);
 }
 
 // #[no_mangle]
