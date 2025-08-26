@@ -5,9 +5,9 @@ pub fn main() {
     let init_success = tel::initialize_telephony(0,tel::OnIncommingCall::AutoAnswer,5070,tel::TransportMode::UDP);
 
     //Account Setup
-    let username = String::from ("USERNAME");
-    let reg_uri = String::from ("ADDRESS");
-    let password = String::from ("PASSWORD");
+    let username = String::from ("mortie");
+    let reg_uri = String::from ("127.0.0.1:5060");
+    let password = String::from ("mortie");
     tel::accountSetup(username, reg_uri, password);
 
     loop {
@@ -21,18 +21,18 @@ pub fn main() {
                 if input == "h\n" { unsafe{ tel::hangup_calls()}; }
                 if input == "d\n" { tel::send_dtmf(123456); }
                 if input == "f\n" { tel::send_dtmf(2); }
-                if input == "c\n" {
+                if input == "c\n" { 
                     let mut telNum = String::new();
                     println!("Type In telephone number");
-
+                    
                     match io::stdin().read_line(&mut telNum) {
                         Ok(n) => {
                             let len = telNum.len();
                             telNum.truncate(len - 1);
-                            tel::make_call(&telNum,"DOMAIN"); }
+                            tel::make_call(&telNum,"127.0.0.1"); }
                         Err(error) => println!("error: {}", error),
                     }
-                }
+                } 
             }
             Err(error) => println!("error: {}", error),
         }
