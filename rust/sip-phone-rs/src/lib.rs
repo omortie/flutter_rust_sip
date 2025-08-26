@@ -218,7 +218,7 @@ pub fn accountSetup(username: String, uri: String, password: String) -> Result<i
     let mut acc_cfg = MaybeUninit::<pj::pjsua_acc_config>::uninit();
     unsafe {
         pj::pjsua_acc_config_default(acc_cfg.as_mut_ptr());
-        let mut acc_cfg = acc_cfg.assume_init();
+        let mut acc_cfg_initialized = acc_cfg.assume_init();
         let acc_id: String = [
             "sip:".to_string(),
             username.clone(),
@@ -259,16 +259,16 @@ pub fn accountSetup(username: String, uri: String, password: String) -> Result<i
         };
 
         // Setting members of the struct
-        acc_cfg.id = acc_id_pj_str_t;
-        acc_cfg.reg_uri = reg_uri_pj_str_t;
-        acc_cfg.cred_count = 1;
-        acc_cfg.cred_info[0].realm = realm_pj_str_t;
-        acc_cfg.cred_info[0].scheme = scheme_pj_str_t;
-        acc_cfg.cred_info[0].username = username_pj_str_t;
-        acc_cfg.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
+        acc_cfg_initialized.id = acc_id_pj_str_t;
+        acc_cfg_initialized.reg_uri = reg_uri_pj_str_t;
+        acc_cfg_initialized.cred_count = 1;
+        acc_cfg_initialized.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg_initialized.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg_initialized.cred_info[0].username = username_pj_str_t;
+        acc_cfg_initialized.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
             .try_into()
             .unwrap();
-        acc_cfg.cred_info[0].data = data_pj_str_t;
+        acc_cfg_initialized.cred_info[0].data = data_pj_str_t;
 
             let acc_id: pj::pjsua_acc_id;
             acc_id = 0;

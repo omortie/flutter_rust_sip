@@ -1,3 +1,0 @@
-[submodule "rust/pjproject-sys/pjproject"]
-	path = rust/pjproject-sys/pjproject
-	url = git@github.com:pjsip/pjproject.git

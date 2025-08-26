@@ -25,7 +25,8 @@ fn link_libs_windows() {
 
 // UNIX
 fn link_libs_unix() {
-    println!("cargo:rustc-link-search=native=/home/mortie/Programming/Playground/my_app/rust/pjproject-sys/pjlibs/linux");
+    let project_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    println!("cargo:rustc-link-search={}/pjlibs/linux", project_dir);
 
     println!("cargo:rustc-link-lib=dylib=pjsua2");
     println!("cargo:rustc-link-lib=dylib=pjsua");
