@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
 
-Future<void> main() async {
-  await RustLib.init();
-  runApp(const MyApp());
-}
-
-class MyApp extends HookConsumerWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final name = useState('');
-    final result = useState(1);
-    const domain = "127.0.0.1";
+  State<MyApp> createState() => _MyAppState();
+}
 
-    useEffect(() {
-      result.value = ffiAccountSetup(
+class _MyAppState extends State<MyApp> {
+  String name = '';
+  int result = 1;
+  final String domain = "127.0.0.1";
+
+  @override
+  void initState() {
+    result = ffiAccountSetup(
         username: 'user1',
         uri: domain,
         password: 'user1',
       );
-      return null;
-    }, []);
+    super.initState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
@@ -34,30 +33,35 @@ class MyApp extends HookConsumerWidget {
             spacing: 16,
             children: [
               Text(
-                'Result: `${result.value}` Initialization state: ${result.value == 0 ? "Initialized" : "Not initialized"}',
+                'Result: `$result` Initialization state: ${result == 0 ? "Initialized" : "Not initialized"}',
               ),
               TextField(
                 decoration: const InputDecoration(hintText: 'Phone Number'),
                 onChanged: (value) async {
-                  name.value = value;
+                  setState(() {
+                    name = value;
+                  });
                 },
               ),
               Text(
-                'Action: Call `("${name.value}")`',
+                'Action: Call `("$name")`',
               ),
               ElevatedButton(
                 onPressed:
-                    name.value.isEmpty
+                    name.isEmpty
                         ? null
                         : () async {
-                  if (name.value.isNotEmpty) {
-                            result.value = await ffiMakeCall(
-                              phoneNumber: name.value,
+                  if (name.isNotEmpty) {
+                            final res = await ffiMakeCall(
+                              phoneNumber: name,
                               domain: domain,
                             );
+                            setState(() {
+                              result = res;
+                            });
                   }
                 },
-                child: Text('Call ${name.value}'),
+                child: Text('Call $name'),
               ),
             ],
           ),
