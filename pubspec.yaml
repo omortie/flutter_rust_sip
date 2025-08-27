@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  rust_lib_my_app:
+  rust_sip:
     path: rust_builder
   flutter_rust_bridge: 2.11.1
   freezed_annotation: ^2.0.0
