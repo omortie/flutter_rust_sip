@@ -1,6 +1,6 @@
 use flutter_rust_bridge::{frb};
 // FFI-safe wrappers for telephony functions
-use telephony::*;
+use pjsip::*;
 
 #[frb(init)]
 pub fn init_app() {

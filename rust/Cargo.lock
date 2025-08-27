@@ -649,10 +649,11 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.1"
-source = "git+https://github.com/omortie/pjsip_sys.git#f96203f77d2caf6ac7d8f1f9a5d1577394073f63"
+source = "git+https://github.com/omortie/pjsip_sys.git#35861d147180c5ba4f636a6dda9c9d8f9ab038b2"
 dependencies = [
  "bindgen",
  "pkg-config",
+ "thiserror",
 ]
 
 [[package]]
@@ -738,7 +739,7 @@ name = "rust_lib_my_app"
 version = "0.1.0"
 dependencies = [
  "flutter_rust_bridge",
- "te-telephony-rs",
+ "pjsip-sys",
 ]
 
 [[package]]
@@ -808,28 +809,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "te-telephony-rs"
-version = "0.1.0"
-source = "git+https://github.com/omortie/sip-phone-rs.git#54043d10608deb0a3b7a10f949f944c50009a66b"
-dependencies = [
- "pjsip-sys",
- "thiserror",
-]
-
-[[package]]
 name = "thiserror"
-version = "1.0.69"
+version = "2.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
+checksum = "3467d614147380f2e4e374161426ff399c91084acd2363eaf549172b3d5e60c0"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.69"
+version = "2.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+checksum = "6c5e1be1c48b9172ee610da68fd9cd2770e7a4056cb3fc98710ee6906f0c7960"
 dependencies = [
  "proc-macro2",
  "quote",
