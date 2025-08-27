@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![warn(dead_code)]
 // #![warn(unused_parens)] 
-extern crate pjproject as pj;
+extern crate pjsip as pj;
 
 use thiserror::Error;
 use std::ffi::CString;

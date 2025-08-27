@@ -1,0 +1,16 @@
+[package]
+version = "0.0.1"
+name = "pjsip-sys"
+description = "Rust binding to PJSIP"
+edition = "2018"
+
+[lib]
+name = "pjsip"
+path = "src/lib.rs"
+
+[build-dependencies]
+bindgen = "0.69"
+pkg-config = "0.3.16"
+
+
+[dependencies]

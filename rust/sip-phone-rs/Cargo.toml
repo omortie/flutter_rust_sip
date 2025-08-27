@@ -12,4 +12,4 @@ path = "src/lib.rs"
 
 [dependencies]
 thiserror = "1.0"
-pjproject-sys = { path = "../pjproject-sys" } 
+pjsip-sys = { path = "../pjsip-sys" } 
