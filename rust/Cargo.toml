@@ -1,5 +1,5 @@
 [package]
-name = "rust_lib_my_app"
+name = "flutter_rust_sip"
 version = "0.1.0"
 edition = "2018"
 
@@ -8,7 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
-pjsip-sys = { git = "https://github.com/omortie/pjsip_sys.git" } 
+pjsip-sys = { git = "https://github.com/omortie/pjsip-sys.git" } 
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

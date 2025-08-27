@@ -316,6 +316,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "flutter_rust_sip"
+version = "0.1.0"
+dependencies = [
+ "flutter_rust_bridge",
+ "pjsip-sys",
+]
+
+[[package]]
 name = "futures"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -649,7 +657,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.1"
-source = "git+https://github.com/omortie/pjsip_sys.git#35861d147180c5ba4f636a6dda9c9d8f9ab038b2"
+source = "git+https://github.com/omortie/pjsip-sys.git#346ca8ac8e64e06bbb9e7a6bf6a5782ddc25bbc4"
 dependencies = [
  "bindgen",
  "pkg-config",
@@ -733,14 +741,6 @@ name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
-
-[[package]]
-name = "rust_lib_my_app"
-version = "0.1.0"
-dependencies = [
- "flutter_rust_bridge",
- "pjsip-sys",
-]
 
 [[package]]
 name = "rustc-demangle"
