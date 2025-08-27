@@ -649,6 +649,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.1"
+source = "git+https://github.com/omortie/pjsip_sys.git#f96203f77d2caf6ac7d8f1f9a5d1577394073f63"
 dependencies = [
  "bindgen",
  "pkg-config",
@@ -809,6 +810,7 @@ dependencies = [
 [[package]]
 name = "te-telephony-rs"
 version = "0.1.0"
+source = "git+https://github.com/omortie/sip-phone-rs.git#54043d10608deb0a3b7a10f949f944c50009a66b"
 dependencies = [
  "pjsip-sys",
  "thiserror",

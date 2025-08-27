@@ -8,7 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
-te-telephony-rs = { path = "./sip-phone-rs" } 
+te-telephony-rs = { git = "https://github.com/omortie/sip-phone-rs.git" } 
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
