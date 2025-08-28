@@ -1,6 +1,6 @@
 use flutter_rust_bridge::{frb};
 // FFI-safe wrappers for telephony functions
-use pjsip::*;
+use crate::core::utils::*;
 
 #[frb(init)]
 pub fn init_app() {
@@ -11,9 +11,9 @@ pub fn init_app() {
 }
 
 #[frb(sync)]
-pub fn ffi_account_setup(username: String, uri: String, password: String) -> i8 {
+pub fn ffi_account_setup(username: String, password: String, uri: String, p2p: bool) -> i8 {
     ensure_pj_thread_registered();
-    return accountSetup(username, uri, password).unwrap_or(1);
+    return accountSetup(username, password, uri, p2p).unwrap_or(1);
 }
 
 // make call ffi

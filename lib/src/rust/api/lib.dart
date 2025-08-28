@@ -8,12 +8,14 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 int ffiAccountSetup({
   required String username,
-  required String uri,
   required String password,
+  required String uri,
+  required bool p2P,
 }) => RustLib.instance.api.crateApiLibFfiAccountSetup(
   username: username,
-  uri: uri,
   password: password,
+  uri: uri,
+  p2P: p2P,
 );
 
 Future<int> ffiMakeCall({

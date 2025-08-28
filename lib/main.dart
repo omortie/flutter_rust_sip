@@ -11,14 +11,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String name = '';
   int result = 1;
-  final String domain = "127.0.0.1";
+  String domain = "127.0.0.1";
 
   @override
   void initState() {
     result = ffiAccountSetup(
-        username: 'user1',
-        uri: domain,
-        password: 'user1',
+      username: 'user1',
+      password: 'user1',
+      uri: domain,
+      p2P: true,
       );
     super.initState();
   }
@@ -40,6 +41,14 @@ class _MyAppState extends State<MyApp> {
                 onChanged: (value) async {
                   setState(() {
                     name = value;
+                  });
+                },
+              ),
+              TextField(
+                decoration: const InputDecoration(hintText: 'Domain'),
+                onChanged: (value) async {
+                  setState(() {
+                    domain = value;
                   });
                 },
               ),
