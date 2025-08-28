@@ -250,6 +250,7 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
     acc_cfg_ref.cred_info[0].username = username_pj_str_t;
     acc_cfg_ref.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
     acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+    acc_cfg_ref.
 
     let acc_id : pj::pjsua_acc_id;
     acc_id = 0 ;
@@ -274,18 +275,6 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
 //  |_|  |_| \___||_|| .__/  \___||_|   
 //                   | |                
 //                   |_|                
-    
-pub fn make_pj_str_t_OLD(input : String ) -> pj::pj_str_t {
-    // TODO: See about getting Rust Strings to work, 
-    //       Currently failing at runtime
-    // println!("-----------------------------------");
-    let len = input.len() as ::std::os::raw::c_long;
-    let bytes = input.clone().into_bytes();
-    let mut cchars: Vec<c_char> = bytes.into_iter().map(|b| b as c_char).collect();
-    let slice = cchars.as_mut_slice();
-    let input_ptr: *mut c_char = slice.as_mut_ptr();
-    pj::pj_str_t{ slen: len, ptr: input_ptr}
-}
 
 pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,TelephonyError> {
     let len = input.len() as ::std::os::raw::c_long;

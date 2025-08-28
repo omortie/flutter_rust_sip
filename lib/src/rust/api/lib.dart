@@ -25,3 +25,9 @@ Future<int> ffiMakeCall({
   phoneNumber: phoneNumber,
   domain: domain,
 );
+
+Future<int> ffiSendDtmf({required int digit}) =>
+    RustLib.instance.api.crateApiLibFfiSendDtmf(digit: digit);
+
+Future<void> ffiHangupCalls() =>
+    RustLib.instance.api.crateApiLibFfiHangupCalls();
