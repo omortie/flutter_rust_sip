@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::core::{types::{OnIncommingCall, TransportMode}, utils::*};
+use crate::core::{types::{OnIncommingCall, TransportMode}, helpers::*};
 
 #[frb(init)]
 pub fn init_app() {
