@@ -3,11 +3,11 @@
 
 extern crate pjsip as pj;
 
-use thiserror::Error;
 use std::ffi::CString;
-use std::os::raw::c_char;
 use std::mem::MaybeUninit;
 use std::convert::TryInto;
+
+use crate::core::{helpers::{error_exit, make_pj_str_t}, types::{OnIncommingCall, TelephonyError, TransportMode}};
 
 // GLOBAL VARS
 static REALM_GLOBAL: &'static str = "asterisk";
@@ -52,54 +52,6 @@ pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall
         Err(x) => return Err(x),
     };
     Ok(0)
-}
-
-
-//   ______  _   _  _    _  __  __   _____ 
-//  |  ____|| \ | || |  | ||  \/  | / ____|
-//  | |__   |  \| || |  | || \  / || (___  
-//  |  __|  | . ` || |  | || |\/| | \___ \ 
-//  | |____ | |\  || |__| || |  | | ____) |
-//  |______||_| \_| \____/ |_|  |_||_____/ 
-                                 
-#[derive(Error, Debug)]
-pub enum TelephonyError {
-    #[error("Cannot create a Telephony instance")]
-    CreationError(String),
-    #[error("Internal Config invalid")]
-    ConfigError(String),
-    #[error("Cannot Initialize Telephony instance")]
-    InitializationError(String),
-    #[error("Cannot Initialize Telephony-Transport")]
-    TransportError(String),
-    #[error("Cannot Send DTMF Tone")]
-    DTMFError(String),
-    #[error("Could not Create Call")]
-    CallCreationError(String),
-    #[error("Account Creation Error")]
-    AccountCreationError(String),
-    #[error("Telephony Start Error")]
-    TelephonyStartError(String),
-    #[error("Telephony destruction Error")]
-    TelephonyDestroyError(String),
-    #[error("Input Error")]
-    InputValueError(String),
-}
-
-#[derive(Debug)]
-pub enum TransportMode {
-    TCP,
-    UDP,
-    TLS,
-    UDP6,
-    TCP6,
-    TLS6
-}
-
-#[derive(Debug)]
-pub enum OnIncommingCall {
-    AutoAnswer,
-    Ignore
 }
 
 //    _____        _                   ______                    _    _                    
@@ -250,7 +202,6 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
     acc_cfg_ref.cred_info[0].username = username_pj_str_t;
     acc_cfg_ref.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
     acc_cfg_ref.cred_info[0].data = data_pj_str_t;
-    acc_cfg_ref.
 
     let acc_id : pj::pjsua_acc_id;
     acc_id = 0 ;
@@ -266,37 +217,6 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
     }
     return Ok(0);
 }
-
-//   _    _        _                    
-//  | |  | |      | |                   
-//  | |__| |  ___ | | _ __    ___  _ __ 
-//  |  __  | / _ \| || '_ \  / _ \| '__|
-//  | |  | ||  __/| || |_) ||  __/| |   
-//  |_|  |_| \___||_|| .__/  \___||_|   
-//                   | |                
-//                   |_|                
-
-pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,TelephonyError> {
-    let len = input.len() as ::std::os::raw::c_long;
-    let input_c_string = CString::new(input.clone());
-    match(input_c_string){
-        Err(_x) => {
-            let errMessage : String  = ["Could not use input value: '".to_string(), input, "' Contained Null Byte".to_string() ].concat();
-            return Err(TelephonyError::InputValueError(errMessage));
-        },
-        Ok(c_string) => {
-            let input_ptr = c_string.into_raw();
-            // If memory leak, This line below may be the fix
-            // let _ = unsafe{CString::from_raw(input_ptr)};
-            return Ok(  pj::pj_str_t { 
-                            slen: len, 
-                            ptr: input_ptr
-                        }
-                    );
-        },
-    }
-}
-
 
 //    _____        _  _  _                   _         
 //   / ____|      | || || |                 | |        
@@ -349,6 +269,8 @@ extern "C" fn on_call_state(call_id: pj::pjsua_call_id, e: *mut pj::pjsip_event)
         pj::pjsua_call_get_info(call_id, ci.as_mut_ptr());
         ci.assume_init()
     };
+    // log ci
+    println!("Call info: {:?}", ci.last_status);
 }
 
 
@@ -422,14 +344,7 @@ pub fn hangup_calls(){
 //  | |__| ||  __/\__ \| |_ | |   | |_| || (__ | |_ | || (_) || | | |    | |   | |_| || | | || (__ | |_ | || (_) || | | |\__ \
 //  |_____/  \___||___/ \__||_|    \__,_| \___| \__||_| \___/ |_| |_|    |_|    \__,_||_| |_| \___| \__||_| \___/ |_| |_||___/
 
-fn error_exit(err_msg: &str ){
-    println!("Exiting PJSUA {}",err_msg);
-    let err : *const c_char = CString::new("Error Here").expect("CString::new failed").as_ptr();
-    let thisfile = CString::new("main.rs").expect("CString::new failed").as_ptr();
-    unsafe{pj::pjsua_perror(thisfile, err  , 2)};
-    unsafe{pj::pjsua_destroy()};
-    unsafe{pj::exit(1)};
-}
+
 
 pub fn destroy_telephony()-> Result<i8,TelephonyError>{
     println!("Destroy telephony");
@@ -439,11 +354,3 @@ pub fn destroy_telephony()-> Result<i8,TelephonyError>{
     }
     Ok(0)
 }
-
-
-// mod tests {
-//     #[test]
-//     fn it_works() {
-//         assert_eq!(2 + 2, 4);
-//     }
-// }

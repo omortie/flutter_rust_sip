@@ -19,6 +19,7 @@ class _MyAppState extends State<MyApp> {
         username: 'user1',
         uri: domain,
         password: 'user1',
+      p2P: true,
       );
     super.initState();
   }

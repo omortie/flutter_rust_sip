@@ -1,6 +1,8 @@
-use flutter_rust_bridge::{frb};
 // FFI-safe wrappers for telephony functions
-use crate::core::utils::*;
+
+use flutter_rust_bridge::{frb};
+
+use crate::core::{types::{OnIncommingCall, TransportMode}, utils::*};
 
 #[frb(init)]
 pub fn init_app() {
