@@ -1,4 +1,5 @@
 use thiserror::Error;
+use crate::{core::dart_types::CallState, frb_generated::StreamSink};
                                  
 #[derive(Error, Debug)]
 pub enum TelephonyError {
@@ -39,3 +40,12 @@ pub enum OnIncommingCall {
     AutoAnswer,
     Ignore
 }
+
+pub enum StreamExitResult {
+    LegalExit,
+    EOF,
+    Error,
+}
+
+
+pub type DartUpdateStream = StreamSink<CallState>;

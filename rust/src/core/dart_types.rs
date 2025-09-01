@@ -1,6 +1,9 @@
+
+#[derive(Debug, Clone)]
 pub enum CallState {
-    CALLING,
-    CONNECTING,
-    CONFIRMED,
-    DISCONNECTED
+    Calling,
+    Connecting,
+    Confirmed,
+    Disconnected,
+    Error(String)
 }

@@ -58,3 +58,6 @@ coverage/*
 .fvm/
 .env
 *.log*
+
+# Rust build files
+target/

@@ -1,5 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
+import 'package:flutter_rust_sip/src/rust/core/dart_types.dart';
+import 'package:flutter_rust_sip/src/rust/core/types.dart';
+
+void main() async {
+  await RustLib.init();
+  runApp(const MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -11,14 +20,24 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String name = '';
   int result = 1;
-  String domain = "127.0.0.1";
+  final String domain = "127.0.0.1";
+  final streamController = StreamController<CallState>();
 
   @override
   void initState() {
+    final sid = createNewSession();
+    streamController.addStream(
+      initTelephony(
+        sessionId: sid,
+        localPort: 5070,
+        transportMode: TransportMode.udp,
+        incomingCallStrategy: OnIncommingCall.autoAnswer,
+      ),
+    );
     result = ffiAccountSetup(
       username: 'user1',
-      password: 'user1',
       uri: domain,
+      password: 'user1',
       p2P: true,
       );
     super.initState();
@@ -41,14 +60,6 @@ class _MyAppState extends State<MyApp> {
                 onChanged: (value) async {
                   setState(() {
                     name = value;
-                  });
-                },
-              ),
-              TextField(
-                decoration: const InputDecoration(hintText: 'Domain'),
-                onChanged: (value) async {
-                  setState(() {
-                    domain = value;
                   });
                 },
               ),
@@ -78,9 +89,4 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-}
-
-void main() async {
-  await RustLib.init();
-  runApp(MyApp());
 }

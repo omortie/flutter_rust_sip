@@ -216,7 +216,7 @@ extern "C" fn on_incoming_call(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call
     //     ci.assume_init()
     // };
     unsafe{ pj::pjsua_call_answer(call_id, 200, std::ptr::null(), std::ptr::null()); } 
-    println!("The call id is: {}", call_id);
+    println!("The accepted call id is: {}", call_id);
 }
 
 extern "C" fn on_incoming_call_ignore(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {
@@ -225,7 +225,7 @@ extern "C" fn on_incoming_call_ignore(acc_id: pj::pjsua_acc_id, call_id: pj::pjs
     //     pj::pjsua_call_get_info(call_id, ci.as_mut_ptr());
     //     ci.assume_init()
     // };
-    println!("The call id is: {}", call_id);
+    println!("The ignored call id is: {}", call_id);
 }
 
 extern "C" fn on_call_media_state(call_id: pj::pjsua_call_id) {
