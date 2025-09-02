@@ -18,9 +18,9 @@ pub fn init_telephony(
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
-) -> Result<(), TelephonyError> {
+) -> Result<i8, TelephonyError> {
     // initialize telephony
-    return initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).map(|_| ());
+    initialize_telephony(0, incoming_call_strategy, local_port, transport_mode)
 }
 
 pub fn account_setup(username: String, password: String, uri: String, p2p: bool, call_sink: DartCallStream) -> Result<(), TelephonyError> {
@@ -32,9 +32,9 @@ pub fn account_setup(username: String, password: String, uri: String, p2p: bool,
     });
 }
 
-pub async fn make_call(phone_number: String, domain: String) -> Result<(), TelephonyError> {
+pub async fn make_call(phone_number: String, domain: String) -> Result<i32, TelephonyError> {
     ensure_pj_thread_registered();
-    return makeCall(&phone_number, &domain).map(|_| ());
+    makeCall(&phone_number, &domain)
 }
     
 pub fn ffi_hangup_calls() {

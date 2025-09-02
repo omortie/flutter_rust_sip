@@ -90,13 +90,13 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiSimpleInitApp();
 
-  Future<void> crateApiSimpleInitTelephony({
+  Future<int> crateApiSimpleInitTelephony({
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
   });
 
-  Future<void> crateApiSimpleMakeCall({
+  Future<int> crateApiSimpleMakeCall({
     required String phoneNumber,
     required String domain,
   });
@@ -208,7 +208,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Future<void> crateApiSimpleInitTelephony({
+  Future<int> crateApiSimpleInitTelephony({
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
@@ -228,7 +228,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
+          decodeSuccessData: sse_decode_i_8,
           decodeErrorData: sse_decode_telephony_error,
         ),
         constMeta: kCrateApiSimpleInitTelephonyConstMeta,
@@ -245,7 +245,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<void> crateApiSimpleMakeCall({
+  Future<int> crateApiSimpleMakeCall({
     required String phoneNumber,
     required String domain,
   }) {
@@ -263,7 +263,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
+          decodeSuccessData: sse_decode_i_32,
           decodeErrorData: sse_decode_telephony_error,
         ),
         constMeta: kCrateApiSimpleMakeCallConstMeta,
@@ -337,6 +337,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  int dco_decode_i_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
   }
@@ -472,6 +478,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
+  }
+
+  @protected
+  int sse_decode_i_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt8();
   }
 
   @protected
@@ -625,6 +637,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
+  }
+
+  @protected
+  void sse_encode_i_8(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt8(self);
   }
 
   @protected
