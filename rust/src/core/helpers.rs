@@ -7,7 +7,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::convert::TryInto;
 
-use crate::{core::types::{OnIncommingCall, TelephonyError, TransportMode}, utils::{error_exit, make_pj_str_t}};
+use crate::{core::{dart_types::CallState, manager::{push_call_state_update, CallManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
 // GLOBAL VARS
 static REALM_GLOBAL: &'static str = "asterisk";
@@ -124,7 +124,7 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
         pj::pjsua_transport_create( transportMode, &transport_cfg, transport_id.as_mut_ptr())
     };
 
-    if (status != pj::pj_constants__PJ_SUCCESS as i32 ) {
+    if (status != pj::pj_constants__PJ_SUCCESS as i32) {
         return Err(TelephonyError::TransportError("Error of some kind".to_string()));
     }
     return Ok(0);
@@ -251,9 +251,12 @@ extern "C" fn on_call_state(call_id: pj::pjsua_call_id, e: *mut pj::pjsip_event)
     };
     // log ci
     println!("Call info: {:?}", ci.last_status);
+
+    // push update to the relevant call manager
+    push_call_state_update(call_id, ci);
 }
 
-pub fn make_call(phone_number: &str, domain : &str ) -> Result<i8,TelephonyError>{
+pub fn makeCall(phone_number: &str, domain : &str, sink: DartCallStream) -> Result<i32,TelephonyError>{
 
     // TODO: Check Phone number isnt garbage string
     let call_extension : String  = ["sip:".to_string(), phone_number.to_string(), "@".to_string(), domain.to_string()].concat();
@@ -270,11 +273,14 @@ pub fn make_call(phone_number: &str, domain : &str ) -> Result<i8,TelephonyError
 
     let user_data_null: *mut ::std::os::raw::c_void = &mut 0 as *mut _ as *mut ::std::os::raw::c_void;
     let opt = 0 as *mut pj::pjsua_call_setting;
-    let make_call_restult = unsafe {pj::pjsua_call_make_call( 0 , ptr_call_extension_pj_str_t , opt, user_data_null, 0 as *mut  pj::pjsua_msg_data , 0 as *mut pj::pjsua_call_id)};
+    let mut call_id: pj::pjsua_call_id = 0;
+    let make_call_restult = unsafe {pj::pjsua_call_make_call( 0 , ptr_call_extension_pj_str_t , opt, user_data_null, 0 as *mut  pj::pjsua_msg_data , &mut call_id)};
     if make_call_restult!=0 {
         return Err(TelephonyError::CallCreationError("Could not place Call".to_string()));
     }
-    return Ok(0);
+    // add a new call manager to the registry
+    CallManager::new(call_id, sink);
+    return Ok(call_id);
 }
 
 pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {

@@ -14,7 +14,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 PlatformInt64 createNewSession() =>
     RustLib.instance.api.crateApiSimpleCreateNewSession();
 
-Stream<CallState> initTelephony({
+Stream<ServiceState> initTelephony({
   required PlatformInt64 sessionId,
   required int localPort,
   required TransportMode transportMode,
@@ -26,22 +26,22 @@ Stream<CallState> initTelephony({
   incomingCallStrategy: incomingCallStrategy,
 );
 
-int ffiAccountSetup({
+int accountSetup({
   required String username,
   required String password,
   required String uri,
   required bool p2P,
-}) => RustLib.instance.api.crateApiSimpleFfiAccountSetup(
+}) => RustLib.instance.api.crateApiSimpleAccountSetup(
   username: username,
   password: password,
   uri: uri,
   p2P: p2P,
 );
 
-Future<int> ffiMakeCall({
+Stream<CallState> makeCall({
   required String phoneNumber,
   required String domain,
-}) => RustLib.instance.api.crateApiSimpleFfiMakeCall(
+}) => RustLib.instance.api.crateApiSimpleMakeCall(
   phoneNumber: phoneNumber,
   domain: domain,
 );

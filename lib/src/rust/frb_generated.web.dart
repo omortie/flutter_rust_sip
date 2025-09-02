@@ -29,6 +29,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<CallState> dco_decode_StreamSink_call_state_Sse(dynamic raw);
 
   @protected
+  RustStreamSink<ServiceState> dco_decode_StreamSink_service_state_Sse(
+    dynamic raw,
+  );
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -53,6 +58,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OnIncommingCall dco_decode_on_incomming_call(dynamic raw);
 
   @protected
+  ServiceState dco_decode_service_state(dynamic raw);
+
+  @protected
   TelephonyError dco_decode_telephony_error(dynamic raw);
 
   @protected
@@ -72,6 +80,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<CallState> sse_decode_StreamSink_call_state_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<ServiceState> sse_decode_StreamSink_service_state_Sse(
     SseDeserializer deserializer,
   );
 
@@ -100,6 +113,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OnIncommingCall sse_decode_on_incomming_call(SseDeserializer deserializer);
 
   @protected
+  ServiceState sse_decode_service_state(SseDeserializer deserializer);
+
+  @protected
   TelephonyError sse_decode_telephony_error(SseDeserializer deserializer);
 
   @protected
@@ -123,6 +139,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_StreamSink_call_state_Sse(
     RustStreamSink<CallState> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_service_state_Sse(
+    RustStreamSink<ServiceState> self,
     SseSerializer serializer,
   );
 
@@ -155,6 +177,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     OnIncommingCall self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_service_state(ServiceState self, SseSerializer serializer);
 
   @protected
   void sse_encode_telephony_error(

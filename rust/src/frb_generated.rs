@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 233609604;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1672317302;
 
 // Section: executor
 
@@ -45,6 +45,44 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__simple__account_setup_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "account_setup",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_username = <String>::sse_decode(&mut deserializer);
+            let api_password = <String>::sse_decode(&mut deserializer);
+            let api_uri = <String>::sse_decode(&mut deserializer);
+            let api_p2p = <bool>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::account_setup(
+                    api_username,
+                    api_password,
+                    api_uri,
+                    api_p2p,
+                ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__simple__create_new_session_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -69,44 +107,6 @@ fn wire__crate__api__simple__create_new_session_impl(
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Result::<_, ()>::Ok(crate::api::simple::create_new_session())?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__simple__ffi_account_setup_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "ffi_account_setup",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_username = <String>::sse_decode(&mut deserializer);
-            let api_password = <String>::sse_decode(&mut deserializer);
-            let api_uri = <String>::sse_decode(&mut deserializer);
-            let api_p2p = <bool>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(crate::api::simple::ffi_account_setup(
-                    api_username,
-                    api_password,
-                    api_uri,
-                    api_p2p,
-                ))?;
                 Ok(output_ok)
             })())
         },
@@ -142,45 +142,6 @@ fn wire__crate__api__simple__ffi_hangup_calls_impl(
                     })?;
                     Ok(output_ok)
                 })())
-            }
-        },
-    )
-}
-fn wire__crate__api__simple__ffi_make_call_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "ffi_make_call",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_phone_number = <String>::sse_decode(&mut deserializer);
-            let api_domain = <String>::sse_decode(&mut deserializer);
-            deserializer.end();
-            move |context| async move {
-                transform_result_sse::<_, ()>(
-                    (move || async move {
-                        let output_ok = Result::<_, ()>::Ok(
-                            crate::api::simple::ffi_make_call(api_phone_number, api_domain).await,
-                        )?;
-                        Ok(output_ok)
-                    })()
-                    .await,
-                )
             }
         },
     )
@@ -248,7 +209,7 @@ fn wire__crate__api__simple__init_telephony_impl(
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
             let api_sink = <StreamSink<
-                crate::core::dart_types::CallState,
+                crate::core::dart_types::ServiceState,
                 flutter_rust_bridge::for_generated::SseCodec,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
@@ -267,6 +228,50 @@ fn wire__crate__api__simple__init_telephony_impl(
         },
     )
 }
+fn wire__crate__api__simple__make_call_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "make_call",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_phone_number = <String>::sse_decode(&mut deserializer);
+            let api_domain = <String>::sse_decode(&mut deserializer);
+            let api_sink = <StreamSink<
+                crate::core::dart_types::CallState,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, ()>(
+                    (move || async move {
+                        let output_ok = Result::<_, ()>::Ok(
+                            crate::api::simple::make_call(api_phone_number, api_domain, api_sink)
+                                .await,
+                        )?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 
 // Section: dart2rust
 
@@ -280,6 +285,19 @@ impl SseDecode for flutter_rust_bridge::for_generated::anyhow::Error {
 
 impl SseDecode
     for StreamSink<crate::core::dart_types::CallState, flutter_rust_bridge::for_generated::SseCodec>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
+    }
+}
+
+impl SseDecode
+    for StreamSink<
+        crate::core::dart_types::ServiceState,
+        flutter_rust_bridge::for_generated::SseCodec,
+    >
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -309,18 +327,21 @@ impl SseDecode for crate::core::dart_types::CallState {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
-                return crate::core::dart_types::CallState::Calling;
+                return crate::core::dart_types::CallState::Initialized;
             }
             1 => {
-                return crate::core::dart_types::CallState::Connecting;
+                return crate::core::dart_types::CallState::Calling;
             }
             2 => {
-                return crate::core::dart_types::CallState::Confirmed;
+                return crate::core::dart_types::CallState::Connecting;
             }
             3 => {
-                return crate::core::dart_types::CallState::Disconnected;
+                return crate::core::dart_types::CallState::Confirmed;
             }
             4 => {
+                return crate::core::dart_types::CallState::Disconnected;
+            }
+            5 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
                 return crate::core::dart_types::CallState::Error(var_field0);
             }
@@ -373,6 +394,31 @@ impl SseDecode for crate::core::types::OnIncommingCall {
             1 => crate::core::types::OnIncommingCall::Ignore,
             _ => unreachable!("Invalid variant for OnIncommingCall: {}", inner),
         };
+    }
+}
+
+impl SseDecode for crate::core::dart_types::ServiceState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::core::dart_types::ServiceState::Initialized;
+            }
+            1 => {
+                return crate::core::dart_types::ServiceState::Running;
+            }
+            2 => {
+                return crate::core::dart_types::ServiceState::Stopped;
+            }
+            3 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::core::dart_types::ServiceState::Error(var_field0);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -473,9 +519,9 @@ fn pde_ffi_dispatcher_primary_impl(
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
         3 => wire__crate__api__simple__ffi_hangup_calls_impl(port, ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__simple__ffi_make_call_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__simple__init_telephony_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__simple__init_telephony_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__simple__make_call_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -488,8 +534,8 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__simple__create_new_session_impl(ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__simple__ffi_account_setup_impl(ptr, rust_vec_len, data_len),
+        1 => wire__crate__api__simple__account_setup_impl(ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__simple__create_new_session_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -500,12 +546,13 @@ fn pde_ffi_dispatcher_sync_impl(
 impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallState {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::core::dart_types::CallState::Calling => [0.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Connecting => [1.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Confirmed => [2.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Disconnected => [3.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Initialized => [0.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Calling => [1.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Connecting => [2.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Confirmed => [3.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Disconnected => [4.into_dart()].into_dart(),
             crate::core::dart_types::CallState::Error(field0) => {
-                [4.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+                [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -542,6 +589,33 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::types::OnIncommingCall>
     for crate::core::types::OnIncommingCall
 {
     fn into_into_dart(self) -> crate::core::types::OnIncommingCall {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::core::dart_types::ServiceState {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::core::dart_types::ServiceState::Initialized => [0.into_dart()].into_dart(),
+            crate::core::dart_types::ServiceState::Running => [1.into_dart()].into_dart(),
+            crate::core::dart_types::ServiceState::Stopped => [2.into_dart()].into_dart(),
+            crate::core::dart_types::ServiceState::Error(field0) => {
+                [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::core::dart_types::ServiceState
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::core::dart_types::ServiceState>
+    for crate::core::dart_types::ServiceState
+{
+    fn into_into_dart(self) -> crate::core::dart_types::ServiceState {
         self
     }
 }
@@ -638,6 +712,18 @@ impl SseEncode
     }
 }
 
+impl SseEncode
+    for StreamSink<
+        crate::core::dart_types::ServiceState,
+        flutter_rust_bridge::for_generated::SseCodec,
+    >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
+    }
+}
+
 impl SseEncode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -656,20 +742,23 @@ impl SseEncode for crate::core::dart_types::CallState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::core::dart_types::CallState::Calling => {
+            crate::core::dart_types::CallState::Initialized => {
                 <i32>::sse_encode(0, serializer);
             }
-            crate::core::dart_types::CallState::Connecting => {
+            crate::core::dart_types::CallState::Calling => {
                 <i32>::sse_encode(1, serializer);
             }
-            crate::core::dart_types::CallState::Confirmed => {
+            crate::core::dart_types::CallState::Connecting => {
                 <i32>::sse_encode(2, serializer);
             }
-            crate::core::dart_types::CallState::Disconnected => {
+            crate::core::dart_types::CallState::Confirmed => {
                 <i32>::sse_encode(3, serializer);
             }
-            crate::core::dart_types::CallState::Error(field0) => {
+            crate::core::dart_types::CallState::Disconnected => {
                 <i32>::sse_encode(4, serializer);
+            }
+            crate::core::dart_types::CallState::Error(field0) => {
+                <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(field0, serializer);
             }
             _ => {
@@ -723,6 +812,30 @@ impl SseEncode for crate::core::types::OnIncommingCall {
             },
             serializer,
         );
+    }
+}
+
+impl SseEncode for crate::core::dart_types::ServiceState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::core::dart_types::ServiceState::Initialized => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::core::dart_types::ServiceState::Running => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::core::dart_types::ServiceState::Stopped => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::core::dart_types::ServiceState::Error(field0) => {
+                <i32>::sse_encode(3, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 

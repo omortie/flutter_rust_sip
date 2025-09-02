@@ -1,5 +1,5 @@
 use thiserror::Error;
-use crate::{core::dart_types::CallState, frb_generated::StreamSink};
+use crate::{core::dart_types::{CallState, ServiceState}, frb_generated::StreamSink};
                                  
 #[derive(Error, Debug)]
 pub enum TelephonyError {
@@ -48,4 +48,5 @@ pub enum StreamExitResult {
 }
 
 
-pub type DartUpdateStream = StreamSink<CallState>;
+pub type DartCallStream = StreamSink<CallState>;
+pub type DartServiceStream = StreamSink<ServiceState>;

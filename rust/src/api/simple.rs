@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::{core::{dart_types::CallState, helpers::*, init_logger, types::{OnIncommingCall, TelephonyError, TransportMode}}, frb_generated::StreamSink};
+use crate::{core::{dart_types::{CallState, ServiceState}, helpers::*, init_logger, types::{DartCallStream, DartServiceStream, OnIncommingCall, TelephonyError, TransportMode}}, frb_generated::StreamSink};
 
 
 #[frb(init)]
@@ -26,22 +26,25 @@ pub fn init_telephony(
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
-    sink: StreamSink<CallState>
+    sink: DartServiceStream
 ) -> Result<(), TelephonyError> {
     // initialize telephony
-    return initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).map(|_| ());
+    return initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).map(|_| {
+        sink.add(ServiceState::Initialized).unwrap_or(());
+        ()
+    });
 }
 
 #[frb(sync)]
-pub fn ffi_account_setup(username: String, password: String, uri: String, p2p: bool) -> i8 {
+pub fn account_setup(username: String, password: String, uri: String, p2p: bool) -> i8 {
     ensure_pj_thread_registered();
     return accountSetup(username, password, uri, p2p).unwrap_or(1);
 }
 
 // make call ffi
-pub async fn ffi_make_call(phone_number: String, domain: String) -> i8 {
+pub async fn make_call(phone_number: String, domain: String, sink: DartCallStream) -> i32 {
     ensure_pj_thread_registered();
-    return make_call(&phone_number, &domain).unwrap_or(1);
+    return makeCall(&phone_number, &domain, sink).unwrap_or(1);
 }
     
 #[no_mangle]

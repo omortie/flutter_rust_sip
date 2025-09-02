@@ -22,24 +22,33 @@ class _MyAppState extends State<MyApp> {
   int result = 1;
   final String domain = "127.0.0.1";
   final streamController = StreamController<CallState>();
+  late Stream<ServiceState> telephonyStream;
 
   @override
   void initState() {
     final sid = createNewSession();
-    streamController.addStream(
-      initTelephony(
+    telephonyStream = initTelephony(
         sessionId: sid,
         localPort: 5070,
         transportMode: TransportMode.udp,
-        incomingCallStrategy: OnIncommingCall.autoAnswer,
-      ),
+      incomingCallStrategy: OnIncommingCall.autoAnswer,
     );
-    result = ffiAccountSetup(
-      username: 'user1',
-      uri: domain,
-      password: 'user1',
-      p2P: true,
-      );
+
+    telephonyStream.listen((event) {
+      // Handle service state changes here
+      debugPrint('Service State Changed: $event');
+
+      if (event == ServiceState.initialized()) {
+        // setup account
+        accountSetup(
+          username: 'user',
+          password: 'pass',
+          uri: '127.0.0.1',
+          p2P: true,
+        );
+      }
+    });
+
     super.initState();
   }
 
@@ -63,24 +72,12 @@ class _MyAppState extends State<MyApp> {
                   });
                 },
               ),
-              Text(
-                'Action: Call `("$name")`',
-              ),
+              Text('Action: Call `("$name")`'),
               ElevatedButton(
-                onPressed:
-                    name.isEmpty
-                        ? null
-                        : () async {
-                  if (name.isNotEmpty) {
-                            final res = await ffiMakeCall(
-                              phoneNumber: name,
-                              domain: domain,
-                            );
-                            setState(() {
-                              result = res;
-                            });
-                  }
-                },
+                onPressed: () async {
+                  makeCall(phoneNumber: name, domain: domain);
+                }
+                ,
                 child: Text('Call $name'),
               ),
             ],
