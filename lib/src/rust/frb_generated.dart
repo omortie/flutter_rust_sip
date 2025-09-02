@@ -79,7 +79,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  int crateApiSimpleAccountSetup({
+  Future<void> crateApiSimpleAccountSetup({
+    required PlatformInt64 sessionId,
     required String username,
     required String password,
     required String uri,
@@ -92,7 +93,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiSimpleInitApp();
 
-  Stream<ServiceState> crateApiSimpleInitTelephony({
+  Stream<SessionState> crateApiSimpleInitTelephony({
     required PlatformInt64 sessionId,
     required int localPort,
     required TransportMode transportMode,
@@ -114,28 +115,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  int crateApiSimpleAccountSetup({
+  Future<void> crateApiSimpleAccountSetup({
+    required PlatformInt64 sessionId,
     required String username,
     required String password,
     required String uri,
     required bool p2P,
   }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_64(sessionId, serializer);
           sse_encode_String(username, serializer);
           sse_encode_String(password, serializer);
           sse_encode_String(uri, serializer);
           sse_encode_bool(p2P, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: null,
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_telephony_error,
         ),
         constMeta: kCrateApiSimpleAccountSetupConstMeta,
-        argValues: [username, password, uri, p2P],
+        argValues: [sessionId, username, password, uri, p2P],
         apiImpl: this,
       ),
     );
@@ -143,7 +151,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
     debugName: "account_setup",
-    argNames: ["username", "password", "uri", "p2P"],
+    argNames: ["sessionId", "username", "password", "uri", "p2P"],
   );
 
   @override
@@ -223,13 +231,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Stream<ServiceState> crateApiSimpleInitTelephony({
+  Stream<SessionState> crateApiSimpleInitTelephony({
     required PlatformInt64 sessionId,
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
   }) {
-    final sink = RustStreamSink<ServiceState>();
+    final sink = RustStreamSink<SessionState>();
     unawaited(
       handler.executeNormal(
         NormalTask(
@@ -239,7 +247,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sse_encode_u_32(localPort, serializer);
             sse_encode_transport_mode(transportMode, serializer);
             sse_encode_on_incomming_call(incomingCallStrategy, serializer);
-            sse_encode_StreamSink_service_state_Sse(sink, serializer);
+            sse_encode_StreamSink_session_state_Sse(sink, serializer);
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
@@ -300,8 +308,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             );
           },
           codec: SseCodec(
-            decodeSuccessData: sse_decode_i_32,
-            decodeErrorData: null,
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: sse_decode_telephony_error,
           ),
           constMeta: kCrateApiSimpleMakeCallConstMeta,
           argValues: [phoneNumber, domain, sink],
@@ -330,7 +338,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<ServiceState> dco_decode_StreamSink_service_state_Sse(
+  RustStreamSink<SessionState> dco_decode_StreamSink_session_state_Sse(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -354,7 +362,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return CallState_Initialized();
+        return CallState_Early();
       case 1:
         return CallState_Calling();
       case 2:
@@ -383,12 +391,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  int dco_decode_i_8(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
-
-  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
@@ -401,17 +403,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  ServiceState dco_decode_service_state(dynamic raw) {
+  SessionState dco_decode_session_state(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return ServiceState_Initialized();
+        return SessionState_Initialized();
       case 1:
-        return ServiceState_Running();
+        return SessionState_Running();
       case 2:
-        return ServiceState_Stopped();
+        return SessionState_Stopped();
       case 3:
-        return ServiceState_Error(dco_decode_String(raw[1]));
+        return SessionState_Error(dco_decode_String(raw[1]));
       default:
         throw Exception("unreachable");
     }
@@ -486,7 +488,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<ServiceState> sse_decode_StreamSink_service_state_Sse(
+  RustStreamSink<SessionState> sse_decode_StreamSink_session_state_Sse(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -513,7 +515,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return CallState_Initialized();
+        return CallState_Early();
       case 1:
         return CallState_Calling();
       case 2:
@@ -543,12 +545,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  int sse_decode_i_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt8();
-  }
-
-  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
@@ -563,20 +559,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  ServiceState sse_decode_service_state(SseDeserializer deserializer) {
+  SessionState sse_decode_session_state(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return ServiceState_Initialized();
+        return SessionState_Initialized();
       case 1:
-        return ServiceState_Running();
+        return SessionState_Running();
       case 2:
-        return ServiceState_Stopped();
+        return SessionState_Stopped();
       case 3:
         var var_field0 = sse_decode_String(deserializer);
-        return ServiceState_Error(var_field0);
+        return SessionState_Error(var_field0);
       default:
         throw UnimplementedError('');
     }
@@ -674,15 +670,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_StreamSink_service_state_Sse(
-    RustStreamSink<ServiceState> self,
+  void sse_encode_StreamSink_session_state_Sse(
+    RustStreamSink<SessionState> self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
       self.setupAndSerialize(
         codec: SseCodec(
-          decodeSuccessData: sse_decode_service_state,
+          decodeSuccessData: sse_decode_session_state,
           decodeErrorData: sse_decode_AnyhowException,
         ),
       ),
@@ -706,7 +702,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_call_state(CallState self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
-      case CallState_Initialized():
+      case CallState_Early():
         sse_encode_i_32(0, serializer);
       case CallState_Calling():
         sse_encode_i_32(1, serializer);
@@ -735,12 +731,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_i_8(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt8(self);
-  }
-
-  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -760,16 +750,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_service_state(ServiceState self, SseSerializer serializer) {
+  void sse_encode_session_state(SessionState self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
-      case ServiceState_Initialized():
+      case SessionState_Initialized():
         sse_encode_i_32(0, serializer);
-      case ServiceState_Running():
+      case SessionState_Running():
         sse_encode_i_32(1, serializer);
-      case ServiceState_Stopped():
+      case SessionState_Stopped():
         sse_encode_i_32(2, serializer);
-      case ServiceState_Error(field0: final field0):
+      case SessionState_Error(field0: final field0):
         sse_encode_i_32(3, serializer);
         sse_encode_String(field0, serializer);
     }

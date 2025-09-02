@@ -18,11 +18,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String name = '';
-  int result = 1;
-  final String domain = "127.0.0.1";
-  final streamController = StreamController<CallState>();
-  late Stream<ServiceState> telephonyStream;
+  String? error;
+  String phoneNumber = '';
+  String domain = "127.0.0.1";
+  late Stream<SessionState> telephonyStream;
+  final callStreamController = StreamController<CallState>();
 
   @override
   void initState() {
@@ -35,20 +35,34 @@ class _MyAppState extends State<MyApp> {
     );
 
     telephonyStream.listen((event) {
-      // Handle service state changes here
-      debugPrint('Service State Changed: $event');
+      // Handle session state changes here
+      debugPrint('Session State Changed: $event');
 
-      if (event == ServiceState.initialized()) {
-        // setup account
-        accountSetup(
-          username: 'user',
-          password: 'pass',
-          uri: '127.0.0.1',
+      switch (event) {
+        case SessionState_Initialized _:
+          // setup account
+          accountSetup(
+            username: 'user',
+            password: 'pass',
+            uri: domain,
           p2P: true,
+            sessionId: sid,
         );
+        case SessionState_Error state:
+          error = state.field0;
+          debugPrint('Session Error: $error');
+          error = state.field0;
+        case SessionState_Running _:
+          debugPrint('Session is running');
+        default:
+          debugPrint('Unknown Session State: $event');
       }
     });
 
+    callStreamController.stream.listen((event) {
+      // Handle call state changes here
+      debugPrint('Call State Changed: $event');
+    });
     super.initState();
   }
 
@@ -62,23 +76,32 @@ class _MyAppState extends State<MyApp> {
             spacing: 16,
             children: [
               Text(
-                'Result: `$result` Initialization state: ${result == 0 ? "Initialized" : "Not initialized"}',
+                'Initialization state: ${error == null ? "Initialized" : "Not initialized, error: $error"}',
               ),
               TextField(
                 decoration: const InputDecoration(hintText: 'Phone Number'),
                 onChanged: (value) async {
                   setState(() {
-                    name = value;
+                    phoneNumber = value;
                   });
                 },
               ),
-              Text('Action: Call `("$name")`'),
+              TextField(
+                decoration: const InputDecoration(hintText: 'Domain'),
+                onChanged: (value) async {
+                  setState(() {
+                    domain = value;
+                  });
+                },
+              ),
+              Text('Action: Call `("$phoneNumber")`'),
               ElevatedButton(
-                onPressed: () async {
-                  makeCall(phoneNumber: name, domain: domain);
-                }
-                ,
-                child: Text('Call $name'),
+                onPressed: () {
+                  callStreamController.addStream(
+                    makeCall(phoneNumber: phoneNumber, domain: domain),
+                  );
+                },
+                child: Text('Call $phoneNumber'),
               ),
             ],
           ),

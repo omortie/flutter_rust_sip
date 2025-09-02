@@ -1,6 +1,6 @@
 pub mod helpers;
 pub mod types;
-pub mod manager;
+pub mod managers;
 pub mod dart_types;
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};

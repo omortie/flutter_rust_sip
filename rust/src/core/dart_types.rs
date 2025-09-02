@@ -1,7 +1,7 @@
 
 #[derive(Debug, Clone)]
 pub enum CallState {
-    Initialized,
+    Early,
     Calling,
     Connecting,
     Confirmed,
@@ -10,7 +10,7 @@ pub enum CallState {
 }
 
 #[derive(Debug, Clone)]
-pub enum ServiceState {
+pub enum SessionState {
     Initialized,
     Running,
     Stopped,

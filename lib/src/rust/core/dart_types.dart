@@ -12,7 +12,7 @@ part 'dart_types.freezed.dart';
 sealed class CallState with _$CallState {
   const CallState._();
 
-  const factory CallState.initialized() = CallState_Initialized;
+  const factory CallState.early() = CallState_Early;
   const factory CallState.calling() = CallState_Calling;
   const factory CallState.connecting() = CallState_Connecting;
   const factory CallState.confirmed() = CallState_Confirmed;
@@ -21,11 +21,11 @@ sealed class CallState with _$CallState {
 }
 
 @freezed
-sealed class ServiceState with _$ServiceState {
-  const ServiceState._();
+sealed class SessionState with _$SessionState {
+  const SessionState._();
 
-  const factory ServiceState.initialized() = ServiceState_Initialized;
-  const factory ServiceState.running() = ServiceState_Running;
-  const factory ServiceState.stopped() = ServiceState_Stopped;
-  const factory ServiceState.error(String field0) = ServiceState_Error;
+  const factory SessionState.initialized() = SessionState_Initialized;
+  const factory SessionState.running() = SessionState_Running;
+  const factory SessionState.stopped() = SessionState_Stopped;
+  const factory SessionState.error(String field0) = SessionState_Error;
 }

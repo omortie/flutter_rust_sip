@@ -27,7 +27,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<CallState> dco_decode_StreamSink_call_state_Sse(dynamic raw);
 
   @protected
-  RustStreamSink<ServiceState> dco_decode_StreamSink_service_state_Sse(
+  RustStreamSink<SessionState> dco_decode_StreamSink_session_state_Sse(
     dynamic raw,
   );
 
@@ -47,16 +47,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_i_64(dynamic raw);
 
   @protected
-  int dco_decode_i_8(dynamic raw);
-
-  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
   OnIncommingCall dco_decode_on_incomming_call(dynamic raw);
 
   @protected
-  ServiceState dco_decode_service_state(dynamic raw);
+  SessionState dco_decode_session_state(dynamic raw);
 
   @protected
   TelephonyError dco_decode_telephony_error(dynamic raw);
@@ -82,7 +79,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  RustStreamSink<ServiceState> sse_decode_StreamSink_service_state_Sse(
+  RustStreamSink<SessionState> sse_decode_StreamSink_session_state_Sse(
     SseDeserializer deserializer,
   );
 
@@ -102,16 +99,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
 
   @protected
-  int sse_decode_i_8(SseDeserializer deserializer);
-
-  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
   OnIncommingCall sse_decode_on_incomming_call(SseDeserializer deserializer);
 
   @protected
-  ServiceState sse_decode_service_state(SseDeserializer deserializer);
+  SessionState sse_decode_session_state(SseDeserializer deserializer);
 
   @protected
   TelephonyError sse_decode_telephony_error(SseDeserializer deserializer);
@@ -141,8 +135,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_StreamSink_service_state_Sse(
-    RustStreamSink<ServiceState> self,
+  void sse_encode_StreamSink_session_state_Sse(
+    RustStreamSink<SessionState> self,
     SseSerializer serializer,
   );
 
@@ -162,9 +156,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
 
   @protected
-  void sse_encode_i_8(int self, SseSerializer serializer);
-
-  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -177,7 +168,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_service_state(ServiceState self, SseSerializer serializer);
+  void sse_encode_session_state(SessionState self, SseSerializer serializer);
 
   @protected
   void sse_encode_telephony_error(

@@ -7,7 +7,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::convert::TryInto;
 
-use crate::{core::{dart_types::CallState, manager::{push_call_state_update, CallManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
+use crate::{core::{dart_types::CallState, managers::{push_call_state_update, CallManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
 // GLOBAL VARS
 static REALM_GLOBAL: &'static str = "asterisk";
@@ -256,10 +256,14 @@ extern "C" fn on_call_state(call_id: pj::pjsua_call_id, e: *mut pj::pjsip_event)
     push_call_state_update(call_id, ci);
 }
 
-pub fn makeCall(phone_number: &str, domain : &str, sink: DartCallStream) -> Result<i32,TelephonyError>{
+pub fn makeCall(phone_number: &str, domain : &str) -> Result<i32,TelephonyError>{
 
     // TODO: Check Phone number isnt garbage string
-    let call_extension : String  = ["sip:".to_string(), phone_number.to_string(), "@".to_string(), domain.to_string()].concat();
+    let call_extension: String = if phone_number.is_empty() {
+        format!("sip:{}", domain)
+    } else {
+        format!("sip:{}@{}", phone_number, domain)
+    };
     let len = call_extension.len() as ::std::os::raw::c_long;
     let call_extension_c_string = CString::new(call_extension);
     let call_extension_c_string_ok = match(call_extension_c_string) {
@@ -278,8 +282,6 @@ pub fn makeCall(phone_number: &str, domain : &str, sink: DartCallStream) -> Resu
     if make_call_restult!=0 {
         return Err(TelephonyError::CallCreationError("Could not place Call".to_string()));
     }
-    // add a new call manager to the registry
-    CallManager::new(call_id, sink);
     return Ok(call_id);
 }
 

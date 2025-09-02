@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::{core::{dart_types::{CallState, ServiceState}, helpers::*, init_logger, types::{DartCallStream, DartServiceStream, OnIncommingCall, TelephonyError, TransportMode}}, frb_generated::StreamSink};
+use crate::core::{dart_types::{CallState, SessionState}, helpers::*, init_logger, managers::{push_session_state_update, CallManager}, types::{DartCallStream, DartSessionStream, OnIncommingCall, TelephonyError, TransportMode}};
 
 
 #[frb(init)]
@@ -26,28 +26,32 @@ pub fn init_telephony(
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
-    sink: DartServiceStream
+    sink: DartSessionStream
 ) -> Result<(), TelephonyError> {
     // initialize telephony
-    return initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).map(|_| {
-        sink.add(ServiceState::Initialized).unwrap_or(());
-        ()
+    return initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).and_then(|_| {
+        // register session manager
+        let session = crate::core::managers::SessionManager::new(session_id, sink);
+        session.push_event(SessionState::Initialized)
     });
 }
 
-#[frb(sync)]
-pub fn account_setup(username: String, password: String, uri: String, p2p: bool) -> i8 {
+pub fn account_setup(session_id: i64, username: String, password: String, uri: String, p2p: bool) -> Result<(), TelephonyError> {
     ensure_pj_thread_registered();
-    return accountSetup(username, password, uri, p2p).unwrap_or(1);
+    return accountSetup(username, password, uri, p2p).and_then(|_| {
+        push_session_state_update(session_id, SessionState::Running)
+    });
 }
 
-// make call ffi
-pub async fn make_call(phone_number: String, domain: String, sink: DartCallStream) -> i32 {
+pub async fn make_call(phone_number: String, domain: String, sink: DartCallStream) -> Result<(), TelephonyError> {
     ensure_pj_thread_registered();
-    return makeCall(&phone_number, &domain, sink).unwrap_or(1);
+    return makeCall(&phone_number, &domain).and_then(|call_id| {
+        // add a new call manager to the registry
+        let call = CallManager::new(call_id, sink);
+        call.push_event(CallState::Calling)
+    });
 }
     
-#[no_mangle]
 pub fn ffi_hangup_calls() {
     hangup_calls();
 }
