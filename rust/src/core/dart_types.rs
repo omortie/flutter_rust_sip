@@ -10,6 +10,12 @@ pub enum CallState {
 }
 
 #[derive(Debug, Clone)]
+pub struct CallInfo {
+    pub call_id: i32,
+    pub state: CallState,
+}
+
+#[derive(Debug, Clone)]
 pub enum SessionState {
     Initialized,
     Running,

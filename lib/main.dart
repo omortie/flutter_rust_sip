@@ -21,43 +21,33 @@ class _MyAppState extends State<MyApp> {
   String? error;
   String phoneNumber = '';
   String domain = "127.0.0.1";
-  late Stream<SessionState> telephonyStream;
-  final callStreamController = StreamController<CallState>();
+  final callStreamController = StreamController<CallInfo>();
 
   @override
   void initState() {
-    final sid = createNewSession();
-    telephonyStream = initTelephony(
-        sessionId: sid,
+    initTelephony(
         localPort: 5070,
         transportMode: TransportMode.udp,
-      incomingCallStrategy: OnIncommingCall.autoAnswer,
-    );
-
-    telephonyStream.listen((event) {
-      // Handle session state changes here
-      debugPrint('Session State Changed: $event');
-
-      switch (event) {
-        case SessionState_Initialized _:
-          // setup account
-          accountSetup(
+          incomingCallStrategy: OnIncommingCall.autoAnswer,
+        )
+        .then((value) {
+          setState(() {
+            error = null;
+          });
+          callStreamController.addStream(
+            accountSetup(
             username: 'user',
             password: 'pass',
             uri: domain,
-          p2P: true,
-            sessionId: sid,
-        );
-        case SessionState_Error state:
-          error = state.field0;
-          debugPrint('Session Error: $error');
-          error = state.field0;
-        case SessionState_Running _:
-          debugPrint('Session is running');
-        default:
-          debugPrint('Unknown Session State: $event');
-      }
-    });
+              p2P: true,
+            ),
+          );
+        })
+        .catchError((e) {
+          setState(() {
+            error = e.toString();
+          });
+        });
 
     callStreamController.stream.listen((event) {
       // Handle call state changes here
@@ -97,9 +87,7 @@ class _MyAppState extends State<MyApp> {
               Text('Action: Call `("$phoneNumber")`'),
               ElevatedButton(
                 onPressed: () {
-                  callStreamController.addStream(
-                    makeCall(phoneNumber: phoneNumber, domain: domain),
-                  );
+                  makeCall(phoneNumber: phoneNumber, domain: domain);
                 },
                 child: Text('Call $phoneNumber'),
               ),

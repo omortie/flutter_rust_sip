@@ -8,6 +8,24 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'dart_types.freezed.dart';
 
+class CallInfo {
+  final int callId;
+  final CallState state;
+
+  const CallInfo({required this.callId, required this.state});
+
+  @override
+  int get hashCode => callId.hashCode ^ state.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallInfo &&
+          runtimeType == other.runtimeType &&
+          callId == other.callId &&
+          state == other.state;
+}
+
 @freezed
 sealed class CallState with _$CallState {
   const CallState._();
@@ -18,14 +36,4 @@ sealed class CallState with _$CallState {
   const factory CallState.confirmed() = CallState_Confirmed;
   const factory CallState.disconnected() = CallState_Disconnected;
   const factory CallState.error(String field0) = CallState_Error;
-}
-
-@freezed
-sealed class SessionState with _$SessionState {
-  const SessionState._();
-
-  const factory SessionState.initialized() = SessionState_Initialized;
-  const factory SessionState.running() = SessionState_Running;
-  const factory SessionState.stopped() = SessionState_Stopped;
-  const factory SessionState.error(String field0) = SessionState_Error;
 }

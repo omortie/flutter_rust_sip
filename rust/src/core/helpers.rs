@@ -7,7 +7,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::convert::TryInto;
 
-use crate::{core::{dart_types::CallState, managers::{push_call_state_update, CallManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
+use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
 // GLOBAL VARS
 static REALM_GLOBAL: &'static str = "asterisk";
@@ -243,7 +243,7 @@ extern "C" fn on_call_media_state(call_id: pj::pjsua_call_id) {
     }
 }
 
-extern "C" fn on_call_state(call_id: pj::pjsua_call_id, e: *mut pj::pjsip_event){
+extern "C" fn on_call_state(call_id: pj::pjsua_call_id, _: *mut pj::pjsip_event){
     let ci = unsafe {
         let mut ci : MaybeUninit<pj::pjsua_call_info> = MaybeUninit::uninit();
         pj::pjsua_call_get_info(call_id, ci.as_mut_ptr());
@@ -253,7 +253,7 @@ extern "C" fn on_call_state(call_id: pj::pjsua_call_id, e: *mut pj::pjsip_event)
     println!("Call info: {:?}", ci.last_status);
 
     // push update to the relevant call manager
-    push_call_state_update(call_id, ci);
+    push_call_state_update(call_id, ci).unwrap_or(());
 }
 
 pub fn makeCall(phone_number: &str, domain : &str) -> Result<i32,TelephonyError>{

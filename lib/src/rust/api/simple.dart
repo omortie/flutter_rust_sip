@@ -11,42 +11,33 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SESSION_COUNTER`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `deref`, `initialize`
 
-PlatformInt64 createNewSession() =>
-    RustLib.instance.api.crateApiSimpleCreateNewSession();
-
-Stream<SessionState> initTelephony({
-  required PlatformInt64 sessionId,
+Future<void> initTelephony({
   required int localPort,
   required TransportMode transportMode,
   required OnIncommingCall incomingCallStrategy,
 }) => RustLib.instance.api.crateApiSimpleInitTelephony(
-  sessionId: sessionId,
   localPort: localPort,
   transportMode: transportMode,
   incomingCallStrategy: incomingCallStrategy,
 );
 
-Future<void> accountSetup({
-  required PlatformInt64 sessionId,
+Stream<CallInfo> accountSetup({
   required String username,
   required String password,
   required String uri,
   required bool p2P,
 }) => RustLib.instance.api.crateApiSimpleAccountSetup(
-  sessionId: sessionId,
   username: username,
   password: password,
   uri: uri,
   p2P: p2P,
 );
 
-Stream<CallState> makeCall({
-  required String phoneNumber,
-  required String domain,
-}) => RustLib.instance.api.crateApiSimpleMakeCall(
-  phoneNumber: phoneNumber,
-  domain: domain,
-);
+Future<void> makeCall({required String phoneNumber, required String domain}) =>
+    RustLib.instance.api.crateApiSimpleMakeCall(
+      phoneNumber: phoneNumber,
+      domain: domain,
+    );
 
 Future<void> ffiHangupCalls() =>
     RustLib.instance.api.crateApiSimpleFfiHangupCalls();

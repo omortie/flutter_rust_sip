@@ -1,5 +1,5 @@
 use thiserror::Error;
-use crate::{core::dart_types::{CallState, SessionState}, frb_generated::StreamSink};
+use crate::{core::dart_types::{CallInfo, SessionState}, frb_generated::StreamSink};
                                  
 #[derive(Error, Debug)]
 pub enum TelephonyError {
@@ -15,6 +15,8 @@ pub enum TelephonyError {
     DTMFError(String),
     #[error("Could not Create Call")]
     CallCreationError(String),
+    #[error("Call Status Update Error")]
+    CallStatusUpdateError(String),
     #[error("Account Creation Error")]
     AccountCreationError(String),
     #[error("Telephony Start Error")]
@@ -48,5 +50,4 @@ pub enum StreamExitResult {
 }
 
 
-pub type DartCallStream = StreamSink<CallState>;
-pub type DartSessionStream = StreamSink<SessionState>;
+pub type DartCallStream = StreamSink<CallInfo>;

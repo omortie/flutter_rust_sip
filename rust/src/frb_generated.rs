@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1672317302;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 645017884;
 
 // Section: executor
 
@@ -67,53 +67,27 @@ fn wire__crate__api__simple__account_setup_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_session_id = <i64>::sse_decode(&mut deserializer);
             let api_username = <String>::sse_decode(&mut deserializer);
             let api_password = <String>::sse_decode(&mut deserializer);
             let api_uri = <String>::sse_decode(&mut deserializer);
             let api_p2p = <bool>::sse_decode(&mut deserializer);
+            let api_call_sink = <StreamSink<
+                crate::core::dart_types::CallInfo,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
                     let output_ok = crate::api::simple::account_setup(
-                        api_session_id,
                         api_username,
                         api_password,
                         api_uri,
                         api_p2p,
+                        api_call_sink,
                     )?;
                     Ok(output_ok)
                 })())
             }
-        },
-    )
-}
-fn wire__crate__api__simple__create_new_session_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "create_new_session",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(crate::api::simple::create_new_session())?;
-                Ok(output_ok)
-            })())
         },
     )
 }
@@ -207,25 +181,18 @@ fn wire__crate__api__simple__init_telephony_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_session_id = <i64>::sse_decode(&mut deserializer);
             let api_local_port = <u32>::sse_decode(&mut deserializer);
             let api_transport_mode =
                 <crate::core::types::TransportMode>::sse_decode(&mut deserializer);
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
-            let api_sink = <StreamSink<
-                crate::core::dart_types::SessionState,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
                     let output_ok = crate::api::simple::init_telephony(
-                        api_session_id,
                         api_local_port,
                         api_transport_mode,
                         api_incoming_call_strategy,
-                        api_sink,
                     )?;
                     Ok(output_ok)
                 })())
@@ -257,17 +224,12 @@ fn wire__crate__api__simple__make_call_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_phone_number = <String>::sse_decode(&mut deserializer);
             let api_domain = <String>::sse_decode(&mut deserializer);
-            let api_sink = <StreamSink<
-                crate::core::dart_types::CallState,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, crate::core::types::TelephonyError>(
                     (move || async move {
                         let output_ok =
-                            crate::api::simple::make_call(api_phone_number, api_domain, api_sink)
-                                .await?;
+                            crate::api::simple::make_call(api_phone_number, api_domain).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -288,20 +250,7 @@ impl SseDecode for flutter_rust_bridge::for_generated::anyhow::Error {
 }
 
 impl SseDecode
-    for StreamSink<crate::core::dart_types::CallState, flutter_rust_bridge::for_generated::SseCodec>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <String>::sse_decode(deserializer);
-        return StreamSink::deserialize(inner);
-    }
-}
-
-impl SseDecode
-    for StreamSink<
-        crate::core::dart_types::SessionState,
-        flutter_rust_bridge::for_generated::SseCodec,
-    >
+    for StreamSink<crate::core::dart_types::CallInfo, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -322,6 +271,18 @@ impl SseDecode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
+impl SseDecode for crate::core::dart_types::CallInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_callId = <i32>::sse_decode(deserializer);
+        let mut var_state = <crate::core::dart_types::CallState>::sse_decode(deserializer);
+        return crate::core::dart_types::CallInfo {
+            call_id: var_callId,
+            state: var_state,
+        };
     }
 }
 
@@ -363,13 +324,6 @@ impl SseDecode for i32 {
     }
 }
 
-impl SseDecode for i64 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_i64::<NativeEndian>().unwrap()
-    }
-}
-
 impl SseDecode for Vec<u8> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -391,31 +345,6 @@ impl SseDecode for crate::core::types::OnIncommingCall {
             1 => crate::core::types::OnIncommingCall::Ignore,
             _ => unreachable!("Invalid variant for OnIncommingCall: {}", inner),
         };
-    }
-}
-
-impl SseDecode for crate::core::dart_types::SessionState {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut tag_ = <i32>::sse_decode(deserializer);
-        match tag_ {
-            0 => {
-                return crate::core::dart_types::SessionState::Initialized;
-            }
-            1 => {
-                return crate::core::dart_types::SessionState::Running;
-            }
-            2 => {
-                return crate::core::dart_types::SessionState::Stopped;
-            }
-            3 => {
-                let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::dart_types::SessionState::Error(var_field0);
-            }
-            _ => {
-                unimplemented!("");
-            }
-        }
     }
 }
 
@@ -450,17 +379,21 @@ impl SseDecode for crate::core::types::TelephonyError {
             }
             6 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::AccountCreationError(var_field0);
+                return crate::core::types::TelephonyError::CallStatusUpdateError(var_field0);
             }
             7 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::TelephonyStartError(var_field0);
+                return crate::core::types::TelephonyError::AccountCreationError(var_field0);
             }
             8 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::TelephonyDestroyError(var_field0);
+                return crate::core::types::TelephonyError::TelephonyStartError(var_field0);
             }
             9 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::core::types::TelephonyError::TelephonyDestroyError(var_field0);
+            }
+            10 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
                 return crate::core::types::TelephonyError::InputValueError(var_field0);
             }
@@ -516,10 +449,10 @@ fn pde_ffi_dispatcher_primary_impl(
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
         1 => wire__crate__api__simple__account_setup_impl(port, ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__simple__ffi_hangup_calls_impl(port, ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__simple__init_telephony_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__simple__make_call_impl(port, ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__simple__ffi_hangup_calls_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__simple__init_telephony_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__simple__make_call_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -532,13 +465,33 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        2 => wire__crate__api__simple__create_new_session_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
 
 // Section: rust2dart
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallInfo {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.call_id.into_into_dart().into_dart(),
+            self.state.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::core::dart_types::CallInfo
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::core::dart_types::CallInfo>
+    for crate::core::dart_types::CallInfo
+{
+    fn into_into_dart(self) -> crate::core::dart_types::CallInfo {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallState {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -590,33 +543,6 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::types::OnIncommingCall>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::core::dart_types::SessionState {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        match self {
-            crate::core::dart_types::SessionState::Initialized => [0.into_dart()].into_dart(),
-            crate::core::dart_types::SessionState::Running => [1.into_dart()].into_dart(),
-            crate::core::dart_types::SessionState::Stopped => [2.into_dart()].into_dart(),
-            crate::core::dart_types::SessionState::Error(field0) => {
-                [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
-            }
-            _ => {
-                unimplemented!("");
-            }
-        }
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::core::dart_types::SessionState
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::core::dart_types::SessionState>
-    for crate::core::dart_types::SessionState
-{
-    fn into_into_dart(self) -> crate::core::dart_types::SessionState {
-        self
-    }
-}
-// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::core::types::TelephonyError {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -638,17 +564,20 @@ impl flutter_rust_bridge::IntoDart for crate::core::types::TelephonyError {
             crate::core::types::TelephonyError::CallCreationError(field0) => {
                 [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::AccountCreationError(field0) => {
+            crate::core::types::TelephonyError::CallStatusUpdateError(field0) => {
                 [6.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
+            crate::core::types::TelephonyError::AccountCreationError(field0) => {
                 [7.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
+            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
                 [8.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::InputValueError(field0) => {
+            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
                 [9.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::core::types::TelephonyError::InputValueError(field0) => {
+                [10.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -701,19 +630,7 @@ impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
 }
 
 impl SseEncode
-    for StreamSink<crate::core::dart_types::CallState, flutter_rust_bridge::for_generated::SseCodec>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        unimplemented!("")
-    }
-}
-
-impl SseEncode
-    for StreamSink<
-        crate::core::dart_types::SessionState,
-        flutter_rust_bridge::for_generated::SseCodec,
-    >
+    for StreamSink<crate::core::dart_types::CallInfo, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -732,6 +649,14 @@ impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
+impl SseEncode for crate::core::dart_types::CallInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.call_id, serializer);
+        <crate::core::dart_types::CallState>::sse_encode(self.state, serializer);
     }
 }
 
@@ -772,13 +697,6 @@ impl SseEncode for i32 {
     }
 }
 
-impl SseEncode for i64 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_i64::<NativeEndian>(self).unwrap();
-    }
-}
-
 impl SseEncode for Vec<u8> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -802,30 +720,6 @@ impl SseEncode for crate::core::types::OnIncommingCall {
             },
             serializer,
         );
-    }
-}
-
-impl SseEncode for crate::core::dart_types::SessionState {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        match self {
-            crate::core::dart_types::SessionState::Initialized => {
-                <i32>::sse_encode(0, serializer);
-            }
-            crate::core::dart_types::SessionState::Running => {
-                <i32>::sse_encode(1, serializer);
-            }
-            crate::core::dart_types::SessionState::Stopped => {
-                <i32>::sse_encode(2, serializer);
-            }
-            crate::core::dart_types::SessionState::Error(field0) => {
-                <i32>::sse_encode(3, serializer);
-                <String>::sse_encode(field0, serializer);
-            }
-            _ => {
-                unimplemented!("");
-            }
-        }
     }
 }
 
@@ -857,20 +751,24 @@ impl SseEncode for crate::core::types::TelephonyError {
                 <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::AccountCreationError(field0) => {
+            crate::core::types::TelephonyError::CallStatusUpdateError(field0) => {
                 <i32>::sse_encode(6, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
+            crate::core::types::TelephonyError::AccountCreationError(field0) => {
                 <i32>::sse_encode(7, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
+            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
                 <i32>::sse_encode(8, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::InputValueError(field0) => {
+            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
                 <i32>::sse_encode(9, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            crate::core::types::TelephonyError::InputValueError(field0) => {
+                <i32>::sse_encode(10, serializer);
                 <String>::sse_encode(field0, serializer);
             }
             _ => {

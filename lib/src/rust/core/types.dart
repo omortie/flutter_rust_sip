@@ -26,6 +26,8 @@ sealed class TelephonyError with _$TelephonyError implements FrbException {
       TelephonyError_DTMFError;
   const factory TelephonyError.callCreationError(String field0) =
       TelephonyError_CallCreationError;
+  const factory TelephonyError.callStatusUpdateError(String field0) =
+      TelephonyError_CallStatusUpdateError;
   const factory TelephonyError.accountCreationError(String field0) =
       TelephonyError_AccountCreationError;
   const factory TelephonyError.telephonyStartError(String field0) =
