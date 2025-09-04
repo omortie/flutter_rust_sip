@@ -291,7 +291,15 @@ pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {
     return Ok(0); 
 }
 
-pub fn hangup_calls(){
+pub fn hangupCall(call_id:i32) -> Result<(),TelephonyError>{
+    let status = unsafe{ pj::pjsua_call_hangup(call_id, 0, std::ptr::null(), std::ptr::null())};
+    if status!=0{
+        return Err(TelephonyError::CallStatusUpdateError("Could not Hangup Call".to_string()));
+    }
+    Ok(())
+}
+
+pub fn hangupCalls(){
     unsafe{ pj::pjsua_call_hangup_all()}; 
 }
 

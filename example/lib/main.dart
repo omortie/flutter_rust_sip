@@ -79,8 +79,9 @@ extension CallInfoExtension on CallState {
 
 class CallStatusCard extends StatelessWidget {
   final CallInfo callInfo;
+  final void Function(int)? onHangup;
 
-  const CallStatusCard({super.key, required this.callInfo});
+  const CallStatusCard({super.key, required this.callInfo, this.onHangup});
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +126,29 @@ class CallStatusCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(width: 16),
+            // Hangup button
+            ElevatedButton.icon(
+              onPressed: callInfo.state.isActive
+                  ? () async {
+                      try {
+                        await hangupCall(callId: callInfo.callId);
+                        // notify parent to remove/update the call entry
+                        if (onHangup != null) onHangup!(callInfo.callId);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Hangup failed: $e')),
+                        );
+                      }
+                    }
+                  : null,
+              icon: const Icon(Icons.call_end),
+              label: const Text('Hang Up'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    callInfo.state.isActive ? Colors.red : Colors.grey,
+              ),
             ),
           ],
         ),

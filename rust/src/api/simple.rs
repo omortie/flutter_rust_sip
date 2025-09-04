@@ -35,7 +35,12 @@ pub async fn make_call(phone_number: String, domain: String) -> Result<i32, Tele
     ensure_pj_thread_registered();
     makeCall(&phone_number, &domain)
 }
+
+pub fn hangup_call(call_id: i32) -> Result<(), TelephonyError> {
+    ensure_pj_thread_registered();
+    hangupCall(call_id)
+}
     
-pub fn ffi_hangup_calls() {
-    hangup_calls();
+pub fn hangup_calls() {
+    hangupCalls();
 }

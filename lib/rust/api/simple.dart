@@ -29,5 +29,7 @@ Future<int> makeCall({required String phoneNumber, required String domain}) =>
       domain: domain,
     );
 
-Future<void> ffiHangupCalls() =>
-    RustLib.instance.api.crateApiSimpleFfiHangupCalls();
+Future<void> hangupCall({required int callId}) =>
+    RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);
+
+Future<void> hangupCalls() => RustLib.instance.api.crateApiSimpleHangupCalls();

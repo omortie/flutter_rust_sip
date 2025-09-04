@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -59399593;
+  int get rustContentHash => 2139595066;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,7 +79,9 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<void> crateApiSimpleFfiHangupCalls();
+  Future<void> crateApiSimpleHangupCall({required int callId});
+
+  Future<void> crateApiSimpleHangupCalls();
 
   Future<void> crateApiSimpleInitApp();
 
@@ -105,11 +107,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateApiSimpleFfiHangupCalls() {
+  Future<void> crateApiSimpleHangupCall({required int callId}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_32(callId, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -119,17 +122,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_telephony_error,
+        ),
+        constMeta: kCrateApiSimpleHangupCallConstMeta,
+        argValues: [callId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSimpleHangupCallConstMeta =>
+      const TaskConstMeta(debugName: "hangup_call", argNames: ["callId"]);
+
+  @override
+  Future<void> crateApiSimpleHangupCalls() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleFfiHangupCallsConstMeta,
+        constMeta: kCrateApiSimpleHangupCallsConstMeta,
         argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleFfiHangupCallsConstMeta =>
-      const TaskConstMeta(debugName: "ffi_hangup_calls", argNames: []);
+  TaskConstMeta get kCrateApiSimpleHangupCallsConstMeta =>
+      const TaskConstMeta(debugName: "hangup_calls", argNames: []);
 
   @override
   Future<void> crateApiSimpleInitApp() {
@@ -140,7 +170,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -179,7 +209,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 3,
+              funcId: 4,
               port: port_,
             );
           },
@@ -228,7 +258,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },

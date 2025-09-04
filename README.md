@@ -5,7 +5,6 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 ## Features
 
 - SIP registration and call handling
-- Cross-platform support (Android, iOS, desktop)
 - High performance via Rust FFI
 
 ## Getting Started
@@ -19,11 +18,18 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 2. Install dependencies:
     Make sure that [PJSIP](https://github.com/pjsip/pjproject) built and installed 
     [Notice for Linux/MacOS](https://docs.pjsip.org/en/latest/pjsua2/building.html#common-requirements)
+
+3. Install Flutter dependencies
     ```sh
     flutter pub get
     ```
 
-3. Go to the `example` and Run the app:
+4. Run Dart Build Runner
+    ```sh
+    dart run build_runner build -d
+    ```
+
+5. Go to the `example` and Run the app:
     ```sh
     flutter run
     ```
