@@ -7,6 +7,8 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::convert::TryInto;
 
+use pjsip::pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
+
 use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
 // GLOBAL VARS
@@ -81,6 +83,15 @@ pub fn init(loglevel : u32 , incomming_call_behaviour: OnIncommingCall ) -> Resu
 
     cfg.cb.on_call_media_state = Some(on_call_media_state);
     cfg.cb.on_call_state = Some(on_call_state);
+    
+    // configuring default stun server of Google
+    let stun_srv = "stun:stun.l.google.com:19302".to_string();
+    let stun_srv_pj_str_t = match (make_pj_str_t(stun_srv)){
+        Err(x)=> return Err(x),
+        Ok(y)=>y
+    };
+    cfg.stun_srv_cnt = 1;
+    cfg.stun_srv[0] = stun_srv_pj_str_t;
 
 	let mut log_cfg =  unsafe {
         let mut log_cfg: MaybeUninit<pj::pjsua_logging_config> = MaybeUninit::uninit();
@@ -152,11 +163,6 @@ pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
 
     let acc_id : String      = ["sip:".to_string(),uri.clone()].concat();
     let reg_uri : String    = "".to_string();
-    let realm : String      = REALM_GLOBAL.to_owned();
-    // "asterisk".to_owned();
-    let scheme : String     = uri;
-    // let username : String   = username;
-    // let data : String       = password;
 
     let acc_id_pj_str_t = match(make_pj_str_t(acc_id)){
         Err(x)=> return Err(x),
@@ -166,33 +172,13 @@ pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
         Err(x)=> return Err(x),
         Ok(y)=>y 
     }; 
-    // let realm_pj_str_t = match(make_pj_str_t(realm)){
-    //     Err(x)=> return Err(x),
-    //     Ok(y)=>y 
-    // }; 
-    // let scheme_pj_str_t = match(make_pj_str_t(scheme)){
-    //     Err(x)=> return Err(x),
-    //     Ok(y)=>y 
-    // }; 
-    // let username_pj_str_t = match(make_pj_str_t(username)){
-    //     Err(x)=> return Err(x),
-    //     Ok(y)=>y 
-    // };
-    // let data_pj_str_t = match(make_pj_str_t(data)){
-    //     Err(x)=> return Err(x),
-    //     Ok(y)=>y 
-    // };
 
     // Setting members of the struct
     acc_cfg_ref.id = acc_id_pj_str_t ;
     acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
     acc_cfg_ref.register_on_acc_add = true as i32;
     acc_cfg_ref.cred_count = 0;
-    // acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
-    // acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
-    // acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-    // acc_cfg_ref.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
-    // acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+    acc_cfg_ref.media_stun_use = pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
 
     let acc_id : pj::pjsua_acc_id;
     acc_id = 0 ;

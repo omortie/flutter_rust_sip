@@ -14,21 +14,21 @@ lazy_static::lazy_static! {
 }
 
 pub fn init_telephony(
+    uri: String,
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
-) -> Result<i8, TelephonyError> {
+    call_sink: DartCallStream,
+) -> Result<(), TelephonyError> {
     // initialize telephony
-    initialize_telephony(0, incoming_call_strategy, local_port, transport_mode)
-}
-
-pub fn account_setup(uri: String, call_sink: DartCallStream) -> Result<(), TelephonyError> {
-    ensure_pj_thread_registered();
-    return accountSetup(uri).and_then(|_| {
-        // create a call manager
-        CallStateManager::new(call_sink);
-        Ok(())
-    });
+    initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).and_then(|_| {
+        ensure_pj_thread_registered();
+        accountSetup(uri).and_then(|_| {
+            // create a call manager
+            CallStateManager::new(call_sink);
+            Ok(())
+        })
+    })
 }
 
 pub async fn make_call(phone_number: String, domain: String) -> Result<i32, TelephonyError> {

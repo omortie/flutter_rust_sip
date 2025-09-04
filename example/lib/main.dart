@@ -151,34 +151,21 @@ class _CallerWidgetState extends State<CallerWidget> {
   String? error;
   String phoneNumber = '';
   String domain = "127.0.0.1";
-  late Future<int> result;
-
-  
 
   @override
   void initState() {
-    result = initTelephony(
-          localPort: 5060,
+    widget.callStreamController.addStream(
+      initTelephony(
+        uri: domain,
+        localPort: 5060,
         transportMode: TransportMode.udp,
-          incomingCallStrategy: OnIncommingCall.autoAnswer,
-        )
-        .then((value) {
-          setState(() {
-            error = null;
-          });
-          widget.callStreamController.addStream(
-        accountSetup(
-          uri: domain,
-            ),
-          );
-          return value;
-        })
-        .catchError((e) {
-          setState(() {
-            error = e.toString();
-          });
-          return -1;
+        incomingCallStrategy: OnIncommingCall.autoAnswer,
+      ).handleError((e) {
+        setState(() {
+          error = e.toString();
         });
+      }),
+    );
 
     super.initState();
   }
@@ -188,17 +175,8 @@ class _CallerWidgetState extends State<CallerWidget> {
     return Column(
       spacing: 16,
       children: [
-        FutureBuilder(
-          future: result,
-          builder: (context, result) {
-            if (result.hasData) {
-              return Text(
-                'Initialization state: ${error == null ? "Initialized" : "Not initialized, error: $error"}',
-              );
-            } else {
-              return const CircularProgressIndicator();
-            }
-          }
+        Text(
+          'Initialization state: ${error == null ? "Initialized" : "Not initialized, error: $error"}',
         ),
         TextField(
           decoration: const InputDecoration(hintText: 'Phone Number'),

@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 645017884;
+  int get rustContentHash => -59399593;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,13 +79,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri});
-
   Future<void> crateApiSimpleFfiHangupCalls();
 
   Future<void> crateApiSimpleInitApp();
 
-  Future<int> crateApiSimpleInitTelephony({
+  Stream<CallInfo> crateApiSimpleInitTelephony({
+    required String uri,
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
@@ -106,41 +105,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri}) {
-    final callSink = RustStreamSink<CallInfo>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_String(uri, serializer);
-            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 1,
-              port: port_,
-            );
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: sse_decode_telephony_error,
-          ),
-          constMeta: kCrateApiSimpleAccountSetupConstMeta,
-          argValues: [uri, callSink],
-          apiImpl: this,
-        ),
-      ),
-    );
-    return callSink.stream;
-  }
-
-  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
-    debugName: "account_setup",
-    argNames: ["uri", "callSink"],
-  );
-
-  @override
   Future<void> crateApiSimpleFfiHangupCalls() {
     return handler.executeNormal(
       NormalTask(
@@ -149,7 +113,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 1,
             port: port_,
           );
         },
@@ -176,7 +140,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 2,
             port: port_,
           );
         },
@@ -195,40 +159,59 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Future<int> crateApiSimpleInitTelephony({
+  Stream<CallInfo> crateApiSimpleInitTelephony({
+    required String uri,
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
   }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_u_32(localPort, serializer);
-          sse_encode_transport_mode(transportMode, serializer);
-          sse_encode_on_incomming_call(incomingCallStrategy, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_telephony_error,
+    final callSink = RustStreamSink<CallInfo>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(uri, serializer);
+            sse_encode_u_32(localPort, serializer);
+            sse_encode_transport_mode(transportMode, serializer);
+            sse_encode_on_incomming_call(incomingCallStrategy, serializer);
+            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 3,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: sse_decode_telephony_error,
+          ),
+          constMeta: kCrateApiSimpleInitTelephonyConstMeta,
+          argValues: [
+            uri,
+            localPort,
+            transportMode,
+            incomingCallStrategy,
+            callSink,
+          ],
+          apiImpl: this,
         ),
-        constMeta: kCrateApiSimpleInitTelephonyConstMeta,
-        argValues: [localPort, transportMode, incomingCallStrategy],
-        apiImpl: this,
       ),
     );
+    return callSink.stream;
   }
 
   TaskConstMeta get kCrateApiSimpleInitTelephonyConstMeta =>
       const TaskConstMeta(
         debugName: "init_telephony",
-        argNames: ["localPort", "transportMode", "incomingCallStrategy"],
+        argNames: [
+          "uri",
+          "localPort",
+          "transportMode",
+          "incomingCallStrategy",
+          "callSink",
+        ],
       );
 
   @override
@@ -245,7 +228,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 4,
             port: port_,
           );
         },
@@ -318,12 +301,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   int dco_decode_i_32(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
-
-  @protected
-  int dco_decode_i_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
   }
@@ -453,12 +430,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
-  }
-
-  @protected
-  int sse_decode_i_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt8();
   }
 
   @protected
@@ -612,12 +583,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
-  }
-
-  @protected
-  void sse_encode_i_8(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt8(self);
   }
 
   @protected
