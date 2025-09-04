@@ -11,7 +11,7 @@ anyhow = "1.0.99"
 flutter_rust_bridge = "=2.11.1"
 lazy_static = "1.5.0"
 log = "0.4.27"
-pjsip-sys = { path = "../../pjsip-sys" } 
+pjsip-sys = { git = "https://github.com/omortie/pjsip-sys.git" } 
 thiserror = "2.0.16"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }

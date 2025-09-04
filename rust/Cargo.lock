@@ -697,6 +697,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.1"
+source = "git+https://github.com/omortie/pjsip-sys.git#03fa5c398f64182e3dc76409e308434eabd9ab23"
 dependencies = [
  "bindgen",
  "pkg-config",
