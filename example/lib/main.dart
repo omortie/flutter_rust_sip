@@ -25,11 +25,7 @@ class _MyAppState extends State<MyApp> {
       // Handle call state changes here
       debugPrint('Call State Changed: $event');
       setState(() {
-        if (event.state == const CallState.disconnected()) {
-          activeCalls.remove(event.callId);
-        } else {
-          activeCalls[event.callId] = event;
-        }
+        activeCalls[event.callId] = event;
       });
     });
     super.initState();
@@ -57,13 +53,7 @@ class _MyAppState extends State<MyApp> {
               Wrap(
                 children:
                     activeCalls.entries
-                    .map((e) => CallStatusCard(
-                        callInfo: e.value,
-                        onHangup: (callId) {
-                          setState(() {
-                            activeCalls.remove(callId);
-                          });
-                        }))
+                        .map((e) => CallStatusCard(callInfo: e.value))
                         .toList(),
               ),
             ],
@@ -78,7 +68,6 @@ extension CallInfoExtension on CallState {
   bool get isActive {
     return when(
       early: () => false,
-      incoming: () => true,
       calling: () => true,
       connecting: () => true,
       confirmed: () => true,
@@ -140,23 +129,18 @@ class CallStatusCard extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             // Hangup button
-            callInfo.state == const CallState.incoming()
-                ? ElevatedButton.icon(
-                    onPressed: () async {
-                      await answerCall(callId: callInfo.callId);
-                    },
-                    icon: const Icon(Icons.call),
-                    label: const Text('Answer'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                  )
-                : ElevatedButton.icon(
-                    onPressed: callInfo.state.isActive
-                        ? () async {
-                            await hangupCall(callId: callInfo.callId);
-                            // notify parent to remove/update the call entry
-                            onHangup?.call(callInfo.callId);
+            ElevatedButton.icon(
+              onPressed: callInfo.state.isActive
+                  ? () async {
+                      try {
+                        await hangupCall(callId: callInfo.callId);
+                        // notify parent to remove/update the call entry
+                        if (onHangup != null) onHangup!(callInfo.callId);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Hangup failed: $e')),
+                        );
+                      }
                     }
                   : null,
               icon: const Icon(Icons.call_end),

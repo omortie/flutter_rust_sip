@@ -31,7 +31,6 @@ sealed class CallState with _$CallState {
   const CallState._();
 
   const factory CallState.early() = CallState_Early;
-  const factory CallState.incoming() = CallState_Incoming;
   const factory CallState.calling() = CallState_Calling;
   const factory CallState.connecting() = CallState_Connecting;
   const factory CallState.confirmed() = CallState_Confirmed;
