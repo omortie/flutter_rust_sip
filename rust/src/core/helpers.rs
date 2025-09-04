@@ -11,16 +11,13 @@ use pjsip::pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
 
 use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
-// GLOBAL VARS
-static REALM_GLOBAL: &'static str = "asterisk";
-
 pub fn ensure_pj_thread_registered() {
     thread_local! {
         static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
     }
     REGISTERED.with(|reg| {
         if !reg.get() {
-            let mut thread_desc = [0i64; 64]; // PJ_THREAD_DESC_SIZE is usually 64, type must match pj_thread_desc
+            let mut thread_desc = [0i64; 64];
             let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
             unsafe {
@@ -31,7 +28,7 @@ pub fn ensure_pj_thread_registered() {
     });
 }
 
-pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode) -> Result<i8,TelephonyError> {
+pub fn initializeTelephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode) -> Result<i8,TelephonyError> {
 
     // INIT
     let initResult = init(logLevel,incommingCallBehaviour);
@@ -41,14 +38,14 @@ pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall
     };
 
     // ADD TRANSPORT
-    let transportResult = add_transport(port,transportmode);
+    let transportResult = addTransport(port,transportmode);
     match(transportResult){
         Ok(_) => (),
         Err(x) => return Err(x),
     };
 
     // START
-    let startResult = start_telephony();
+    let startResult = startTelephony();
     match(startResult){
         Ok(_) => (),
         Err(x) => return Err(x),
@@ -110,7 +107,7 @@ pub fn init(loglevel : u32 , incomming_call_behaviour: OnIncommingCall ) -> Resu
     return Ok(0);
 }
 
-pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyError>{
+pub fn addTransport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyError>{
      /* Add UDP transport. */
     println!("INIT TRANSPORT CFG");
 
@@ -141,7 +138,7 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
     return Ok(0);
 }
 
-pub fn start_telephony() -> Result <i8,TelephonyError>{
+pub fn startTelephony() -> Result <i8,TelephonyError>{
     let status = unsafe{pj::pjsua_start()};
     if (status != pj::pj_constants__PJ_SUCCESS as i32) {
         println!("Error starting pjsua, status = {}",status);
@@ -296,6 +293,16 @@ pub fn hangupCall(call_id:i32) -> Result<(),TelephonyError>{
     if status!=0{
         return Err(TelephonyError::CallStatusUpdateError("Could not Hangup Call".to_string()));
     }
+    Ok(())
+}
+
+// answer the call
+pub fn answerCall(call_id: pj::pjsua_call_id) -> Result<(),TelephonyError> {
+    let status = unsafe { pj::pjsua_call_answer(call_id, 200, std::ptr::null(), std::ptr::null())};
+    if status != 0 {
+        return Err(TelephonyError::CallStatusUpdateError("Could not Answer Call".to_string()));
+    }
+    println!("The call id answered: {}", call_id);
     Ok(())
 }
 

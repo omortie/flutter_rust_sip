@@ -40,6 +40,7 @@ pub fn push_call_state_update(call_id: pj::pjsua_call_id, ci: pj::pjsua_call_inf
     // convert to your CallState enum
     let state = match ci.state {
         s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_EARLY => CallState::Early,
+            s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_INCOMING => CallState::Incoming,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CALLING => CallState::Calling,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CONNECTING => CallState::Connecting,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CONFIRMED => CallState::Confirmed,

@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 2139595066;
+  int get rustContentHash => -1711448183;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,6 +79,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<void> crateApiSimpleAnswerCall({required int callId});
+
   Future<void> crateApiSimpleHangupCall({required int callId});
 
   Future<void> crateApiSimpleHangupCalls();
@@ -107,7 +109,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateApiSimpleHangupCall({required int callId}) {
+  Future<void> crateApiSimpleAnswerCall({required int callId}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -117,6 +119,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             generalizedFrbRustBinding,
             serializer,
             funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_telephony_error,
+        ),
+        constMeta: kCrateApiSimpleAnswerCallConstMeta,
+        argValues: [callId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSimpleAnswerCallConstMeta =>
+      const TaskConstMeta(debugName: "answer_call", argNames: ["callId"]);
+
+  @override
+  Future<void> crateApiSimpleHangupCall({required int callId}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_32(callId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
             port: port_,
           );
         },
@@ -143,7 +173,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -170,7 +200,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -209,7 +239,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 4,
+              funcId: 5,
               port: port_,
             );
           },
@@ -258,7 +288,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 6,
             port: port_,
           );
         },
@@ -315,14 +345,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 0:
         return CallState_Early();
       case 1:
-        return CallState_Calling();
+        return CallState_Incoming();
       case 2:
-        return CallState_Connecting();
+        return CallState_Calling();
       case 3:
-        return CallState_Confirmed();
+        return CallState_Connecting();
       case 4:
-        return CallState_Disconnected();
+        return CallState_Confirmed();
       case 5:
+        return CallState_Disconnected();
+      case 6:
         return CallState_Error(dco_decode_String(raw[1]));
       default:
         throw Exception("unreachable");
@@ -441,14 +473,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 0:
         return CallState_Early();
       case 1:
-        return CallState_Calling();
+        return CallState_Incoming();
       case 2:
-        return CallState_Connecting();
+        return CallState_Calling();
       case 3:
-        return CallState_Confirmed();
+        return CallState_Connecting();
       case 4:
-        return CallState_Disconnected();
+        return CallState_Confirmed();
       case 5:
+        return CallState_Disconnected();
+      case 6:
         var var_field0 = sse_decode_String(deserializer);
         return CallState_Error(var_field0);
       default:
@@ -595,16 +629,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     switch (self) {
       case CallState_Early():
         sse_encode_i_32(0, serializer);
-      case CallState_Calling():
+      case CallState_Incoming():
         sse_encode_i_32(1, serializer);
-      case CallState_Connecting():
+      case CallState_Calling():
         sse_encode_i_32(2, serializer);
-      case CallState_Confirmed():
+      case CallState_Connecting():
         sse_encode_i_32(3, serializer);
-      case CallState_Disconnected():
+      case CallState_Confirmed():
         sse_encode_i_32(4, serializer);
-      case CallState_Error(field0: final field0):
+      case CallState_Disconnected():
         sse_encode_i_32(5, serializer);
+      case CallState_Error(field0: final field0):
+        sse_encode_i_32(6, serializer);
         sse_encode_String(field0, serializer);
     }
   }

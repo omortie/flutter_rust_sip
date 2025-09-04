@@ -21,7 +21,7 @@ pub fn init_telephony(
     call_sink: DartCallStream,
 ) -> Result<(), TelephonyError> {
     // initialize telephony
-    initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).and_then(|_| {
+    initializeTelephony(0, incoming_call_strategy, local_port, transport_mode).and_then(|_| {
         ensure_pj_thread_registered();
         accountSetup(uri).and_then(|_| {
             // create a call manager
@@ -36,11 +36,17 @@ pub async fn make_call(phone_number: String, domain: String) -> Result<i32, Tele
     makeCall(&phone_number, &domain)
 }
 
+pub fn answer_call(call_id: i32) -> Result<(), TelephonyError> {
+    ensure_pj_thread_registered();
+    answerCall(call_id)
+}
+
 pub fn hangup_call(call_id: i32) -> Result<(), TelephonyError> {
     ensure_pj_thread_registered();
     hangupCall(call_id)
 }
     
 pub fn hangup_calls() {
+    ensure_pj_thread_registered();
     hangupCalls();
 }
