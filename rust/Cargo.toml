@@ -1,5 +1,5 @@
 [package]
-name = "rust_sip"
+name = "flutter_rust_sip"
 version = "0.1.0"
 edition = "2018"
 

@@ -347,6 +347,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "flutter_rust_sip"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "flutter_rust_bridge",
+ "lazy_static",
+ "log",
+ "pjsip-sys",
+ "thiserror 2.0.16",
+ "tracing-appender",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "futures"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -793,20 +807,6 @@ name = "regex-syntax"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "caf4aa5b0f434c91fe5c7f1ecb6a5ece2130b02ad2a590589dda5146df959001"
-
-[[package]]
-name = "rust_sip"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "flutter_rust_bridge",
- "lazy_static",
- "log",
- "pjsip-sys",
- "thiserror 2.0.16",
- "tracing-appender",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "rustc-demangle"
