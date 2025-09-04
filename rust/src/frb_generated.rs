@@ -67,10 +67,7 @@ fn wire__crate__api__simple__account_setup_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_username = <String>::sse_decode(&mut deserializer);
-            let api_password = <String>::sse_decode(&mut deserializer);
             let api_uri = <String>::sse_decode(&mut deserializer);
-            let api_p2p = <bool>::sse_decode(&mut deserializer);
             let api_call_sink = <StreamSink<
                 crate::core::dart_types::CallInfo,
                 flutter_rust_bridge::for_generated::SseCodec,
@@ -78,13 +75,7 @@ fn wire__crate__api__simple__account_setup_impl(
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
-                    let output_ok = crate::api::simple::account_setup(
-                        api_username,
-                        api_password,
-                        api_uri,
-                        api_p2p,
-                        api_call_sink,
-                    )?;
+                    let output_ok = crate::api::simple::account_setup(api_uri, api_call_sink)?;
                     Ok(output_ok)
                 })())
             }
@@ -267,13 +258,6 @@ impl SseDecode for String {
     }
 }
 
-impl SseDecode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_u8().unwrap() != 0
-    }
-}
-
 impl SseDecode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -444,6 +428,13 @@ impl SseDecode for u8 {
 impl SseDecode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
+}
+
+impl SseDecode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u8().unwrap() != 0
+    }
 }
 
 fn pde_ffi_dispatcher_primary_impl(
@@ -652,13 +643,6 @@ impl SseEncode for String {
     }
 }
 
-impl SseEncode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_u8(self as _).unwrap();
-    }
-}
-
 impl SseEncode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -829,6 +813,13 @@ impl SseEncode for u8 {
 impl SseEncode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
+}
+
+impl SseEncode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u8(self as _).unwrap();
+    }
 }
 
 #[cfg(not(target_family = "wasm"))]

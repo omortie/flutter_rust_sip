@@ -22,9 +22,9 @@ pub fn init_telephony(
     initialize_telephony(0, incoming_call_strategy, local_port, transport_mode)
 }
 
-pub fn account_setup(username: String, password: String, uri: String, p2p: bool, call_sink: DartCallStream) -> Result<(), TelephonyError> {
+pub fn account_setup(uri: String, call_sink: DartCallStream) -> Result<(), TelephonyError> {
     ensure_pj_thread_registered();
-    return accountSetup(username, password, uri, p2p).and_then(|_| {
+    return accountSetup(uri).and_then(|_| {
         // create a call manager
         CallStateManager::new(call_sink);
         Ok(())

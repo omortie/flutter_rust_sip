@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
                   setState(() {
                     activeCalls[callID] = CallInfo(
                       callId: callID,
-                      state: CallState.early(),
+                      state: const CallState.early(),
                     );
                   });
                 },
@@ -167,11 +167,8 @@ class _CallerWidgetState extends State<CallerWidget> {
             error = null;
           });
           widget.callStreamController.addStream(
-            accountSetup(
-            username: 'user',
-            password: 'pass',
-            uri: domain,
-              p2P: true,
+        accountSetup(
+          uri: domain,
             ),
           );
           return value;

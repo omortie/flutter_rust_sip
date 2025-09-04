@@ -79,12 +79,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Stream<CallInfo> crateApiSimpleAccountSetup({
-    required String username,
-    required String password,
-    required String uri,
-    required bool p2P,
-  });
+  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri});
 
   Future<void> crateApiSimpleFfiHangupCalls();
 
@@ -111,22 +106,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Stream<CallInfo> crateApiSimpleAccountSetup({
-    required String username,
-    required String password,
-    required String uri,
-    required bool p2P,
-  }) {
+  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri}) {
     final callSink = RustStreamSink<CallInfo>();
     unawaited(
       handler.executeNormal(
         NormalTask(
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_String(username, serializer);
-            sse_encode_String(password, serializer);
             sse_encode_String(uri, serializer);
-            sse_encode_bool(p2P, serializer);
             sse_encode_StreamSink_call_info_Sse(callSink, serializer);
             pdeCallFfi(
               generalizedFrbRustBinding,
@@ -140,7 +127,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             decodeErrorData: sse_decode_telephony_error,
           ),
           constMeta: kCrateApiSimpleAccountSetupConstMeta,
-          argValues: [username, password, uri, p2P, callSink],
+          argValues: [uri, callSink],
           apiImpl: this,
         ),
       ),
@@ -150,7 +137,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
     debugName: "account_setup",
-    argNames: ["username", "password", "uri", "p2P", "callSink"],
+    argNames: ["uri", "callSink"],
   );
 
   @override
@@ -297,12 +284,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool dco_decode_bool(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as bool;
-  }
-
-  @protected
   CallInfo dco_decode_call_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -437,12 +418,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
   CallInfo sse_decode_call_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_callId = sse_decode_i_32(deserializer);
@@ -569,6 +544,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -598,12 +579,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 
   @protected
@@ -728,5 +703,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }

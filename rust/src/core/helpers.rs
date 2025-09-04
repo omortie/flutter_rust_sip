@@ -140,7 +140,7 @@ pub fn start_telephony() -> Result <i8,TelephonyError>{
     Ok(0)
 }
 
-pub fn accountSetup(username : String, password : String, uri : String, p2p: bool) -> Result<i8,TelephonyError> {
+pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
     println!("ACCOUNT SETUP");
     let status : pj::pj_status_t;
     let mut acc_cfg =  unsafe {
@@ -150,13 +150,13 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
     };
     let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() }; 
 
-    let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
+    let acc_id : String      = ["sip:".to_string(),uri.clone()].concat();
     let reg_uri : String    = "".to_string();
     let realm : String      = REALM_GLOBAL.to_owned();
     // "asterisk".to_owned();
     let scheme : String     = uri;
-    let username : String   = username;
-    let data : String       = password;
+    // let username : String   = username;
+    // let data : String       = password;
 
     let acc_id_pj_str_t = match(make_pj_str_t(acc_id)){
         Err(x)=> return Err(x),
@@ -166,33 +166,33 @@ pub fn accountSetup(username : String, password : String, uri : String, p2p: boo
         Err(x)=> return Err(x),
         Ok(y)=>y 
     }; 
-    let realm_pj_str_t = match(make_pj_str_t(realm)){
-        Err(x)=> return Err(x),
-        Ok(y)=>y 
-    }; 
-    let scheme_pj_str_t = match(make_pj_str_t(scheme)){
-        Err(x)=> return Err(x),
-        Ok(y)=>y 
-    }; 
-    let username_pj_str_t = match(make_pj_str_t(username)){
-        Err(x)=> return Err(x),
-        Ok(y)=>y 
-    };
-    let data_pj_str_t = match(make_pj_str_t(data)){
-        Err(x)=> return Err(x),
-        Ok(y)=>y 
-    };
+    // let realm_pj_str_t = match(make_pj_str_t(realm)){
+    //     Err(x)=> return Err(x),
+    //     Ok(y)=>y 
+    // }; 
+    // let scheme_pj_str_t = match(make_pj_str_t(scheme)){
+    //     Err(x)=> return Err(x),
+    //     Ok(y)=>y 
+    // }; 
+    // let username_pj_str_t = match(make_pj_str_t(username)){
+    //     Err(x)=> return Err(x),
+    //     Ok(y)=>y 
+    // };
+    // let data_pj_str_t = match(make_pj_str_t(data)){
+    //     Err(x)=> return Err(x),
+    //     Ok(y)=>y 
+    // };
 
     // Setting members of the struct
     acc_cfg_ref.id = acc_id_pj_str_t ;
     acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
-    acc_cfg_ref.register_on_acc_add = p2p as i32;
-    acc_cfg_ref.cred_count = 1;
-    acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
-    acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
-    acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-    acc_cfg_ref.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
-    acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+    acc_cfg_ref.register_on_acc_add = true as i32;
+    acc_cfg_ref.cred_count = 0;
+    // acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
+    // acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
+    // acc_cfg_ref.cred_info[0].username = username_pj_str_t;
+    // acc_cfg_ref.cred_info[0].data_type = pj::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
+    // acc_cfg_ref.cred_info[0].data = data_pj_str_t;
 
     let acc_id : pj::pjsua_acc_id;
     acc_id = 0 ;

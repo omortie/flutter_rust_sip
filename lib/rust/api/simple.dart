@@ -21,17 +21,8 @@ Future<int> initTelephony({
   incomingCallStrategy: incomingCallStrategy,
 );
 
-Stream<CallInfo> accountSetup({
-  required String username,
-  required String password,
-  required String uri,
-  required bool p2P,
-}) => RustLib.instance.api.crateApiSimpleAccountSetup(
-  username: username,
-  password: password,
-  uri: uri,
-  p2P: p2P,
-);
+Stream<CallInfo> accountSetup({required String uri}) =>
+    RustLib.instance.api.crateApiSimpleAccountSetup(uri: uri);
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>
     RustLib.instance.api.crateApiSimpleMakeCall(

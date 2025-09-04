@@ -1,4 +1,4 @@
-library flutter_rust_sip;
+library;
 
 export 'rust/api/simple.dart';
 export 'rust/frb_generated.dart' show RustLib;
