@@ -4,7 +4,6 @@ use flutter_rust_bridge::{frb};
 
 use crate::core::{helpers::*, init_logger, managers::{CallStateManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}};
 
-
 #[frb(init)]
 pub fn init_app() {
     init_logger();
