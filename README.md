@@ -23,9 +23,7 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
     flutter pub get
     ```
 
-3. Build the Rust library (see `rust/README.md` for details).
-
-4. Run the app:
+3. Go to the `example` and Run the app:
     ```sh
     flutter run
     ```
@@ -34,8 +32,9 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 
 - `lib/` - Flutter/Dart code
 - `rust/` - Rust SIP core
+- `example/` - A simple example of using SIP lib in Flutter
 
 *This project is under active development.*
 
 ### Acknowledgement
-used [sip-phone-rs](https://github.com/Charles-Schleich/sip-phone-rs) sources as helper initializers
+used [sip-phone-rs](https://github.com/Charles-Schleich/sip-phone-rs) sources as helper inspiration
