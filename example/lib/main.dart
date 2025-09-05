@@ -184,6 +184,7 @@ class _CallerWidgetState extends State<CallerWidget> {
         localPort: 5060,
         transportMode: TransportMode.udp,
         incomingCallStrategy: OnIncommingCall.autoAnswer,
+        stunSrv: "stun.l.google.com",
       ).handleError((e) {
         setState(() {
           error = e.toString();

@@ -174,6 +174,7 @@ fn wire__crate__api__simple__init_telephony_impl(
                 <crate::core::types::TransportMode>::sse_decode(&mut deserializer);
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
+            let api_stun_srv = <String>::sse_decode(&mut deserializer);
             let api_call_sink = <StreamSink<
                 crate::core::dart_types::CallInfo,
                 flutter_rust_bridge::for_generated::SseCodec,
@@ -186,6 +187,7 @@ fn wire__crate__api__simple__init_telephony_impl(
                         api_local_port,
                         api_transport_mode,
                         api_incoming_call_strategy,
+                        api_stun_srv,
                         api_call_sink,
                     )?;
                     Ok(output_ok)

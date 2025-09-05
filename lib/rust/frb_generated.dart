@@ -90,6 +90,7 @@ abstract class RustLibApi extends BaseApi {
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
+    required String stunSrv,
   });
 
   Future<int> crateApiSimpleMakeCall({
@@ -194,6 +195,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
+    required String stunSrv,
   }) {
     final callSink = RustStreamSink<CallInfo>();
     unawaited(
@@ -205,6 +207,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sse_encode_u_32(localPort, serializer);
             sse_encode_transport_mode(transportMode, serializer);
             sse_encode_on_incomming_call(incomingCallStrategy, serializer);
+            sse_encode_String(stunSrv, serializer);
             sse_encode_StreamSink_call_info_Sse(callSink, serializer);
             pdeCallFfi(
               generalizedFrbRustBinding,
@@ -223,6 +226,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             localPort,
             transportMode,
             incomingCallStrategy,
+            stunSrv,
             callSink,
           ],
           apiImpl: this,
@@ -240,6 +244,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "localPort",
           "transportMode",
           "incomingCallStrategy",
+          "stunSrv",
           "callSink",
         ],
       );

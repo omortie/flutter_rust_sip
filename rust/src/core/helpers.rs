@@ -11,9 +11,6 @@ use pjsip::pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
 
 use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
-// GLOBAL VARS
-static REALM_GLOBAL: &'static str = "asterisk";
-
 pub fn ensure_pj_thread_registered() {
     thread_local! {
         static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
@@ -31,10 +28,10 @@ pub fn ensure_pj_thread_registered() {
     });
 }
 
-pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode) -> Result<i8,TelephonyError> {
+pub fn initialize_telephony(incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode, stun_srv: String) -> Result<i8,TelephonyError> {
 
     // INIT
-    let initResult = init(logLevel,incommingCallBehaviour);
+    let initResult = init(incommingCallBehaviour, stun_srv);
     match(initResult){
         Ok(_) => (),
         Err(x) => return Err(x),
@@ -56,7 +53,7 @@ pub fn initialize_telephony(logLevel:u32, incommingCallBehaviour:OnIncommingCall
     Ok(0)
 }                                                                      
 
-pub fn init(loglevel : u32 , incomming_call_behaviour: OnIncommingCall ) -> Result<i8,TelephonyError> { 
+pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Result<i8,TelephonyError> { 
         
     let status : pj::pj_status_t;
 
@@ -84,11 +81,14 @@ pub fn init(loglevel : u32 , incomming_call_behaviour: OnIncommingCall ) -> Resu
     cfg.cb.on_call_media_state = Some(on_call_media_state);
     cfg.cb.on_call_state = Some(on_call_state);
     
+    let mut stun_srv_string = stun_srv.clone();
     // configuring default stun server of Google
-    let stun_srv = "stun:stun.l.google.com:19302".to_string();
-    let stun_srv_pj_str_t = match (make_pj_str_t(stun_srv)){
-        Err(x)=> return Err(x),
-        Ok(y)=>y
+    if stun_srv.is_empty() {
+        stun_srv_string = "stun.l.google.com".to_string(); // default STUN server
+    }
+    let stun_srv_pj_str_t = match make_pj_str_t(stun_srv_string) {
+        Err(x) => return Err(x),
+        Ok(y) => y
     };
     cfg.stun_srv_cnt = 1;
     cfg.stun_srv[0] = stun_srv_pj_str_t;
@@ -99,7 +99,7 @@ pub fn init(loglevel : u32 , incomming_call_behaviour: OnIncommingCall ) -> Resu
         log_cfg.assume_init()
     };
 	
-    log_cfg.console_level = loglevel;
+    log_cfg.console_level = 0;
     
 	status = unsafe{pj::pjsua_init(&cfg, &log_cfg, std::ptr::null())};
     if (status != pj::pj_constants__PJ_SUCCESS as i32){ 
@@ -121,6 +121,8 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
     };    
 
     transport_cfg.port = port;
+    transport_cfg.port = 4000;
+    transport_cfg.port_range = 1;
     let transportMode = match(mode){
         TransportMode::TCP  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
         TransportMode::TLS  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TLS,

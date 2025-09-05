@@ -16,11 +16,13 @@ Stream<CallInfo> initTelephony({
   required int localPort,
   required TransportMode transportMode,
   required OnIncommingCall incomingCallStrategy,
+  required String stunSrv,
 }) => RustLib.instance.api.crateApiSimpleInitTelephony(
   uri: uri,
   localPort: localPort,
   transportMode: transportMode,
   incomingCallStrategy: incomingCallStrategy,
+  stunSrv: stunSrv,
 );
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>

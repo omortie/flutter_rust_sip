@@ -18,10 +18,11 @@ pub fn init_telephony(
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
+    stun_srv: String,
     call_sink: DartCallStream,
 ) -> Result<(), TelephonyError> {
     // initialize telephony
-    initialize_telephony(0, incoming_call_strategy, local_port, transport_mode).and_then(|_| {
+    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv).and_then(|_| {
         ensure_pj_thread_registered();
         accountSetup(uri).and_then(|_| {
             // create a call manager
