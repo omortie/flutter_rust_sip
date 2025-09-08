@@ -151,7 +151,7 @@ pub fn start_telephony() -> Result <i8,TelephonyError>{
     Ok(0)
 }
 
-pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
+pub fn accountSetup(uri : String) -> Result<i32,TelephonyError> {
     println!("ACCOUNT SETUP");
     let status : pj::pj_status_t;
     let mut acc_cfg =  unsafe {
@@ -192,7 +192,7 @@ pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
         error_exit("Error Adding Account");
         return Err(TelephonyError::AccountCreationError("Error Adding Account".to_string()));
     }
-    return Ok(0);
+    return Ok(acc_id);
 }
 
 extern "C" fn on_incoming_call(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {

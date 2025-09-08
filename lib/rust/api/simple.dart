@@ -8,22 +8,26 @@ import '../core/types.dart';
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SESSION_COUNTER`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `ACCOUNT_REGISTRY`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `deref`, `initialize`
 
-Stream<CallInfo> initTelephony({
-  required String uri,
+Future<int> initTelephony({
   required int localPort,
   required TransportMode transportMode,
   required OnIncommingCall incomingCallStrategy,
   required String stunSrv,
 }) => RustLib.instance.api.crateApiSimpleInitTelephony(
-  uri: uri,
   localPort: localPort,
   transportMode: transportMode,
   incomingCallStrategy: incomingCallStrategy,
   stunSrv: stunSrv,
 );
+
+Future<int> accountSetup({required String uri}) =>
+    RustLib.instance.api.crateApiSimpleAccountSetup(uri: uri);
+
+Stream<CallInfo> registerCallStream({required int accountId}) =>
+    RustLib.instance.api.crateApiSimpleRegisterCallStream(accountId: accountId);
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>
     RustLib.instance.api.crateApiSimpleMakeCall(

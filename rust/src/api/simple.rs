@@ -10,26 +10,27 @@ pub fn init_app() {
 }
 
 lazy_static::lazy_static! {
-    static ref SESSION_COUNTER: std::sync::Mutex<i64> = std::sync::Mutex::new(0);
+    static ref ACCOUNT_REGISTRY: std::sync::Mutex<i32> = std::sync::Mutex::new(0);
 }
 
 pub fn init_telephony(
-    uri: String,
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
-    call_sink: DartCallStream,
-) -> Result<(), TelephonyError> {
+) -> Result<i8, TelephonyError> {
     // initialize telephony
-    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv).and_then(|_| {
-        ensure_pj_thread_registered();
-        accountSetup(uri).and_then(|_| {
-            // create a call manager
-            CallStateManager::new(call_sink);
-            Ok(())
-        })
-    })
+    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv)
+}
+
+pub fn account_setup(uri: String) -> Result<i32, TelephonyError> {
+    ensure_pj_thread_registered();
+    accountSetup(uri)
+}
+
+pub fn register_call_stream(account_id: i32, call_sink: DartCallStream) -> Result<(), TelephonyError> {
+    CallStateManager::new(call_sink, account_id);
+    Ok(())
 }
 
 pub async fn make_call(phone_number: String, domain: String) -> Result<i32, TelephonyError> {

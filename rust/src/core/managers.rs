@@ -11,10 +11,11 @@ lazy_static::lazy_static! {
 
 pub struct CallStateManager {
     pub update_stream: DartCallStream,
+    pub account_id: i32,
 }
 
 impl CallStateManager {
-    pub fn new(update_stream: DartCallStream) -> Arc<Self> {
+    pub fn new(update_stream: DartCallStream, account_id: i32) -> Arc<Self> {
         // Acquire the registry lock once and do check+insert while holding it
         let mut registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
 
@@ -25,6 +26,7 @@ impl CallStateManager {
         // Create the manager while holding the lock to avoid races, store it and return it.
         let manager = Arc::new(CallStateManager {
             update_stream,
+            account_id,
         });
 
         *registry = Some(manager.clone());
