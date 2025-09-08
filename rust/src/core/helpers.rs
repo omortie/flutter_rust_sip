@@ -121,8 +121,6 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
     };    
 
     transport_cfg.port = port;
-    transport_cfg.port = 4000;
-    transport_cfg.port_range = 1;
     let transportMode = match(mode){
         TransportMode::TCP  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
         TransportMode::TLS  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TLS,
