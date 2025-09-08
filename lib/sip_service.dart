@@ -6,35 +6,33 @@ import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
-  final int accountId;
   final rx.BehaviorSubject<CallInfo> stateBroadcast;
   final StreamSubscription<CallInfo> originalSub;
 
   bool _initialized = false;
 
-  SIPService({required this.accountId, required this.originalSub, required this.stateBroadcast,});
+  SIPService({required this.originalSub, required this.stateBroadcast});
 
   static Future<SIPService> init({
     required String uri,
   }) async {
     try {
-      final accountId = await accountSetup(
+      final stream = accountSetup(
         uri: '127.0.0.1',
       );
-      final stream = registerCallStream(accountId: accountId);
       final bs = rx.BehaviorSubject<CallInfo>();
       final originalSub = stream.listen((event) {
         debugPrint('Call State Changed: ${event.state}');
         bs.add(event);
       });
 
-      final service = SIPService(accountId: accountId, originalSub: originalSub, stateBroadcast: bs);
+      final service = SIPService(originalSub: originalSub, stateBroadcast: bs);
 
       service._initialized = true;
 
       Future.microtask(() async {
         while (service._initialized) {
-          // todo: ping rust side to announce we still want the service.
+          await markSipAlive();
           debugPrint('Pinging SIP service to keep alive...');
           await Future.delayed(const Duration(seconds: 1));
         }
@@ -51,7 +49,7 @@ class SIPService {
     _initialized = false;
     await originalSub.cancel();
     await stateBroadcast.close();
-    // todo: destroy telephony on rust side
+    await destroyTelephony();
     debugPrint('SIPService disposed');
   }
 

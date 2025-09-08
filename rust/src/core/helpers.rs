@@ -17,7 +17,7 @@ pub fn ensure_pj_thread_registered() {
     }
     REGISTERED.with(|reg| {
         if !reg.get() {
-            let mut thread_desc = [0i64; 64]; // PJ_THREAD_DESC_SIZE is usually 64, type must match pj_thread_desc
+            let mut thread_desc = [0i64; 64];
             let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
             unsafe {
