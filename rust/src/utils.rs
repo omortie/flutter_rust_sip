@@ -6,10 +6,10 @@ use crate::core::types::TelephonyError;
 pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,TelephonyError> {
     let len = input.len() as ::std::os::raw::c_long;
     let input_c_string = CString::new(input.clone());
-    match(input_c_string){
+    match input_c_string{
         Err(_x) => {
-            let errMessage : String  = ["Could not use input value: '".to_string(), input, "' Contained Null Byte".to_string() ].concat();
-            return Err(TelephonyError::InputValueError(errMessage));
+            let err_message : String  = ["Could not use input value: '".to_string(), input, "' Contained Null Byte".to_string() ].concat();
+            return Err(TelephonyError::InputValueError(err_message));
         },
         Ok(c_string) => {
             let input_ptr = c_string.into_raw();

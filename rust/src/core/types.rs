@@ -1,5 +1,5 @@
 use thiserror::Error;
-use crate::{core::dart_types::{CallInfo, SessionState}, frb_generated::StreamSink};
+use crate::{core::dart_types::{CallInfo}, frb_generated::StreamSink};
                                  
 #[derive(Error, Debug)]
 pub enum TelephonyError {

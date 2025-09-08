@@ -137,9 +137,11 @@ class CallStatusCard extends StatelessWidget {
                         // notify parent to remove/update the call entry
                         if (onHangup != null) onHangup!(callInfo.callId);
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Hangup failed: $e')),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Hangup failed: $e')),
+                          );
+                        }
                       }
                     }
                   : null,

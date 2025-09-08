@@ -32,21 +32,21 @@ pub fn initialize_telephony(incommingCallBehaviour:OnIncommingCall, port:u32, tr
 
     // INIT
     let initResult = init(incommingCallBehaviour, stun_srv);
-    match(initResult){
+    match initResult{
         Ok(_) => (),
         Err(x) => return Err(x),
     };
 
     // ADD TRANSPORT
     let transportResult = add_transport(port,transportmode);
-    match(transportResult){
+    match transportResult{
         Ok(_) => (),
         Err(x) => return Err(x),
     };
 
     // START
     let startResult = start_telephony();
-    match(startResult){
+    match startResult{
         Ok(_) => (),
         Err(x) => return Err(x),
     };
@@ -59,7 +59,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     status = unsafe{pj::pjsua_create()};
 
-    if (status != pj::pj_constants__PJ_SUCCESS as i32){ 
+    if status != pj::pj_constants__PJ_SUCCESS as i32 { 
         println!("Error in pjsua_create, status:= {}",status);
         error_exit("Error in pjsua_create");
         return Err(TelephonyError::CreationError("Could not Create Telephony Instance".to_string()));
@@ -73,7 +73,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     };
 
     // cfg.cb.on_incoming_call = Some(aux_on_incomming_call());
-    match(incomming_call_behaviour){
+    match incomming_call_behaviour{
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
         OnIncommingCall::Ignore => cfg.cb.on_incoming_call = Some(on_incoming_call_ignore),
     }
@@ -102,7 +102,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     log_cfg.console_level = 0;
     
 	status = unsafe{pj::pjsua_init(&cfg, &log_cfg, std::ptr::null())};
-    if (status != pj::pj_constants__PJ_SUCCESS as i32){ 
+    if status != pj::pj_constants__PJ_SUCCESS as i32 { 
         error_exit("Error in pjsua_init");
         println!("Error in pjsua_init, status:= {}",status);
         return Err(TelephonyError::InitializationError("Error in pjsua_init".to_string()));
@@ -121,7 +121,7 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
     };    
 
     transport_cfg.port = port;
-    let transportMode = match(mode){
+    let transportMode = match mode{
         TransportMode::TCP  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
         TransportMode::TLS  => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TLS,
         TransportMode::UDP6 => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_UDP6,
@@ -130,12 +130,12 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
         TransportMode::TLS6 => pj::pjsip_transport_type_e_PJSIP_TRANSPORT_TLS6
     };
 
-    let mut status =  unsafe {
+    let status =  unsafe {
         let mut transport_id: MaybeUninit<pj::pjsua_transport_id> = MaybeUninit::uninit();
         pj::pjsua_transport_create( transportMode, &transport_cfg, transport_id.as_mut_ptr())
     };
 
-    if (status != pj::pj_constants__PJ_SUCCESS as i32) {
+    if status != pj::pj_constants__PJ_SUCCESS as i32 {
         return Err(TelephonyError::TransportError("Error of some kind".to_string()));
     }
     return Ok(0);
@@ -143,7 +143,7 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
 
 pub fn start_telephony() -> Result <i8,TelephonyError>{
     let status = unsafe{pj::pjsua_start()};
-    if (status != pj::pj_constants__PJ_SUCCESS as i32) {
+    if status != pj::pj_constants__PJ_SUCCESS as i32 {
         println!("Error starting pjsua, status = {}",status);
         error_exit("Error starting pjsua");
         return Err(TelephonyError::TelephonyStartError("Could not Start Telephony".to_string()));
@@ -164,11 +164,11 @@ pub fn accountSetup(uri : String) -> Result<i8,TelephonyError> {
     let acc_id : String      = ["sip:".to_string(),uri.clone()].concat();
     let reg_uri : String    = "".to_string();
 
-    let acc_id_pj_str_t = match(make_pj_str_t(acc_id)){
+    let acc_id_pj_str_t = match make_pj_str_t(acc_id){
         Err(x)=> return Err(x),
-        Ok(y)=>y 
-    }; 
-    let reg_uri_pj_str_t = match(make_pj_str_t(reg_uri)){
+        Ok(y)=>y
+    };
+    let reg_uri_pj_str_t = match make_pj_str_t(reg_uri){
         Err(x)=> return Err(x),
         Ok(y)=>y 
     }; 
@@ -252,8 +252,8 @@ pub fn makeCall(phone_number: &str, domain : &str) -> Result<i32,TelephonyError>
     };
     let len = call_extension.len() as ::std::os::raw::c_long;
     let call_extension_c_string = CString::new(call_extension);
-    let call_extension_c_string_ok = match(call_extension_c_string) {
-        Err(_y) => return (Err(TelephonyError::CallCreationError("Phone number or Domain supplied could not be represented as a C-String".to_string()))),
+    let call_extension_c_string_ok = match call_extension_c_string {
+        Err(_y) => return Err(TelephonyError::CallCreationError("Phone number or Domain supplied could not be represented as a C-String".to_string())),
         Ok(x) => x
     };
 
