@@ -39,9 +39,11 @@ impl CallStateManager {
 pub fn push_call_state_update(call_id: pj::pjsua_call_id, ci: pj::pjsua_call_info) -> Result<(), TelephonyError> {
     // convert to your CallState enum
     let state = match ci.state {
-        s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_EARLY => CallState::Early,
+            s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_NULL => CallState::Null,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CALLING => CallState::Calling,
-            s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CONNECTING => CallState::Connecting,
+            s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_INCOMING => CallState::Incoming,
+        s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_EARLY => CallState::Early,
+        s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CONNECTING => CallState::Connecting,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_CONFIRMED => CallState::Confirmed,
             s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_DISCONNECTED => CallState::Disconnected,
             _ => CallState::Disconnected,

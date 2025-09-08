@@ -66,13 +66,11 @@ class _MyAppState extends State<MyApp> {
 
 extension CallInfoExtension on CallState {
   bool get isActive {
-    return when(
-      early: () => false,
+    return maybeWhen(
       calling: () => true,
       connecting: () => true,
       confirmed: () => true,
-      disconnected: () => false,
-      error: (_) => false,
+      orElse: () => false,
     );
   }
 }

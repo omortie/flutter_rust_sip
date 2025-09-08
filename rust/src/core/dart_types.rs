@@ -1,7 +1,9 @@
 
 #[derive(Debug, Clone)]
 pub enum CallState {
+    Null,
     Early,
+    Incoming,
     Calling,
     Connecting,
     Confirmed,

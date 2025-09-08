@@ -318,16 +318,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return CallState_Early();
+        return CallState_Null();
       case 1:
-        return CallState_Calling();
+        return CallState_Early();
       case 2:
-        return CallState_Connecting();
+        return CallState_Incoming();
       case 3:
-        return CallState_Confirmed();
+        return CallState_Calling();
       case 4:
-        return CallState_Disconnected();
+        return CallState_Connecting();
       case 5:
+        return CallState_Confirmed();
+      case 6:
+        return CallState_Disconnected();
+      case 7:
         return CallState_Error(dco_decode_String(raw[1]));
       default:
         throw Exception("unreachable");
@@ -444,16 +448,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return CallState_Early();
+        return CallState_Null();
       case 1:
-        return CallState_Calling();
+        return CallState_Early();
       case 2:
-        return CallState_Connecting();
+        return CallState_Incoming();
       case 3:
-        return CallState_Confirmed();
+        return CallState_Calling();
       case 4:
-        return CallState_Disconnected();
+        return CallState_Connecting();
       case 5:
+        return CallState_Confirmed();
+      case 6:
+        return CallState_Disconnected();
+      case 7:
         var var_field0 = sse_decode_String(deserializer);
         return CallState_Error(var_field0);
       default:
@@ -598,18 +606,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_call_state(CallState self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
-      case CallState_Early():
+      case CallState_Null():
         sse_encode_i_32(0, serializer);
-      case CallState_Calling():
+      case CallState_Early():
         sse_encode_i_32(1, serializer);
-      case CallState_Connecting():
+      case CallState_Incoming():
         sse_encode_i_32(2, serializer);
-      case CallState_Confirmed():
+      case CallState_Calling():
         sse_encode_i_32(3, serializer);
-      case CallState_Disconnected():
+      case CallState_Connecting():
         sse_encode_i_32(4, serializer);
-      case CallState_Error(field0: final field0):
+      case CallState_Confirmed():
         sse_encode_i_32(5, serializer);
+      case CallState_Disconnected():
+        sse_encode_i_32(6, serializer);
+      case CallState_Error(field0: final field0):
+        sse_encode_i_32(7, serializer);
         sse_encode_String(field0, serializer);
     }
   }

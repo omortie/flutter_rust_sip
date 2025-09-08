@@ -281,21 +281,27 @@ impl SseDecode for crate::core::dart_types::CallState {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
-                return crate::core::dart_types::CallState::Early;
+                return crate::core::dart_types::CallState::Null;
             }
             1 => {
-                return crate::core::dart_types::CallState::Calling;
+                return crate::core::dart_types::CallState::Early;
             }
             2 => {
-                return crate::core::dart_types::CallState::Connecting;
+                return crate::core::dart_types::CallState::Incoming;
             }
             3 => {
-                return crate::core::dart_types::CallState::Confirmed;
+                return crate::core::dart_types::CallState::Calling;
             }
             4 => {
-                return crate::core::dart_types::CallState::Disconnected;
+                return crate::core::dart_types::CallState::Connecting;
             }
             5 => {
+                return crate::core::dart_types::CallState::Confirmed;
+            }
+            6 => {
+                return crate::core::dart_types::CallState::Disconnected;
+            }
+            7 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
                 return crate::core::dart_types::CallState::Error(var_field0);
             }
@@ -492,13 +498,15 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::dart_types::CallInfo>
 impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallState {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::core::dart_types::CallState::Early => [0.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Calling => [1.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Connecting => [2.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Confirmed => [3.into_dart()].into_dart(),
-            crate::core::dart_types::CallState::Disconnected => [4.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Null => [0.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Early => [1.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Incoming => [2.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Calling => [3.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Connecting => [4.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Confirmed => [5.into_dart()].into_dart(),
+            crate::core::dart_types::CallState::Disconnected => [6.into_dart()].into_dart(),
             crate::core::dart_types::CallState::Error(field0) => {
-                [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+                [7.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -653,23 +661,29 @@ impl SseEncode for crate::core::dart_types::CallState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::core::dart_types::CallState::Early => {
+            crate::core::dart_types::CallState::Null => {
                 <i32>::sse_encode(0, serializer);
             }
-            crate::core::dart_types::CallState::Calling => {
+            crate::core::dart_types::CallState::Early => {
                 <i32>::sse_encode(1, serializer);
             }
-            crate::core::dart_types::CallState::Connecting => {
+            crate::core::dart_types::CallState::Incoming => {
                 <i32>::sse_encode(2, serializer);
             }
-            crate::core::dart_types::CallState::Confirmed => {
+            crate::core::dart_types::CallState::Calling => {
                 <i32>::sse_encode(3, serializer);
             }
-            crate::core::dart_types::CallState::Disconnected => {
+            crate::core::dart_types::CallState::Connecting => {
                 <i32>::sse_encode(4, serializer);
             }
-            crate::core::dart_types::CallState::Error(field0) => {
+            crate::core::dart_types::CallState::Confirmed => {
                 <i32>::sse_encode(5, serializer);
+            }
+            crate::core::dart_types::CallState::Disconnected => {
+                <i32>::sse_encode(6, serializer);
+            }
+            crate::core::dart_types::CallState::Error(field0) => {
+                <i32>::sse_encode(7, serializer);
                 <String>::sse_encode(field0, serializer);
             }
             _ => {
