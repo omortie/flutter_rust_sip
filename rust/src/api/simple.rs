@@ -17,13 +17,14 @@ pub fn init_telephony(
 ) -> Result<i8, TelephonyError> {
     // initialize telephony
     initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv).inspect(|_| {
+        // Start SIP alive tester task to check alive flag periodically as destroy management
         std::thread::spawn(|| crate::core::managers::sip_alive_tester_task());
     })
 }
 
 pub fn account_setup(uri: String) -> Result<i32, TelephonyError> {
     ensure_pj_thread_registered();
-    accountSetup(uri)
+    crate::core::helpers::account_setup(uri)
 }
 
 pub fn register_call_stream(call_sink: DartCallStream) -> Result<(), TelephonyError> {

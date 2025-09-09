@@ -76,14 +76,6 @@ class _SIPWidgetState extends State<SIPWidget> {
       children: [
         CallerWidget(
           service: widget.service,
-          callBack: (callID) {
-            setState(() {
-              activeCalls[callID] = frs.CallInfo(
-                callId: callID,
-                state: const frs.CallState.early(),
-              );
-            });
-          },
         ),
         Wrap(
           children: activeCalls.entries
@@ -100,12 +92,10 @@ class _SIPWidgetState extends State<SIPWidget> {
 
 class CallerWidget extends StatefulWidget {
   final SIPService service;
-  final Function(int) callBack;
 
   const CallerWidget({
     super.key,
     required this.service,
-    required this.callBack,
   });
 
   @override
@@ -144,9 +134,7 @@ class _CallerWidgetState extends State<CallerWidget> {
         Text('Action: Call `("$phoneNumber")`'),
         ElevatedButton(
           onPressed: () {
-            widget.service.call(phoneNumber, domain).then((callID) {
-              widget.callBack(callID);
-            });
+            widget.service.call(phoneNumber, domain);
           },
           child: Text('Call $phoneNumber'),
         ),

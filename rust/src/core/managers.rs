@@ -2,9 +2,9 @@ extern crate pjsip as pj;
 
 use std::{sync::{atomic::{AtomicBool, AtomicU64, Ordering}, Arc, Mutex}, time::Duration};
 
-use crate::core::{
+use crate::{core::{
     dart_types::{CallInfo, CallState}, types::{DartCallStream, TelephonyError}
-};
+}, utils::pj_str_to_string};
 
 // Global registry of call manager
 lazy_static::lazy_static! {
@@ -40,11 +40,10 @@ impl CallStateManager {
 
     pub fn push_event(
         &self,
-        call_id: pj::pjsua_call_id,
-        state: CallState,
+        ci: CallInfo,
     ) -> Result<(), TelephonyError> {
         self.update_stream
-            .add(CallInfo { call_id, state })
+            .add(ci)
             .map_err(|_| {
                 TelephonyError::CallStatusUpdateError(
                     "Failed to push call state update".to_string(),
@@ -54,6 +53,7 @@ impl CallStateManager {
 
     pub fn destroy_telephony(&self) -> Result<i8, TelephonyError> {
         self.kill_sig.store(true, Ordering::Relaxed);
+        crate::core::helpers::hangup_calls();
         crate::core::helpers::destroy_telephony()
     }
 }
@@ -87,7 +87,13 @@ pub fn push_call_state_update(
     drop(guard);
 
     if let Some(call_manager) = maybe_manager {
-        call_manager.push_event(call_id, state)
+        call_manager.push_event(
+            CallInfo {
+                call_id: call_id as i32,
+                call_url: pj_str_to_string(ci.remote_info),
+                state,
+            }
+        )
     } else {
         Err(TelephonyError::CallStatusUpdateError(
             "Call manager not initialized".to_string(),

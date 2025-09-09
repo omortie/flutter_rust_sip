@@ -14,6 +14,7 @@ pub enum CallState {
 #[derive(Debug, Clone)]
 pub struct CallInfo {
     pub call_id: i32,
+    pub call_url: String,
     pub state: CallState,
 }
 

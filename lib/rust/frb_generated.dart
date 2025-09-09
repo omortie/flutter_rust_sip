@@ -416,11 +416,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   CallInfo dco_decode_call_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return CallInfo(
       callId: dco_decode_i_32(arr[0]),
-      state: dco_decode_call_state(arr[1]),
+      callUrl: dco_decode_String(arr[1]),
+      state: dco_decode_call_state(arr[2]),
     );
   }
 
@@ -554,8 +555,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   CallInfo sse_decode_call_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_callId = sse_decode_i_32(deserializer);
+    var var_callUrl = sse_decode_String(deserializer);
     var var_state = sse_decode_call_state(deserializer);
-    return CallInfo(callId: var_callId, state: var_state);
+    return CallInfo(callId: var_callId, callUrl: var_callUrl, state: var_state);
   }
 
   @protected
@@ -722,6 +724,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_call_info(CallInfo self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.callId, serializer);
+    sse_encode_String(self.callUrl, serializer);
     sse_encode_call_state(self.state, serializer);
   }
 

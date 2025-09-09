@@ -151,7 +151,7 @@ pub fn start_telephony() -> Result <i8,TelephonyError>{
     Ok(0)
 }
 
-pub fn accountSetup(uri : String) -> Result<i32,TelephonyError> {
+pub fn account_setup(uri : String) -> Result<i32,TelephonyError> {
     println!("ACCOUNT SETUP");
     let status : pj::pj_status_t;
     let mut acc_cfg =  unsafe {

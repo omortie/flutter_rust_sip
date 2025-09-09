@@ -397,9 +397,11 @@ impl SseDecode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_callId = <i32>::sse_decode(deserializer);
+        let mut var_callUrl = <String>::sse_decode(deserializer);
         let mut var_state = <crate::core::dart_types::CallState>::sse_decode(deserializer);
         return crate::core::dart_types::CallInfo {
             call_id: var_callId,
+            call_url: var_callUrl,
             state: var_state,
         };
     }
@@ -619,6 +621,7 @@ impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallInfo {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.call_id.into_into_dart().into_dart(),
+            self.call_url.into_into_dart().into_dart(),
             self.state.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -794,6 +797,7 @@ impl SseEncode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.call_id, serializer);
+        <String>::sse_encode(self.call_url, serializer);
         <crate::core::dart_types::CallState>::sse_encode(self.state, serializer);
     }
 }
