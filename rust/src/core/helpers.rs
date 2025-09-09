@@ -196,21 +196,11 @@ pub fn accountSetup(uri : String) -> Result<i32,TelephonyError> {
 }
 
 extern "C" fn on_incoming_call(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {
-    // let ci = unsafe {
-    //     let mut ci : MaybeUninit<pj::pjsua_call_info> = MaybeUninit::uninit();
-    //     pj::pjsua_call_get_info(call_id, ci.as_mut_ptr());
-    //     ci.assume_init()
-    // };
     unsafe{ pj::pjsua_call_answer(call_id, 200, std::ptr::null(), std::ptr::null()); } 
     println!("The accepted call id is: {}", call_id);
 }
 
 extern "C" fn on_incoming_call_ignore(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {
-    // let ci = unsafe {
-    //     let mut ci : MaybeUninit<pj::pjsua_call_info> = MaybeUninit::uninit();
-    //     pj::pjsua_call_get_info(call_id, ci.as_mut_ptr());
-    //     ci.assume_init()
-    // };
     println!("The ignored call id is: {}", call_id);
 }
 
