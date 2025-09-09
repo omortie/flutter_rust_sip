@@ -53,7 +53,6 @@ impl CallStateManager {
 
     pub fn destroy_telephony(&self) -> Result<i8, TelephonyError> {
         self.kill_sig.store(true, Ordering::Relaxed);
-        crate::core::helpers::hangup_calls();
         crate::core::helpers::destroy_telephony()
     }
 }

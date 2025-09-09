@@ -25,13 +25,18 @@ class _MyAppState extends State<MyApp> {
           child: FutureBuilder(
               future: SIPService.init(uri: "127.0.0.1"),
               builder: (context, snapshot) {
+                String? error;
                 if (snapshot.hasData) {
-                  final service = snapshot.data!;
-                  return SIPWidget(service: service);
-                } else {
-                  return Text(
-                      'Error initializing SIPService: ${snapshot.error}');
+                  final (service, err) = snapshot.data!;
+                  if (err != null) {
+                    error = err;
+                  } else if (service != null) {
+                    return SIPWidget(service: service);
+                  }
+                } else if (snapshot.hasError) {
+                  error = snapshot.error.toString();
                 }
+                return Text('Error initializing SIPService: $error');
               }),
         ),
       ),

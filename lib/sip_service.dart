@@ -10,7 +10,9 @@ class SIPService {
   final rx.BehaviorSubject<CallInfo> stateBroadcast;
   final StreamSubscription<CallInfo> originalSub;
 
-  bool _initialized = false;
+  bool initialized = false;
+
+  String? error;
 
   SIPService({
     required this.accountId,
@@ -18,7 +20,7 @@ class SIPService {
     required this.stateBroadcast,
   });
 
-  static Future<SIPService> init({
+  static Future<(SIPService?, String?)> init({
     required String uri,
   }) async {
     try {
@@ -38,25 +40,25 @@ class SIPService {
         stateBroadcast: bs,
       );
 
-      service._initialized = true;
+      service.initialized = true;
 
       Future.microtask(() async {
-        while (service._initialized) {
+        while (service.initialized) {
           await markSipAlive();
           debugPrint('Pinging SIP service to keep alive...');
           await Future.delayed(const Duration(seconds: 1));
         }
       });
 
-      return service;
+      return (service, null);
     } catch (e) {
       debugPrint('Error initializing SIPService: $e');
-      rethrow;
+      return (null, e.toString());
     }
   }
 
   Future<void> dispose() async {
-    _initialized = false;
+    initialized = false;
     await originalSub.cancel();
     await stateBroadcast.close();
     await destroyTelephony();
@@ -64,7 +66,7 @@ class SIPService {
   }
 
   Future<int> call(String phoneNumber, String domain) async {
-    if (!_initialized) {
+    if (!initialized) {
       throw Exception('SIPService not initialized');
     }
     try {
@@ -82,7 +84,7 @@ class SIPService {
   }
 
   Future<void> hangup(int callId) async {
-    if (!_initialized) {
+    if (!initialized) {
       throw Exception('SIPService not initialized');
     }
     try {
