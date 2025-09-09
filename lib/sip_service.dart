@@ -6,27 +6,37 @@ import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
+  final int accountId;
   final rx.BehaviorSubject<CallInfo> stateBroadcast;
   final StreamSubscription<CallInfo> originalSub;
 
   bool _initialized = false;
 
-  SIPService({required this.originalSub, required this.stateBroadcast});
+  SIPService({
+    required this.accountId,
+    required this.originalSub,
+    required this.stateBroadcast,
+  });
 
   static Future<SIPService> init({
     required String uri,
   }) async {
     try {
-      final stream = accountSetup(
+      final accountId = await accountSetup(
         uri: '127.0.0.1',
       );
+      final stream = registerCallStream();
       final bs = rx.BehaviorSubject<CallInfo>();
       final originalSub = stream.listen((event) {
         debugPrint('Call State Changed: ${event.state}');
         bs.add(event);
       });
 
-      final service = SIPService(originalSub: originalSub, stateBroadcast: bs);
+      final service = SIPService(
+        accountId: accountId,
+        originalSub: originalSub,
+        stateBroadcast: bs,
+      );
 
       service._initialized = true;
 
@@ -58,7 +68,11 @@ class SIPService {
       throw Exception('SIPService not initialized');
     }
     try {
-      final callId = await makeCall(phoneNumber: phoneNumber, domain: domain);
+      final callId = await makeCall(
+        accId: accountId,
+        phoneNumber: phoneNumber,
+        domain: domain,
+      );
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
       return callId;
     } catch (e) {

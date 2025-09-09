@@ -21,33 +21,37 @@ pub fn init_telephony(
     })
 }
 
-pub fn account_setup(uri: String, call_sink: DartCallStream) -> Result<i32, TelephonyError> {
+pub fn account_setup(uri: String) -> Result<i32, TelephonyError> {
     ensure_pj_thread_registered();
-    accountSetup(uri).and_then(|id| {
-        // Initialize the call state manager singleton
-        CallStateManager::new(call_sink);
-        Ok(id)
-    })
+    accountSetup(uri)
+}
+
+pub fn register_call_stream(call_sink: DartCallStream) -> Result<(), TelephonyError> {
+    // Initialize the call state manager singleton
+    CallStateManager::new(call_sink);
+    Ok(())
 }
 
 pub fn mark_sip_alive() {
     crate::core::managers::mark_sip_alive();
 }
 
-pub async fn make_call(phone_number: String, domain: String) -> Result<i32, TelephonyError> {
+pub async fn make_call(acc_id: i32, phone_number: String, domain: String) -> Result<i32, TelephonyError> {
     ensure_pj_thread_registered();
-    makeCall(&phone_number, &domain)
+    crate::core::helpers::make_call(acc_id, &phone_number, &domain)
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), TelephonyError> {
     ensure_pj_thread_registered();
-    hangupCall(call_id)
+    crate::core::helpers::hangup_call(call_id)
 }
     
 pub fn hangup_calls() {
-    hangupCalls();
+    ensure_pj_thread_registered();
+    crate::core::helpers::hangup_calls();
 }
 
 pub fn destroy_telephony() -> Result<i8, TelephonyError> {
-    crate::core::helpers::destroy_telephony()
+    ensure_pj_thread_registered();
+    crate::core::managers::destroy_telephony_manager()
 }

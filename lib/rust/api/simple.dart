@@ -20,17 +20,24 @@ Future<int> initTelephony({
   stunSrv: stunSrv,
 );
 
-Stream<CallInfo> accountSetup({required String uri}) =>
+Future<int> accountSetup({required String uri}) =>
     RustLib.instance.api.crateApiSimpleAccountSetup(uri: uri);
+
+Stream<CallInfo> registerCallStream() =>
+    RustLib.instance.api.crateApiSimpleRegisterCallStream();
 
 Future<void> markSipAlive() =>
     RustLib.instance.api.crateApiSimpleMarkSipAlive();
 
-Future<int> makeCall({required String phoneNumber, required String domain}) =>
-    RustLib.instance.api.crateApiSimpleMakeCall(
-      phoneNumber: phoneNumber,
-      domain: domain,
-    );
+Future<int> makeCall({
+  required int accId,
+  required String phoneNumber,
+  required String domain,
+}) => RustLib.instance.api.crateApiSimpleMakeCall(
+  accId: accId,
+  phoneNumber: phoneNumber,
+  domain: domain,
+);
 
 Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);

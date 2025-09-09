@@ -242,7 +242,7 @@ extern "C" fn on_call_state(call_id: pj::pjsua_call_id, _: *mut pj::pjsip_event)
     push_call_state_update(call_id, ci).unwrap_or(());
 }
 
-pub fn makeCall(phone_number: &str, domain : &str) -> Result<i32,TelephonyError>{
+pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,TelephonyError>{
 
     // TODO: Check Phone number isnt garbage string
     let call_extension: String = if phone_number.is_empty() {
@@ -264,7 +264,7 @@ pub fn makeCall(phone_number: &str, domain : &str) -> Result<i32,TelephonyError>
     let user_data_null: *mut ::std::os::raw::c_void = &mut 0 as *mut _ as *mut ::std::os::raw::c_void;
     let opt = 0 as *mut pj::pjsua_call_setting;
     let mut call_id: pj::pjsua_call_id = 0;
-    let make_call_restult = unsafe {pj::pjsua_call_make_call( 0 , ptr_call_extension_pj_str_t , opt, user_data_null, 0 as *mut  pj::pjsua_msg_data , &mut call_id)};
+    let make_call_restult = unsafe {pj::pjsua_call_make_call( acc_id , ptr_call_extension_pj_str_t , opt, user_data_null, 0 as *mut  pj::pjsua_msg_data , &mut call_id)};
     if make_call_restult!=0 {
         return Err(TelephonyError::CallCreationError("Could not place Call".to_string()));
     }
@@ -291,7 +291,7 @@ pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {
     return Ok(0); 
 }
 
-pub fn hangupCall(call_id:i32) -> Result<(),TelephonyError>{
+pub fn hangup_call(call_id:i32) -> Result<(),TelephonyError>{
     let status = unsafe{ pj::pjsua_call_hangup(call_id, 0, std::ptr::null(), std::ptr::null())};
     if status!=0{
         return Err(TelephonyError::CallStatusUpdateError("Could not Hangup Call".to_string()));
@@ -299,7 +299,7 @@ pub fn hangupCall(call_id:i32) -> Result<(),TelephonyError>{
     Ok(())
 }
 
-pub fn hangupCalls(){
+pub fn hangup_calls(){
     unsafe{ pj::pjsua_call_hangup_all()}; 
 }
 

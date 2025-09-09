@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1972405281;
+  int get rustContentHash => 1405273398;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,7 +79,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri});
+  Future<int> crateApiSimpleAccountSetup({required String uri});
 
   Future<int> crateApiSimpleDestroyTelephony();
 
@@ -97,11 +97,14 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<int> crateApiSimpleMakeCall({
+    required int accId,
     required String phoneNumber,
     required String domain,
   });
 
   Future<void> crateApiSimpleMarkSipAlive();
+
+  Stream<CallInfo> crateApiSimpleRegisterCallStream();
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -113,39 +116,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Stream<CallInfo> crateApiSimpleAccountSetup({required String uri}) {
-    final callSink = RustStreamSink<CallInfo>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_String(uri, serializer);
-            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 1,
-              port: port_,
-            );
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_i_32,
-            decodeErrorData: sse_decode_telephony_error,
-          ),
-          constMeta: kCrateApiSimpleAccountSetupConstMeta,
-          argValues: [uri, callSink],
-          apiImpl: this,
+  Future<int> crateApiSimpleAccountSetup({required String uri}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(uri, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_i_32,
+          decodeErrorData: sse_decode_telephony_error,
         ),
+        constMeta: kCrateApiSimpleAccountSetupConstMeta,
+        argValues: [uri],
+        apiImpl: this,
       ),
     );
-    return callSink.stream;
   }
 
-  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
-    debugName: "account_setup",
-    argNames: ["uri", "callSink"],
-  );
+  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta =>
+      const TaskConstMeta(debugName: "account_setup", argNames: ["uri"]);
 
   @override
   Future<int> crateApiSimpleDestroyTelephony() {
@@ -302,6 +298,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<int> crateApiSimpleMakeCall({
+    required int accId,
     required String phoneNumber,
     required String domain,
   }) {
@@ -309,6 +306,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_32(accId, serializer);
           sse_encode_String(phoneNumber, serializer);
           sse_encode_String(domain, serializer);
           pdeCallFfi(
@@ -323,7 +321,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_telephony_error,
         ),
         constMeta: kCrateApiSimpleMakeCallConstMeta,
-        argValues: [phoneNumber, domain],
+        argValues: [accId, phoneNumber, domain],
         apiImpl: this,
       ),
     );
@@ -331,7 +329,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
     debugName: "make_call",
-    argNames: ["phoneNumber", "domain"],
+    argNames: ["accId", "phoneNumber", "domain"],
   );
 
   @override
@@ -360,6 +358,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleMarkSipAliveConstMeta =>
       const TaskConstMeta(debugName: "mark_sip_alive", argNames: []);
+
+  @override
+  Stream<CallInfo> crateApiSimpleRegisterCallStream() {
+    final callSink = RustStreamSink<CallInfo>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 9,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: sse_decode_telephony_error,
+          ),
+          constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
+          argValues: [callSink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return callSink.stream;
+  }
+
+  TaskConstMeta get kCrateApiSimpleRegisterCallStreamConstMeta =>
+      const TaskConstMeta(
+        debugName: "register_call_stream",
+        argNames: ["callSink"],
+      );
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {

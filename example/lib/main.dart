@@ -65,6 +65,12 @@ class _SIPWidgetState extends State<SIPWidget> {
   }
 
   @override
+  void dispose() {
+    Future.microtask(() async => await widget.service.dispose());
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -91,8 +97,6 @@ class _SIPWidgetState extends State<SIPWidget> {
     );
   }
 }
-
-
 
 class CallerWidget extends StatefulWidget {
   final SIPService service;
