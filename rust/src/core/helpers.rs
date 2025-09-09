@@ -195,12 +195,12 @@ pub fn accountSetup(uri : String) -> Result<i32,TelephonyError> {
     return Ok(acc_id);
 }
 
-extern "C" fn on_incoming_call(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {
+extern "C" fn on_incoming_call(_acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, _rdata: *mut pj::pjsip_rx_data) {
     unsafe{ pj::pjsua_call_answer(call_id, 200, std::ptr::null(), std::ptr::null()); } 
     println!("The accepted call id is: {}", call_id);
 }
 
-extern "C" fn on_incoming_call_ignore(acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, rdata: *mut pj::pjsip_rx_data) {
+extern "C" fn on_incoming_call_ignore(_acc_id: pj::pjsua_acc_id, call_id: pj::pjsua_call_id, _rdata: *mut pj::pjsip_rx_data) {
     println!("The ignored call id is: {}", call_id);
 }
 
@@ -264,7 +264,7 @@ pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,T
 pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {
 
     let digits : String       = digit.to_string();
-    let digits_pj_str_t = match(make_pj_str_t(digits)){
+    let digits_pj_str_t = match make_pj_str_t(digits){
         Err(_e) => return Err(TelephonyError::DTMFError("Cannot Send DTMF Tone, digits contain Null Somehow".to_string())),
         Ok(v) => v
     };
