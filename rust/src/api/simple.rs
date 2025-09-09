@@ -16,7 +16,9 @@ pub fn init_telephony(
     stun_srv: String,
 ) -> Result<i8, TelephonyError> {
     // initialize telephony
-    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv)
+    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv).inspect(|_| {
+        std::thread::spawn(|| crate::core::managers::sip_alive_tester_task());
+    })
 }
 
 pub fn account_setup(uri: String, call_sink: DartCallStream) -> Result<i32, TelephonyError> {
@@ -24,7 +26,6 @@ pub fn account_setup(uri: String, call_sink: DartCallStream) -> Result<i32, Tele
     accountSetup(uri).and_then(|id| {
         // Initialize the call state manager singleton
         CallStateManager::new(call_sink);
-        std::thread::spawn(|| crate::core::managers::sip_alive_tester_task());
         Ok(id)
     })
 }

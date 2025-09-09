@@ -1,6 +1,6 @@
 extern crate pjsip as pj;
 
-use std::sync::{Arc, Mutex};
+use std::{sync::{atomic::{AtomicU64, Ordering}, Arc, Mutex}, time::Duration};
 
 use crate::core::{
     dart_types::{CallInfo, CallState}, helpers::ensure_pj_thread_registered, types::{DartCallStream, TelephonyError}
@@ -13,7 +13,7 @@ lazy_static::lazy_static! {
 
 pub struct CallStateManager {
     pub update_stream: DartCallStream,
-    pub last_alive_mark: std::sync::Mutex<std::time::SystemTime>,
+    pub last_alive_mark: AtomicU64,
 }
 
 impl CallStateManager {
@@ -28,7 +28,7 @@ impl CallStateManager {
         // Create the manager while holding the lock to avoid races, store it and return it.
         let manager = Arc::new(CallStateManager {
             update_stream,
-            last_alive_mark: std::sync::Mutex::new(std::time::SystemTime::now()),
+            last_alive_mark: AtomicU64::new(now_ms()),
         });
 
         *registry = Some(manager.clone());
@@ -49,14 +49,12 @@ impl CallStateManager {
                 )
             })
     }
+}
 
-    pub fn mark_alive(&self) {
-        let mut last_alive_mark = self
-            .last_alive_mark
-            .lock()
-            .expect("last_alive_mark lock poisoned");
-        *last_alive_mark = std::time::SystemTime::now();
-        println!("Marked SIP alive at {:?}", *last_alive_mark);
+fn now_ms() -> u64 {
+    match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        Ok(dur) => dur.as_millis() as u64,
+        Err(_) => 0u64,
     }
 }
 
@@ -96,7 +94,7 @@ pub fn mark_sip_alive() {
     drop(guard);
 
     if let Some(call_manager) = maybe_manager {
-        call_manager.mark_alive();
+        call_manager.last_alive_mark.store(now_ms(), Ordering::Relaxed);
     }
 }
 
@@ -107,11 +105,9 @@ pub fn sip_alive_tester_task() {
         drop(guard);
 
         if let Some(maybe_manager) = maybe_manager {
-            let last_alive_mark = maybe_manager
-                .last_alive_mark
-                .lock()
-                .expect("last_alive_mark lock poisoned");
-            if last_alive_mark.elapsed().unwrap_or_default() > std::time::Duration::from_secs(5) {
+            let last_ms = maybe_manager.last_alive_mark.load(Ordering::Relaxed);
+            let elapsed_ms = now_ms().saturating_sub(last_ms);
+            if elapsed_ms > Duration::from_secs(5).as_millis() as u64 {
                 println!("SIP not marked alive for over 5 seconds, attempting to close it...");
                 unsafe {
                     ensure_pj_thread_registered();
