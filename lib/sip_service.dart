@@ -6,49 +6,39 @@ import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
-  final int accountId;
-  final rx.BehaviorSubject<CallInfo> stateBroadcast;
-  final StreamSubscription<CallInfo> originalSub;
+  final List<int> callIds = [];
+  late rx.BehaviorSubject<CallInfo> stateBroadcast;
+  final Stream<CallInfo> updateStream;
 
   bool initialized = false;
 
   String? error;
 
   SIPService({
-    required this.accountId,
-    required this.originalSub,
-    required this.stateBroadcast,
-  });
+    required this.updateStream}) {
+    stateBroadcast = rx.BehaviorSubject<CallInfo>();
+    updateStream.listen((event) {
+      debugPrint('Call State Changed: ${event.state}');
+
+      if (event.state == CallState.disconnected()) {
+        callIds.remove(event.callId);
+      }
+
+      stateBroadcast.add(event);
+    });
+
+    initialized = true;
+  }
 
   static Future<(SIPService?, String?)> init({
     required String uri,
   }) async {
     try {
-      final accountId = await accountSetup(
-        uri: '127.0.0.1',
-      );
       final stream = registerCallStream();
-      final bs = rx.BehaviorSubject<CallInfo>();
-      final originalSub = stream.listen((event) {
-        debugPrint('Call State Changed: ${event.state}');
-        bs.add(event);
-      });
 
       final service = SIPService(
-        accountId: accountId,
-        originalSub: originalSub,
-        stateBroadcast: bs,
+        updateStream: stream,
       );
-
-      service.initialized = true;
-
-      Future.microtask(() async {
-        while (service.initialized) {
-          await markSipAlive();
-          debugPrint('Pinging SIP service to keep alive...');
-          await Future.delayed(const Duration(seconds: 1));
-        }
-      });
 
       return (service, null);
     } catch (e) {
@@ -59,7 +49,6 @@ class SIPService {
 
   Future<void> dispose() async {
     initialized = false;
-    await originalSub.cancel();
     await stateBroadcast.close();
     await destroyPjsua();
     debugPrint('SIPService disposed');
@@ -71,15 +60,25 @@ class SIPService {
     }
     try {
       final callId = await makeCall(
-        accId: accountId,
         phoneNumber: phoneNumber,
         domain: domain,
       );
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
+      callIds.add(callId);
+
+      Future.microtask(() async {
+        while (callIds.contains(callId) && initialized) {
+          await markCallAlive(callId: callId);
+          debugPrint('Pinging outgoing call $callId to keep alive...');
+          await Future.delayed(const Duration(seconds: 1));
+        }
+      });
+
       return callId;
     } catch (e) {
       debugPrint('Error making call to $phoneNumber: $e');
-      rethrow;
+      error = e.toString();
+      return -1;
     }
   }
 
@@ -89,10 +88,11 @@ class SIPService {
     }
     try {
       await hangupCall(callId: callId);
+      callIds.remove(callId);
       debugPrint('Call with ID $callId hung up successfully');
     } catch (e) {
       debugPrint('Error hanging up call with ID $callId: $e');
-      rethrow;
+      error = e.toString();
     }
   }
 }

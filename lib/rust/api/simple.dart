@@ -22,24 +22,17 @@ Future<int> initPjsua({
   uri: uri,
 );
 
-Future<int> accountSetup({required String uri}) =>
-    RustLib.instance.api.crateApiSimpleAccountSetup(uri: uri);
-
 Stream<CallInfo> registerCallStream() =>
     RustLib.instance.api.crateApiSimpleRegisterCallStream();
 
-Future<void> markSipAlive() =>
-    RustLib.instance.api.crateApiSimpleMarkSipAlive();
+Future<void> markCallAlive({required int callId}) =>
+    RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);
 
-Future<int> makeCall({
-  required int accId,
-  required String phoneNumber,
-  required String domain,
-}) => RustLib.instance.api.crateApiSimpleMakeCall(
-  accId: accId,
-  phoneNumber: phoneNumber,
-  domain: domain,
-);
+Future<int> makeCall({required String phoneNumber, required String domain}) =>
+    RustLib.instance.api.crateApiSimpleMakeCall(
+      phoneNumber: phoneNumber,
+      domain: domain,
+    );
 
 Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);

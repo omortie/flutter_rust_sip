@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1773489372;
+  int get rustContentHash => 1527028031;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,8 +79,6 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<int> crateApiSimpleAccountSetup({required String uri});
-
   Future<int> crateApiSimpleDestroyPjsua();
 
   Future<void> crateApiSimpleHangupCall({required int callId});
@@ -96,12 +94,11 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<int> crateApiSimpleMakeCall({
-    required int accId,
     required String phoneNumber,
     required String domain,
   });
 
-  Future<void> crateApiSimpleMarkSipAlive();
+  Future<void> crateApiSimpleMarkCallAlive({required int callId});
 
   Stream<CallInfo> crateApiSimpleRegisterCallStream();
 }
@@ -115,34 +112,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<int> crateApiSimpleAccountSetup({required String uri}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(uri, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleAccountSetupConstMeta,
-        argValues: [uri],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta =>
-      const TaskConstMeta(debugName: "account_setup", argNames: ["uri"]);
-
-  @override
   Future<int> crateApiSimpleDestroyPjsua() {
     return handler.executeNormal(
       NormalTask(
@@ -151,7 +120,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 1,
             port: port_,
           );
         },
@@ -179,7 +148,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 2,
             port: port_,
           );
         },
@@ -206,7 +175,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 3,
             port: port_,
           );
         },
@@ -244,7 +213,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 4,
             port: port_,
           );
         },
@@ -278,7 +247,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<int> crateApiSimpleMakeCall({
-    required int accId,
     required String phoneNumber,
     required String domain,
   }) {
@@ -286,13 +254,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_i_32(accId, serializer);
           sse_encode_String(phoneNumber, serializer);
           sse_encode_String(domain, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 5,
             port: port_,
           );
         },
@@ -301,7 +268,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleMakeCallConstMeta,
-        argValues: [accId, phoneNumber, domain],
+        argValues: [phoneNumber, domain],
         apiImpl: this,
       ),
     );
@@ -309,19 +276,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
     debugName: "make_call",
-    argNames: ["accId", "phoneNumber", "domain"],
+    argNames: ["phoneNumber", "domain"],
   );
 
   @override
-  Future<void> crateApiSimpleMarkSipAlive() {
+  Future<void> crateApiSimpleMarkCallAlive({required int callId}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_32(callId, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 6,
             port: port_,
           );
         },
@@ -329,15 +297,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiSimpleMarkSipAliveConstMeta,
-        argValues: [],
+        constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
+        argValues: [callId],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleMarkSipAliveConstMeta =>
-      const TaskConstMeta(debugName: "mark_sip_alive", argNames: []);
+  TaskConstMeta get kCrateApiSimpleMarkCallAliveConstMeta =>
+      const TaskConstMeta(debugName: "mark_call_alive", argNames: ["callId"]);
 
   @override
   Stream<CallInfo> crateApiSimpleRegisterCallStream() {
@@ -351,7 +319,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 8,
+              funcId: 7,
               port: port_,
             );
           },
