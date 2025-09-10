@@ -1,10 +1,20 @@
 extern crate pjsip as pj_sys;
 
-use std::{collections::HashMap, sync::{Arc, Mutex}, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
-use crate::{api::simple::hangup_call, core::{
-    dart_types::{CallInfo, CallState}, types::{DartCallStream}
-}, utils::pj_str_to_string};
+use log::info;
+
+use crate::{
+    core::{
+        dart_types::{CallInfo, CallState},
+        types::DartCallStream,
+    },
+    utils::pj_str_to_string,
+};
 
 pub struct CallHeartbeat {
     pub last_live_mark: std::time::SystemTime,
@@ -30,29 +40,19 @@ impl CallManager {
         }
 
         // Create the manager while holding the lock to avoid races, store it and return it.
-        let manager = Arc::new(CallManager {
-            update_stream,
-        });
+        let manager = Arc::new(CallManager { update_stream });
 
         *registry = Some(manager.clone());
 
         manager
     }
 
-    pub fn push_event(
-        &self,
-        ci: CallInfo,
-    ) {
-        self.update_stream
-            .add(ci)
-            .unwrap_or(());
+    pub fn push_event(&self, ci: CallInfo) {
+        self.update_stream.add(ci).unwrap_or(());
     }
 }
 
-pub fn push_call_state_update(
-    call_id: pj_sys::pjsua_call_id,
-    ci: pj_sys::pjsua_call_info,
-) {
+pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_call_info) {
     // convert to your CallState enum
     let state = match ci.state {
         s if s == pj_sys::pjsip_inv_state_PJSIP_INV_STATE_NULL => CallState::Null,
@@ -71,13 +71,11 @@ pub fn push_call_state_update(
     drop(guard);
 
     if let Some(call_manager) = maybe_manager {
-        call_manager.push_event(
-            CallInfo {
-                call_id: call_id,
-                call_url: pj_str_to_string(ci.remote_contact),
-                state,
-            }
-        );
+        call_manager.push_event(CallInfo {
+            call_id: call_id,
+            call_url: pj_str_to_string(ci.remote_contact),
+            state,
+        });
     }
 }
 
@@ -92,26 +90,16 @@ pub fn mark_call_alive(call_id: i32) {
 
 pub fn call_alive_tester_task() {
     loop {
-        let mut closed_calls = Vec::new();
-
-        let call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
-        for (&call_id, heartbeat) in call_registry.iter() {
-            println!("Checking call {} for heartbeat", call_id);
-            if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
-                if elapsed > Duration::from_secs(5) {
-                    // Call is considered dead, hang up
-                    hangup_call(call_id).inspect(|_| {
-                        closed_calls.push(call_id); // add to closed calls list to remove from call registry
-                    }).unwrap_or(());
+        {
+            let call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
+            for (&call_id, heartbeat) in call_registry.iter() {
+                println!("Checking call {} for heartbeat", call_id);
+                if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
+                    if elapsed > Duration::from_secs(5) {
+                        // Call is considered dead, hang up
+                        crate::api::simple::hangup_call(call_id).unwrap_or(());
+                    }
                 }
-            }
-        }
-        drop(call_registry); // release lock before potentially acquiring it again
-
-        if !closed_calls.is_empty() {
-            let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
-            for call_id in closed_calls {
-                call_registry.remove(&call_id);
             }
         }
 
@@ -119,12 +107,29 @@ pub fn call_alive_tester_task() {
     }
 }
 
-pub fn make_call(phone_number: String, domain: String) -> Result<i32, crate::core::types::PJSUAError> {
+pub fn make_call(
+    phone_number: String,
+    domain: String,
+) -> Result<i32, crate::core::types::PJSUAError> {
     crate::core::helpers::make_call(&phone_number, &domain).map(|call_id| {
         let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
-        call_registry.insert(call_id, CallHeartbeat {
-            last_live_mark: std::time::SystemTime::now(),
-        });
+        call_registry.insert(
+            call_id,
+            CallHeartbeat {
+                last_live_mark: std::time::SystemTime::now(),
+            },
+        );
         call_id
+    })
+}
+
+pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
+    crate::core::helpers::hangup_call(call_id).map(|_| {
+        let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
+        if call_registry.remove(&call_id).is_some() {
+            info!("Removed call {} from registry", call_id);
+        } else {
+            info!("Call {} not found in registry", call_id);
+        }
     })
 }

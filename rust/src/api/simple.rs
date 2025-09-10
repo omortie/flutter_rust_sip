@@ -43,7 +43,7 @@ pub async fn make_call(phone_number: String, domain: String) -> Result<i32, PJSU
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
     ensure_pj_thread_registered();
-    crate::core::helpers::hangup_call(call_id)
+    crate::core::managers::hangup_call(call_id)
 }
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
