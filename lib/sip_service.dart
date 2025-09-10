@@ -30,21 +30,16 @@ class SIPService {
     initialized = true;
   }
 
-  static Future<(SIPService?, String?)> init() async {
-    try {
+  static SIPService init() {
       final stream = registerCallStream();
 
       final service = SIPService(
         updateStream: stream,
       );
 
-      return (service, null);
-    } catch (e) {
-      debugPrint('Error initializing SIPService: $e');
-      return (null, e.toString());
-    }
+    return service;
   }
-
+ 
   Future<void> dispose() async {
     initialized = false;
     await stateBroadcast.close();
@@ -71,9 +66,7 @@ class SIPService {
           await Future.delayed(const Duration(seconds: 1));
         }
       });
-
       
-
       return callId;
     } catch (e) {
       debugPrint('Error making call to $phoneNumber: $e');

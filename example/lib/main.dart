@@ -17,23 +17,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('flutter_rust_sip example')),
-        body: Center(
-          child: FutureBuilder(
-              future: SIPService.init(),
-              builder: (context, snapshot) {
-                String? error;
-                if (snapshot.hasData) {
-                  final (service, err) = snapshot.data!;
-                  if (err != null) {
-                    error = err;
-                  } else if (service != null) {
-                    return SIPWidget(service: service);
-                  }
-                } else if (snapshot.hasError) {
-                  error = snapshot.error.toString();
-                }
-                return Text('Error initializing SIPService: $error');
-              }),
+        body: const Center(
+          child: SIPWidget(),
         ),
       ),
     );
@@ -43,21 +28,21 @@ class MyApp extends StatelessWidget {
 class SIPWidget extends StatefulWidget {
   const SIPWidget({
     super.key,
-    required this.service,
   });
-
-  final SIPService service;
 
   @override
   State<SIPWidget> createState() => _SIPWidgetState();
 }
 
 class _SIPWidgetState extends State<SIPWidget> {
+  late SIPService service;
   final Map<int, frs.CallInfo> activeCalls = {};
 
   @override
   void initState() {
-    widget.service.stateBroadcast.listen((state) {
+    service = SIPService.init();
+
+    service.stateBroadcast.listen((state) {
       setState(() {
         activeCalls[state.callId] = state;
       });
@@ -67,7 +52,7 @@ class _SIPWidgetState extends State<SIPWidget> {
 
   @override
   void dispose() {
-    Future.microtask(() async => await widget.service.dispose());
+    Future.microtask(() async => await service.dispose());
     super.dispose();
   }
 
@@ -76,13 +61,13 @@ class _SIPWidgetState extends State<SIPWidget> {
     return Column(
       children: [
         CallerWidget(
-          service: widget.service,
+          service: service,
         ),
         Wrap(
           children: activeCalls.entries
               .map((e) => CallStatusCard(
                     callInfo: e.value,
-                    service: widget.service,
+                    service: service,
                   ))
               .toList(),
         ),
