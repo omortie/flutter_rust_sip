@@ -10,12 +10,17 @@ part 'dart_types.freezed.dart';
 
 class CallInfo {
   final int callId;
+  final String callUrl;
   final CallState state;
 
-  const CallInfo({required this.callId, required this.state});
+  const CallInfo({
+    required this.callId,
+    required this.callUrl,
+    required this.state,
+  });
 
   @override
-  int get hashCode => callId.hashCode ^ state.hashCode;
+  int get hashCode => callId.hashCode ^ callUrl.hashCode ^ state.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -23,6 +28,7 @@ class CallInfo {
       other is CallInfo &&
           runtimeType == other.runtimeType &&
           callId == other.callId &&
+          callUrl == other.callUrl &&
           state == other.state;
 }
 

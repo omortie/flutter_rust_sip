@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1331466938;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1527028031;
 
 // Section: executor
 
@@ -45,7 +45,7 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
-fn wire__crate__api__simple__account_setup_impl(
+fn wire__crate__api__simple__destroy_pjsua_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -53,7 +53,7 @@ fn wire__crate__api__simple__account_setup_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "account_setup",
+            debug_name: "destroy_pjsua",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -67,11 +67,10 @@ fn wire__crate__api__simple__account_setup_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_uri = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
-                    let output_ok = crate::api::simple::account_setup(api_uri)?;
+                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
+                    let output_ok = crate::api::simple::destroy_pjsua()?;
                     Ok(output_ok)
                 })())
             }
@@ -103,42 +102,8 @@ fn wire__crate__api__simple__hangup_call_impl(
             let api_call_id = <i32>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
+                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
                     let output_ok = crate::api::simple::hangup_call(api_call_id)?;
-                    Ok(output_ok)
-                })())
-            }
-        },
-    )
-}
-fn wire__crate__api__simple__hangup_calls_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "hangup_calls",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            deserializer.end();
-            move |context| {
-                transform_result_sse::<_, ()>((move || {
-                    let output_ok = Result::<_, ()>::Ok({
-                        crate::api::simple::hangup_calls();
-                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -179,7 +144,7 @@ fn wire__crate__api__simple__init_app_impl(
         },
     )
 }
-fn wire__crate__api__simple__init_telephony_impl(
+fn wire__crate__api__simple__init_pjsua_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -187,7 +152,7 @@ fn wire__crate__api__simple__init_telephony_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "init_telephony",
+            debug_name: "init_pjsua",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -207,14 +172,16 @@ fn wire__crate__api__simple__init_telephony_impl(
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
             let api_stun_srv = <String>::sse_decode(&mut deserializer);
+            let api_uri = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
-                    let output_ok = crate::api::simple::init_telephony(
+                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
+                    let output_ok = crate::api::simple::init_pjsua(
                         api_local_port,
                         api_transport_mode,
                         api_incoming_call_strategy,
                         api_stun_srv,
+                        api_uri,
                     )?;
                     Ok(output_ok)
                 })())
@@ -248,7 +215,7 @@ fn wire__crate__api__simple__make_call_impl(
             let api_domain = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, crate::core::types::TelephonyError>(
+                transform_result_sse::<_, crate::core::types::PJSUAError>(
                     (move || async move {
                         let output_ok =
                             crate::api::simple::make_call(api_phone_number, api_domain).await?;
@@ -256,6 +223,41 @@ fn wire__crate__api__simple__make_call_impl(
                     })()
                     .await,
                 )
+            }
+        },
+    )
+}
+fn wire__crate__api__simple__mark_call_alive_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "mark_call_alive",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_call_id = <i32>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::simple::mark_call_alive(api_call_id);
+                    })?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -282,16 +284,14 @@ fn wire__crate__api__simple__register_call_stream_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_account_id = <i32>::sse_decode(&mut deserializer);
             let api_call_sink = <StreamSink<
                 crate::core::dart_types::CallInfo,
                 flutter_rust_bridge::for_generated::SseCodec,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::TelephonyError>((move || {
-                    let output_ok =
-                        crate::api::simple::register_call_stream(api_account_id, api_call_sink)?;
+                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
+                    let output_ok = crate::api::simple::register_call_stream(api_call_sink)?;
                     Ok(output_ok)
                 })())
             }
@@ -331,9 +331,11 @@ impl SseDecode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_callId = <i32>::sse_decode(deserializer);
+        let mut var_callUrl = <String>::sse_decode(deserializer);
         let mut var_state = <crate::core::dart_types::CallState>::sse_decode(deserializer);
         return crate::core::dart_types::CallInfo {
             call_id: var_callId,
+            call_url: var_callUrl,
             state: var_state,
         };
     }
@@ -414,54 +416,54 @@ impl SseDecode for crate::core::types::OnIncommingCall {
     }
 }
 
-impl SseDecode for crate::core::types::TelephonyError {
+impl SseDecode for crate::core::types::PJSUAError {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::CreationError(var_field0);
+                return crate::core::types::PJSUAError::CreationError(var_field0);
             }
             1 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::ConfigError(var_field0);
+                return crate::core::types::PJSUAError::ConfigError(var_field0);
             }
             2 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::InitializationError(var_field0);
+                return crate::core::types::PJSUAError::InitializationError(var_field0);
             }
             3 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::TransportError(var_field0);
+                return crate::core::types::PJSUAError::TransportError(var_field0);
             }
             4 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::DTMFError(var_field0);
+                return crate::core::types::PJSUAError::DTMFError(var_field0);
             }
             5 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::CallCreationError(var_field0);
+                return crate::core::types::PJSUAError::CallCreationError(var_field0);
             }
             6 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::CallStatusUpdateError(var_field0);
+                return crate::core::types::PJSUAError::CallStatusUpdateError(var_field0);
             }
             7 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::AccountCreationError(var_field0);
+                return crate::core::types::PJSUAError::AccountCreationError(var_field0);
             }
             8 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::TelephonyStartError(var_field0);
+                return crate::core::types::PJSUAError::PJSUAStartError(var_field0);
             }
             9 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::TelephonyDestroyError(var_field0);
+                return crate::core::types::PJSUAError::PJSUADestroyError(var_field0);
             }
             10 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
-                return crate::core::types::TelephonyError::InputValueError(var_field0);
+                return crate::core::types::PJSUAError::InputValueError(var_field0);
             }
             _ => {
                 unimplemented!("");
@@ -521,12 +523,12 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__simple__account_setup_impl(port, ptr, rust_vec_len, data_len),
+        1 => wire__crate__api__simple__destroy_pjsua_impl(port, ptr, rust_vec_len, data_len),
         2 => wire__crate__api__simple__hangup_call_impl(port, ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__simple__hangup_calls_impl(port, ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__simple__init_telephony_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__simple__make_call_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__simple__init_pjsua_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__simple__make_call_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__simple__mark_call_alive_impl(port, ptr, rust_vec_len, data_len),
         7 => wire__crate__api__simple__register_call_stream_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
@@ -551,6 +553,7 @@ impl flutter_rust_bridge::IntoDart for crate::core::dart_types::CallInfo {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.call_id.into_into_dart().into_dart(),
+            self.call_url.into_into_dart().into_dart(),
             self.state.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -620,40 +623,40 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::types::OnIncommingCall>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::core::types::TelephonyError {
+impl flutter_rust_bridge::IntoDart for crate::core::types::PJSUAError {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::core::types::TelephonyError::CreationError(field0) => {
+            crate::core::types::PJSUAError::CreationError(field0) => {
                 [0.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::ConfigError(field0) => {
+            crate::core::types::PJSUAError::ConfigError(field0) => {
                 [1.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::InitializationError(field0) => {
+            crate::core::types::PJSUAError::InitializationError(field0) => {
                 [2.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::TransportError(field0) => {
+            crate::core::types::PJSUAError::TransportError(field0) => {
                 [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::DTMFError(field0) => {
+            crate::core::types::PJSUAError::DTMFError(field0) => {
                 [4.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::CallCreationError(field0) => {
+            crate::core::types::PJSUAError::CallCreationError(field0) => {
                 [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::CallStatusUpdateError(field0) => {
+            crate::core::types::PJSUAError::CallStatusUpdateError(field0) => {
                 [6.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::AccountCreationError(field0) => {
+            crate::core::types::PJSUAError::AccountCreationError(field0) => {
                 [7.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
+            crate::core::types::PJSUAError::PJSUAStartError(field0) => {
                 [8.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
+            crate::core::types::PJSUAError::PJSUADestroyError(field0) => {
                 [9.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
-            crate::core::types::TelephonyError::InputValueError(field0) => {
+            crate::core::types::PJSUAError::InputValueError(field0) => {
                 [10.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
@@ -663,13 +666,13 @@ impl flutter_rust_bridge::IntoDart for crate::core::types::TelephonyError {
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::core::types::TelephonyError
+    for crate::core::types::PJSUAError
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::core::types::TelephonyError>
-    for crate::core::types::TelephonyError
+impl flutter_rust_bridge::IntoIntoDart<crate::core::types::PJSUAError>
+    for crate::core::types::PJSUAError
 {
-    fn into_into_dart(self) -> crate::core::types::TelephonyError {
+    fn into_into_dart(self) -> crate::core::types::PJSUAError {
         self
     }
 }
@@ -726,6 +729,7 @@ impl SseEncode for crate::core::dart_types::CallInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.call_id, serializer);
+        <String>::sse_encode(self.call_url, serializer);
         <crate::core::dart_types::CallState>::sse_encode(self.state, serializer);
     }
 }
@@ -806,51 +810,51 @@ impl SseEncode for crate::core::types::OnIncommingCall {
     }
 }
 
-impl SseEncode for crate::core::types::TelephonyError {
+impl SseEncode for crate::core::types::PJSUAError {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::core::types::TelephonyError::CreationError(field0) => {
+            crate::core::types::PJSUAError::CreationError(field0) => {
                 <i32>::sse_encode(0, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::ConfigError(field0) => {
+            crate::core::types::PJSUAError::ConfigError(field0) => {
                 <i32>::sse_encode(1, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::InitializationError(field0) => {
+            crate::core::types::PJSUAError::InitializationError(field0) => {
                 <i32>::sse_encode(2, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::TransportError(field0) => {
+            crate::core::types::PJSUAError::TransportError(field0) => {
                 <i32>::sse_encode(3, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::DTMFError(field0) => {
+            crate::core::types::PJSUAError::DTMFError(field0) => {
                 <i32>::sse_encode(4, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::CallCreationError(field0) => {
+            crate::core::types::PJSUAError::CallCreationError(field0) => {
                 <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::CallStatusUpdateError(field0) => {
+            crate::core::types::PJSUAError::CallStatusUpdateError(field0) => {
                 <i32>::sse_encode(6, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::AccountCreationError(field0) => {
+            crate::core::types::PJSUAError::AccountCreationError(field0) => {
                 <i32>::sse_encode(7, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::TelephonyStartError(field0) => {
+            crate::core::types::PJSUAError::PJSUAStartError(field0) => {
                 <i32>::sse_encode(8, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::TelephonyDestroyError(field0) => {
+            crate::core::types::PJSUAError::PJSUADestroyError(field0) => {
                 <i32>::sse_encode(9, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::core::types::TelephonyError::InputValueError(field0) => {
+            crate::core::types::PJSUAError::InputValueError(field0) => {
                 <i32>::sse_encode(10, serializer);
                 <String>::sse_encode(field0, serializer);
             }

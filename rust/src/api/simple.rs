@@ -1,48 +1,51 @@
-// FFI-safe wrappers for telephony functions
+// FFI-safe wrappers for PJSUA functions
 
 use flutter_rust_bridge::{frb};
 
-use crate::core::{helpers::*, init_logger, managers::{CallStateManager}, types::{DartCallStream, OnIncommingCall, TelephonyError, TransportMode}};
+use crate::core::{helpers::*, init_logger, managers::{CallManager}, types::{DartCallStream, OnIncommingCall, PJSUAError, TransportMode}};
 
 #[frb(init)]
 pub fn init_app() {
     init_logger();
 }
 
-lazy_static::lazy_static! {
-    static ref ACCOUNT_REGISTRY: std::sync::Mutex<i32> = std::sync::Mutex::new(0);
-}
-
-pub fn init_telephony(
+pub fn init_pjsua(
     local_port: u32,
     transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
-) -> Result<i8, TelephonyError> {
-    // initialize telephony
-    initialize_telephony(incoming_call_strategy, local_port, transport_mode, stun_srv)
+    uri: String,
+) -> Result<i32, PJSUAError> {
+    // initialize pjsua
+    initialize_pjsua(incoming_call_strategy, local_port, transport_mode, stun_srv).and_then(|_| {
+        // Start SIP alive tester task to check alive flag periodically as destroy management
+        std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
+
+        ensure_pj_thread_registered();
+        crate::core::helpers::account_setup(uri)
+    })
 }
 
-pub fn account_setup(uri: String) -> Result<i32, TelephonyError> {
-    ensure_pj_thread_registered();
-    accountSetup(uri)
-}
-
-pub fn register_call_stream(account_id: i32, call_sink: DartCallStream) -> Result<(), TelephonyError> {
-    CallStateManager::new(call_sink, account_id);
+pub fn register_call_stream(call_sink: DartCallStream) -> Result<(), PJSUAError> {
+    // Initialize the call state manager singleton
+    CallManager::init(call_sink);
     Ok(())
 }
 
-pub async fn make_call(phone_number: String, domain: String) -> Result<i32, TelephonyError> {
-    ensure_pj_thread_registered();
-    makeCall(&phone_number, &domain)
+pub fn mark_call_alive(call_id: i32) {
+    crate::core::managers::mark_call_alive(call_id);
 }
 
-pub fn hangup_call(call_id: i32) -> Result<(), TelephonyError> {
+pub async fn make_call(phone_number: String, domain: String) -> Result<i32, PJSUAError> {
     ensure_pj_thread_registered();
-    hangupCall(call_id)
+    crate::core::managers::make_call(phone_number, domain)
 }
-    
-pub fn hangup_calls() {
-    hangupCalls();
+
+pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
+    crate::core::managers::hangup_call(call_id)
+}
+
+pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
+    ensure_pj_thread_registered();
+    crate::core::helpers::destroy_pjsua()
 }

@@ -11,31 +11,29 @@ part 'types.freezed.dart';
 enum OnIncommingCall { autoAnswer, ignore }
 
 @freezed
-sealed class TelephonyError with _$TelephonyError implements FrbException {
-  const TelephonyError._();
+sealed class PJSUAError with _$PJSUAError implements FrbException {
+  const PJSUAError._();
 
-  const factory TelephonyError.creationError(String field0) =
-      TelephonyError_CreationError;
-  const factory TelephonyError.configError(String field0) =
-      TelephonyError_ConfigError;
-  const factory TelephonyError.initializationError(String field0) =
-      TelephonyError_InitializationError;
-  const factory TelephonyError.transportError(String field0) =
-      TelephonyError_TransportError;
-  const factory TelephonyError.dtmfError(String field0) =
-      TelephonyError_DTMFError;
-  const factory TelephonyError.callCreationError(String field0) =
-      TelephonyError_CallCreationError;
-  const factory TelephonyError.callStatusUpdateError(String field0) =
-      TelephonyError_CallStatusUpdateError;
-  const factory TelephonyError.accountCreationError(String field0) =
-      TelephonyError_AccountCreationError;
-  const factory TelephonyError.telephonyStartError(String field0) =
-      TelephonyError_TelephonyStartError;
-  const factory TelephonyError.telephonyDestroyError(String field0) =
-      TelephonyError_TelephonyDestroyError;
-  const factory TelephonyError.inputValueError(String field0) =
-      TelephonyError_InputValueError;
+  const factory PJSUAError.creationError(String field0) =
+      PJSUAError_CreationError;
+  const factory PJSUAError.configError(String field0) = PJSUAError_ConfigError;
+  const factory PJSUAError.initializationError(String field0) =
+      PJSUAError_InitializationError;
+  const factory PJSUAError.transportError(String field0) =
+      PJSUAError_TransportError;
+  const factory PJSUAError.dtmfError(String field0) = PJSUAError_DTMFError;
+  const factory PJSUAError.callCreationError(String field0) =
+      PJSUAError_CallCreationError;
+  const factory PJSUAError.callStatusUpdateError(String field0) =
+      PJSUAError_CallStatusUpdateError;
+  const factory PJSUAError.accountCreationError(String field0) =
+      PJSUAError_AccountCreationError;
+  const factory PJSUAError.pjsuaStartError(String field0) =
+      PJSUAError_PJSUAStartError;
+  const factory PJSUAError.pjsuaDestroyError(String field0) =
+      PJSUAError_PJSUADestroyError;
+  const factory PJSUAError.inputValueError(String field0) =
+      PJSUAError_InputValueError;
 }
 
 enum TransportMode { tcp, udp, tls, udp6, tcp6, tls6 }

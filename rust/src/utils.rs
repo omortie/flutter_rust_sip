@@ -1,15 +1,15 @@
 extern crate pjsip as pj;
 
 use std::{ffi::CString, os::raw::c_char};
-use crate::core::types::TelephonyError;
+use crate::core::types::PJSUAError;
               
-pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,TelephonyError> {
+pub fn make_pj_str_t(input : String ) -> Result<pj::pj_str_t,PJSUAError> {
     let len = input.len() as ::std::os::raw::c_long;
     let input_c_string = CString::new(input.clone());
     match input_c_string{
         Err(_x) => {
             let err_message : String  = ["Could not use input value: '".to_string(), input, "' Contained Null Byte".to_string() ].concat();
-            return Err(TelephonyError::InputValueError(err_message));
+            return Err(PJSUAError::InputValueError(err_message));
         },
         Ok(c_string) => {
             let input_ptr = c_string.into_raw();

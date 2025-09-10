@@ -6,79 +6,86 @@ import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
-  final int accountId;
-  final rx.BehaviorSubject<CallInfo> stateBroadcast;
-  final StreamSubscription<CallInfo> originalSub;
+  final List<int> callIds = [];
+  late rx.BehaviorSubject<CallInfo> stateBroadcast;
+  final Stream<CallInfo> updateStream;
 
-  bool _initialized = false;
+  bool initialized = false;
 
-  SIPService({required this.accountId, required this.originalSub, required this.stateBroadcast,});
+  String? error;
 
-  static Future<SIPService> init({
-    required String uri,
-  }) async {
-    try {
-      final accountId = await accountSetup(
-        uri: '127.0.0.1',
-      );
-      final stream = registerCallStream(accountId: accountId);
-      final bs = rx.BehaviorSubject<CallInfo>();
-      final originalSub = stream.listen((event) {
-        debugPrint('Call State Changed: ${event.state}');
-        bs.add(event);
-      });
+  SIPService({
+    required this.updateStream}) {
+    stateBroadcast = rx.BehaviorSubject<CallInfo>();
+    updateStream.listen((event) {
+      debugPrint('Call State Changed: ${event.state}');
 
-      final service = SIPService(accountId: accountId, originalSub: originalSub, stateBroadcast: bs);
+      if (event.state == CallState.disconnected()) {
+        callIds.remove(event.callId);
+      }
 
-      service._initialized = true;
+      stateBroadcast.add(event);
+    });
 
-      Future.microtask(() async {
-        while (service._initialized) {
-          // todo: ping rust side to announce we still want the service.
-          debugPrint('Pinging SIP service to keep alive...');
-          await Future.delayed(const Duration(seconds: 1));
-        }
-      });
-
-      return service;
-    } catch (e) {
-      debugPrint('Error initializing SIPService: $e');
-      rethrow;
-    }
+    initialized = true;
   }
 
+  static SIPService init() {
+      final stream = registerCallStream();
+
+      final service = SIPService(
+        updateStream: stream,
+      );
+
+    return service;
+  }
+ 
   Future<void> dispose() async {
-    _initialized = false;
-    await originalSub.cancel();
+    initialized = false;
     await stateBroadcast.close();
-    // todo: destroy telephony on rust side
+    await destroyPjsua();
     debugPrint('SIPService disposed');
   }
 
   Future<int> call(String phoneNumber, String domain) async {
-    if (!_initialized) {
+    if (!initialized) {
       throw Exception('SIPService not initialized');
     }
     try {
-      final callId = await makeCall(phoneNumber: phoneNumber, domain: domain);
+      final callId = await makeCall(
+        phoneNumber: phoneNumber,
+        domain: domain,
+      );
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
+      callIds.add(callId);
+
+      Future.microtask(() async {
+        while (callIds.contains(callId) && initialized) {
+          await markCallAlive(callId: callId);
+          debugPrint('Pinging outgoing call $callId to keep alive...');
+          await Future.delayed(const Duration(seconds: 1));
+        }
+      });
+      
       return callId;
     } catch (e) {
       debugPrint('Error making call to $phoneNumber: $e');
-      rethrow;
+      error = e.toString();
+      return -1;
     }
   }
 
   Future<void> hangup(int callId) async {
-    if (!_initialized) {
+    if (!initialized) {
       throw Exception('SIPService not initialized');
     }
     try {
       await hangupCall(callId: callId);
+      callIds.remove(callId);
       debugPrint('Call with ID $callId hung up successfully');
     } catch (e) {
       debugPrint('Error hanging up call with ID $callId: $e');
-      rethrow;
+      error = e.toString();
     }
   }
 }

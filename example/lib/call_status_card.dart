@@ -47,7 +47,7 @@ class CallStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Call #${callInfo.callId}',
+                  'Call #${callInfo.callId} (${callInfo.callUrl})',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
