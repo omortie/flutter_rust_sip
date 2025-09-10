@@ -23,7 +23,7 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
         body: Center(
           child: FutureBuilder(
-              future: SIPService.init(uri: "127.0.0.1"),
+              future: SIPService.init(),
               builder: (context, snapshot) {
                 String? error;
                 if (snapshot.hasData) {
