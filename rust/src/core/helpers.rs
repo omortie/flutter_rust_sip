@@ -81,12 +81,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_media_state = Some(on_call_media_state);
     cfg.cb.on_call_state = Some(on_call_state);
     
-    let mut stun_srv_string = stun_srv.clone();
-    // configuring default stun server of Google
-    if stun_srv.is_empty() {
-        stun_srv_string = "stun.l.google.com".to_string(); // default STUN server
-    }
-    let stun_srv_pj_str_t = match make_pj_str_t(stun_srv_string) {
+    let stun_srv_pj_str_t = match make_pj_str_t(stun_srv) {
         Err(x) => return Err(x),
         Ok(y) => y
     };

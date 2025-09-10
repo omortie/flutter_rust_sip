@@ -89,7 +89,7 @@ pub fn push_call_state_update(
         call_manager.push_event(
             CallInfo {
                 call_id: call_id as i32,
-                call_url: pj_str_to_string(ci.remote_info),
+                call_url: pj_str_to_string(ci.remote_contact),
                 state,
             }
         )

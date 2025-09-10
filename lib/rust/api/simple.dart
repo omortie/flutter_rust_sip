@@ -44,6 +44,4 @@ Future<int> makeCall({
 Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);
 
-Future<void> hangupCalls() => RustLib.instance.api.crateApiSimpleHangupCalls();
-
 Future<int> destroyPjsua() => RustLib.instance.api.crateApiSimpleDestroyPjsua();
