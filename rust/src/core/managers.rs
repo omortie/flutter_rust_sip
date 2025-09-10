@@ -97,7 +97,7 @@ pub fn call_alive_tester_task() {
                 if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                     if elapsed > Duration::from_secs(5) {
                         // Call is considered dead, hang up
-                        crate::api::simple::hangup_call(call_id).unwrap_or(());
+                        hangup_call(call_id).unwrap_or(());
                     }
                 }
             }
@@ -111,6 +111,7 @@ pub fn make_call(
     phone_number: String,
     domain: String,
 ) -> Result<i32, crate::core::types::PJSUAError> {
+    super::helpers::ensure_pj_thread_registered();
     crate::core::helpers::make_call(&phone_number, &domain).map(|call_id| {
         let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
         call_registry.insert(
@@ -124,6 +125,7 @@ pub fn make_call(
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
+    super::helpers::ensure_pj_thread_registered();
     crate::core::helpers::hangup_call(call_id).map(|_| {
         let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
         if call_registry.remove(&call_id).is_some() {
