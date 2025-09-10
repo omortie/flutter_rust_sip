@@ -135,3 +135,13 @@ pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
         }
     })
 }
+
+pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {
+    super::helpers::ensure_pj_thread_registered();
+    crate::core::helpers::hangup_calls();
+    crate::core::helpers::destroy_pjsua().inspect(|_| {
+        let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
+        call_registry.clear();
+        info!("Cleared call registry on PJSUA destroy");
+    })
+}

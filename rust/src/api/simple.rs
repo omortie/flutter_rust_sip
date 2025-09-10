@@ -46,6 +46,5 @@ pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
 }
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
-    ensure_pj_thread_registered();
-    crate::core::helpers::destroy_pjsua()
+    crate::core::managers::destroy_pjsua()
 }

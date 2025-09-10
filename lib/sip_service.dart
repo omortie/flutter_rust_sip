@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
 import 'package:flutter_rust_sip/rust/api/simple.dart';
@@ -11,6 +13,7 @@ class SIPService {
   final Stream<CallInfo> updateStream;
 
   bool initialized = false;
+  static SIPService? _instance;
 
   String? error;
 
@@ -24,20 +27,29 @@ class SIPService {
         callIds.remove(event.callId);
       }
 
-      stateBroadcast.add(event);
+      if (!stateBroadcast.isClosed) {
+        stateBroadcast.add(event);
+      }
     });
 
     initialized = true;
   }
 
-  static SIPService init() {
+  static Future<SIPService> init() async {
+    if (_instance != null) return _instance!;
+
+    try {
+      await frs.init();
       final stream = registerCallStream();
 
-      final service = SIPService(
-        updateStream: stream,
-      );
+      final service = SIPService(updateStream: stream);
+      _instance = service;
 
-    return service;
+      return service;
+    } catch (e) {
+      debugPrint('Error initializing SIPService: $e');
+      return Future.error(e.toString());
+    }
   }
  
   Future<void> dispose() async {
@@ -49,7 +61,7 @@ class SIPService {
 
   Future<int> call(String phoneNumber, String domain) async {
     if (!initialized) {
-      throw Exception('SIPService not initialized');
+      error = 'SIPService not initialized';
     }
     try {
       final callId = await makeCall(
@@ -66,7 +78,7 @@ class SIPService {
           await Future.delayed(const Duration(seconds: 1));
         }
       });
-      
+
       return callId;
     } catch (e) {
       debugPrint('Error making call to $phoneNumber: $e');
@@ -77,7 +89,7 @@ class SIPService {
 
   Future<void> hangup(int callId) async {
     if (!initialized) {
-      throw Exception('SIPService not initialized');
+      error = 'SIPService not initialized';
     }
     try {
       await hangupCall(callId: callId);

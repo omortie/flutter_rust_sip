@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
+import 'package:flutter_rust_sip/flutter_rust_sip.dart';
+
 
 import 'package:flutter_rust_sip/sip_service.dart';
 import 'package:flutter_rust_sip_example/call_status_card.dart';
 
 void main() async {
-  await frs.init();
   runApp(const MyApp());
 }
 
@@ -15,10 +15,38 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('flutter_rust_sip example')),
-        body: const Center(
-          child: SIPWidget(),
+      home: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('flutter_rust_sip example'),
+            bottom: const TabBar(tabs: [
+              Tab(icon: Icon(Icons.call), text: "SIP Calls"),
+              Tab(icon: Icon(Icons.settings), text: "Settings"),
+            ]),
+          ),
+          body: Center(
+            child: TabBarView(
+              children: [
+                FutureBuilder(
+                    future: SIPService.init(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final service = snapshot.data!;
+                        return SIPWidget(service: service);
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator());
+                      }
+                    }),
+                const Text("Settings"),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -27,22 +55,23 @@ class MyApp extends StatelessWidget {
 
 class SIPWidget extends StatefulWidget {
   const SIPWidget({
+    required this.service,
     super.key,
   });
+
+  final SIPService service;
 
   @override
   State<SIPWidget> createState() => _SIPWidgetState();
 }
 
 class _SIPWidgetState extends State<SIPWidget> {
-  late SIPService service;
-  final Map<int, frs.CallInfo> activeCalls = {};
+  final Map<int, CallInfo> activeCalls = {};
 
   @override
   void initState() {
-    service = SIPService.init();
-
-    service.stateBroadcast.listen((state) {
+    widget.service.stateBroadcast.listen((state) {
+      if (!widget.service.initialized) return;
       setState(() {
         activeCalls[state.callId] = state;
       });
@@ -52,7 +81,7 @@ class _SIPWidgetState extends State<SIPWidget> {
 
   @override
   void dispose() {
-    Future.microtask(() async => await service.dispose());
+    Future.microtask(() async => await widget.service.dispose());
     super.dispose();
   }
 
@@ -61,13 +90,13 @@ class _SIPWidgetState extends State<SIPWidget> {
     return Column(
       children: [
         CallerWidget(
-          service: service,
+          service: widget.service,
         ),
         Wrap(
           children: activeCalls.entries
               .map((e) => CallStatusCard(
                     callInfo: e.value,
-                    service: service,
+                    service: widget.service,
                   ))
               .toList(),
         ),
