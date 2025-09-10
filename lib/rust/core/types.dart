@@ -8,46 +8,32 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'types.freezed.dart';
 
-            
-
-            
-
-            enum OnIncommingCall {
-                    autoAnswer,
-ignore,
-                    ;
-                    
-                }
+enum OnIncommingCall { autoAnswer, ignore }
 
 @freezed
-                sealed class PJSUAError with _$PJSUAError implements FrbException {
-                    const PJSUAError._();
+sealed class PJSUAError with _$PJSUAError implements FrbException {
+  const PJSUAError._();
 
-                     const factory PJSUAError.creationError(  String field0,) = PJSUAError_CreationError;
- const factory PJSUAError.configError(  String field0,) = PJSUAError_ConfigError;
- const factory PJSUAError.initializationError(  String field0,) = PJSUAError_InitializationError;
- const factory PJSUAError.transportError(  String field0,) = PJSUAError_TransportError;
- const factory PJSUAError.dtmfError(  String field0,) = PJSUAError_DTMFError;
- const factory PJSUAError.callCreationError(  String field0,) = PJSUAError_CallCreationError;
- const factory PJSUAError.callStatusUpdateError(  String field0,) = PJSUAError_CallStatusUpdateError;
- const factory PJSUAError.accountCreationError(  String field0,) = PJSUAError_AccountCreationError;
- const factory PJSUAError.pjsuaStartError(  String field0,) = PJSUAError_PJSUAStartError;
- const factory PJSUAError.pjsuaDestroyError(  String field0,) = PJSUAError_PJSUADestroyError;
- const factory PJSUAError.inputValueError(  String field0,) = PJSUAError_InputValueError;
+  const factory PJSUAError.creationError(String field0) =
+      PJSUAError_CreationError;
+  const factory PJSUAError.configError(String field0) = PJSUAError_ConfigError;
+  const factory PJSUAError.initializationError(String field0) =
+      PJSUAError_InitializationError;
+  const factory PJSUAError.transportError(String field0) =
+      PJSUAError_TransportError;
+  const factory PJSUAError.dtmfError(String field0) = PJSUAError_DTMFError;
+  const factory PJSUAError.callCreationError(String field0) =
+      PJSUAError_CallCreationError;
+  const factory PJSUAError.callStatusUpdateError(String field0) =
+      PJSUAError_CallStatusUpdateError;
+  const factory PJSUAError.accountCreationError(String field0) =
+      PJSUAError_AccountCreationError;
+  const factory PJSUAError.pjsuaStartError(String field0) =
+      PJSUAError_PJSUAStartError;
+  const factory PJSUAError.pjsuaDestroyError(String field0) =
+      PJSUAError_PJSUADestroyError;
+  const factory PJSUAError.inputValueError(String field0) =
+      PJSUAError_InputValueError;
+}
 
-                    
-
-                    
-                }
-
-enum TransportMode {
-                    tcp,
-udp,
-tls,
-udp6,
-tcp6,
-tls6,
-                    ;
-                    
-                }
-            
+enum TransportMode { tcp, udp, tls, udp6, tcp6, tls6 }
