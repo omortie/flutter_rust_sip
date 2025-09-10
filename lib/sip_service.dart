@@ -30,9 +30,7 @@ class SIPService {
     initialized = true;
   }
 
-  static Future<(SIPService?, String?)> init({
-    required String uri,
-  }) async {
+  static Future<(SIPService?, String?)> init() async {
     try {
       final stream = registerCallStream();
 

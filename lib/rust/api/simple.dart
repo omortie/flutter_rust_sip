@@ -8,33 +8,20 @@ import '../core/types.dart';
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<int> initPjsua({
-  required int localPort,
-  required TransportMode transportMode,
-  required OnIncommingCall incomingCallStrategy,
-  required String stunSrv,
-  required String uri,
-}) => RustLib.instance.api.crateApiSimpleInitPjsua(
-  localPort: localPort,
-  transportMode: transportMode,
-  incomingCallStrategy: incomingCallStrategy,
-  stunSrv: stunSrv,
-  uri: uri,
-);
 
-Stream<CallInfo> registerCallStream() =>
-    RustLib.instance.api.crateApiSimpleRegisterCallStream();
+            
 
-Future<void> markCallAlive({required int callId}) =>
-    RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);
+            Future<int>  initPjsua({required int localPort , required TransportMode transportMode , required OnIncommingCall incomingCallStrategy , required String stunSrv , required String uri }) => RustLib.instance.api.crateApiSimpleInitPjsua(localPort: localPort, transportMode: transportMode, incomingCallStrategy: incomingCallStrategy, stunSrv: stunSrv, uri: uri);
 
-Future<int> makeCall({required String phoneNumber, required String domain}) =>
-    RustLib.instance.api.crateApiSimpleMakeCall(
-      phoneNumber: phoneNumber,
-      domain: domain,
-    );
+Stream<CallInfo>  registerCallStream() => RustLib.instance.api.crateApiSimpleRegisterCallStream();
 
-Future<void> hangupCall({required int callId}) =>
-    RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);
+Future<void>  markCallAlive({required int callId }) => RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);
 
-Future<int> destroyPjsua() => RustLib.instance.api.crateApiSimpleDestroyPjsua();
+Future<int>  makeCall({required String phoneNumber , required String domain }) => RustLib.instance.api.crateApiSimpleMakeCall(phoneNumber: phoneNumber, domain: domain);
+
+Future<void>  hangupCall({required int callId }) => RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);
+
+Future<int>  destroyPjsua() => RustLib.instance.api.crateApiSimpleDestroyPjsua();
+
+            
+            

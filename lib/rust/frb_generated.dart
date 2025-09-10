@@ -9,794 +9,492 @@ import 'core/types.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
-import 'frb_generated.io.dart'
-    if (dart.library.js_interop) 'frb_generated.web.dart';
+import 'frb_generated.io.dart' if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Main entrypoint of the Rust API
-class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
-  @internal
-  static final instance = RustLib._();
 
-  RustLib._();
+                /// Main entrypoint of the Rust API
+                class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
+                  @internal
+                  static final instance = RustLib._();
 
-  /// Initialize flutter_rust_bridge
-  static Future<void> init({
-    RustLibApi? api,
-    BaseHandler? handler,
-    ExternalLibrary? externalLibrary,
-    bool forceSameCodegenVersion = true,
-  }) async {
-    await instance.initImpl(
-      api: api,
-      handler: handler,
-      externalLibrary: externalLibrary,
-      forceSameCodegenVersion: forceSameCodegenVersion,
-    );
-  }
+                  RustLib._();
 
-  /// Initialize flutter_rust_bridge in mock mode.
-  /// No libraries for FFI are loaded.
-  static void initMock({required RustLibApi api}) {
-    instance.initMockImpl(api: api);
-  }
+                  /// Initialize flutter_rust_bridge
+                  static Future<void> init({
+                    RustLibApi? api,
+                    BaseHandler? handler,
+                    ExternalLibrary? externalLibrary,
+                    bool forceSameCodegenVersion = true,
+                  }) async {
+                    await instance.initImpl(
+                      api: api,
+                      handler: handler,
+                      externalLibrary: externalLibrary,
+                      forceSameCodegenVersion: forceSameCodegenVersion,
+                    );
+                  }
 
-  /// Dispose flutter_rust_bridge
-  ///
-  /// The call to this function is optional, since flutter_rust_bridge (and everything else)
-  /// is automatically disposed when the app stops.
-  static void dispose() => instance.disposeImpl();
+                  /// Initialize flutter_rust_bridge in mock mode.
+                  /// No libraries for FFI are loaded.
+                  static void initMock({
+                    required RustLibApi api,
+                  }) {
+                    instance.initMockImpl(
+                      api: api,
+                    );
+                  }
 
-  @override
-  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor =>
-      RustLibApiImpl.new;
+                  /// Dispose flutter_rust_bridge
+                  ///
+                  /// The call to this function is optional, since flutter_rust_bridge (and everything else)
+                  /// is automatically disposed when the app stops.
+                  static void dispose() => instance.disposeImpl();
 
-  @override
-  WireConstructor<RustLibWire> get wireConstructor =>
-      RustLibWire.fromExternalLibrary;
+                  @override
+                  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
 
-  @override
-  Future<void> executeRustInitializers() async {
-    await api.crateApiSimpleInitApp();
-  }
+                  @override
+                  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
 
-  @override
-  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig =>
-      kDefaultExternalLibraryLoaderConfig;
+                  @override
+                  Future<void> executeRustInitializers() async {
+                    await api.crateApiSimpleInitApp();
 
-  @override
-  String get codegenVersion => '2.11.1';
+                  }
 
-  @override
-  int get rustContentHash => 1527028031;
+                  @override
+                  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig => kDefaultExternalLibraryLoaderConfig;
 
-  static const kDefaultExternalLibraryLoaderConfig =
-      ExternalLibraryLoaderConfig(
-        stem: 'flutter_rust_sip',
-        ioDirectory: 'rust/target/release/',
-        webPrefix: 'pkg/',
-      );
-}
+                  @override
+                  String get codegenVersion => '2.11.1';
 
-abstract class RustLibApi extends BaseApi {
-  Future<int> crateApiSimpleDestroyPjsua();
+                  @override
+                  int get rustContentHash => 1527028031;
 
-  Future<void> crateApiSimpleHangupCall({required int callId});
+                  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
+                    stem: 'flutter_rust_sip',
+                    ioDirectory: 'rust/target/release/',
+                    webPrefix: 'pkg/',
+                  );
+                }
+                
 
-  Future<void> crateApiSimpleInitApp();
+                abstract class RustLibApi extends BaseApi {
+                  Future<int> crateApiSimpleDestroyPjsua();
 
-  Future<int> crateApiSimpleInitPjsua({
-    required int localPort,
-    required TransportMode transportMode,
-    required OnIncommingCall incomingCallStrategy,
-    required String stunSrv,
-    required String uri,
-  });
+Future<void> crateApiSimpleHangupCall({required int callId });
 
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  });
+Future<void> crateApiSimpleInitApp();
 
-  Future<void> crateApiSimpleMarkCallAlive({required int callId});
+Future<int> crateApiSimpleInitPjsua({required int localPort , required TransportMode transportMode , required OnIncommingCall incomingCallStrategy , required String stunSrv , required String uri });
 
-  Stream<CallInfo> crateApiSimpleRegisterCallStream();
-}
+Future<int> crateApiSimpleMakeCall({required String phoneNumber , required String domain });
 
-class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
-  RustLibApiImpl({
-    required super.handler,
-    required super.wire,
-    required super.generalizedFrbRustBinding,
-    required super.portManager,
-  });
+Future<void> crateApiSimpleMarkCallAlive({required int callId });
 
-  @override
-  Future<int> crateApiSimpleDestroyPjsua() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
+Stream<CallInfo> crateApiSimpleRegisterCallStream();
+
+
+                }
+                
+
+                class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
+                  RustLibApiImpl({
+                    required super.handler,
+                    required super.wire,
+                    required super.generalizedFrbRustBinding,
+                    required super.portManager,
+                  });
+
+                  @override Future<int> crateApiSimpleDestroyPjsua()  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
           decodeSuccessData: sse_decode_i_8,
           decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
+        )
+        ,
+            constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
+            argValues: [],
+            apiImpl: this,
+        )); }
 
-  TaskConstMeta get kCrateApiSimpleDestroyPjsuaConstMeta =>
-      const TaskConstMeta(debugName: "destroy_pjsua", argNames: []);
 
-  @override
-  Future<void> crateApiSimpleHangupCall({required int callId}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
+        TaskConstMeta get kCrateApiSimpleDestroyPjsuaConstMeta => const TaskConstMeta(
+            debugName: "destroy_pjsua",
+            argNames: [],
+        );
+        
+
+@override Future<void> crateApiSimpleHangupCall({required int callId })  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_i_32(callId, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleHangupCallConstMeta,
-        argValues: [callId],
-        apiImpl: this,
-      ),
-    );
-  }
+        )
+        ,
+            constMeta: kCrateApiSimpleHangupCallConstMeta,
+            argValues: [callId],
+            apiImpl: this,
+        )); }
 
-  TaskConstMeta get kCrateApiSimpleHangupCallConstMeta =>
-      const TaskConstMeta(debugName: "hangup_call", argNames: ["callId"]);
 
-  @override
-  Future<void> crateApiSimpleInitApp() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiSimpleInitAppConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
+        TaskConstMeta get kCrateApiSimpleHangupCallConstMeta => const TaskConstMeta(
+            debugName: "hangup_call",
+            argNames: ["callId"],
+        );
+        
 
-  TaskConstMeta get kCrateApiSimpleInitAppConstMeta =>
-      const TaskConstMeta(debugName: "init_app", argNames: []);
-
-  @override
-  Future<int> crateApiSimpleInitPjsua({
-    required int localPort,
-    required TransportMode transportMode,
-    required OnIncommingCall incomingCallStrategy,
-    required String stunSrv,
-    required String uri,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_u_32(localPort, serializer);
-          sse_encode_transport_mode(transportMode, serializer);
-          sse_encode_on_incomming_call(incomingCallStrategy, serializer);
-          sse_encode_String(stunSrv, serializer);
-          sse_encode_String(uri, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleInitPjsuaConstMeta,
-        argValues: [
-          localPort,
-          transportMode,
-          incomingCallStrategy,
-          stunSrv,
-          uri,
-        ],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
-    debugName: "init_pjsua",
-    argNames: [
-      "localPort",
-      "transportMode",
-      "incomingCallStrategy",
-      "stunSrv",
-      "uri",
-    ],
-  );
-
-  @override
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(phoneNumber, serializer);
-          sse_encode_String(domain, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleMakeCallConstMeta,
-        argValues: [phoneNumber, domain],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
-    debugName: "make_call",
-    argNames: ["phoneNumber", "domain"],
-  );
-
-  @override
-  Future<void> crateApiSimpleMarkCallAlive({required int callId}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 6,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
-        argValues: [callId],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiSimpleMarkCallAliveConstMeta =>
-      const TaskConstMeta(debugName: "mark_call_alive", argNames: ["callId"]);
-
-  @override
-  Stream<CallInfo> crateApiSimpleRegisterCallStream() {
-    final callSink = RustStreamSink<CallInfo>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
+@override Future<void> crateApiSimpleInitApp()  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
             final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 7,
-              port: port_,
-            );
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: sse_decode_pjsua_error,
-          ),
-          constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
-          argValues: [callSink],
-          apiImpl: this,
-        ),
-      ),
-    );
-    return callSink.stream;
-  }
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        )
+        ,
+            constMeta: kCrateApiSimpleInitAppConstMeta,
+            argValues: [],
+            apiImpl: this,
+        )); }
 
-  TaskConstMeta get kCrateApiSimpleRegisterCallStreamConstMeta =>
-      const TaskConstMeta(
-        debugName: "register_call_stream",
-        argNames: ["callSink"],
-      );
 
-  @protected
-  AnyhowException dco_decode_AnyhowException(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return AnyhowException(raw as String);
-  }
+        TaskConstMeta get kCrateApiSimpleInitAppConstMeta => const TaskConstMeta(
+            debugName: "init_app",
+            argNames: [],
+        );
+        
 
-  @protected
-  RustStreamSink<CallInfo> dco_decode_StreamSink_call_info_Sse(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    throw UnimplementedError();
-  }
+@override Future<int> crateApiSimpleInitPjsua({required int localPort , required TransportMode transportMode , required OnIncommingCall incomingCallStrategy , required String stunSrv , required String uri })  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_u_32(localPort, serializer);
+sse_encode_transport_mode(transportMode, serializer);
+sse_encode_on_incomming_call(incomingCallStrategy, serializer);
+sse_encode_String(stunSrv, serializer);
+sse_encode_String(uri, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
+          decodeSuccessData: sse_decode_i_32,
+          decodeErrorData: sse_decode_pjsua_error,
+        )
+        ,
+            constMeta: kCrateApiSimpleInitPjsuaConstMeta,
+            argValues: [localPort, transportMode, incomingCallStrategy, stunSrv, uri],
+            apiImpl: this,
+        )); }
 
-  @protected
-  String dco_decode_String(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as String;
-  }
 
-  @protected
-  CallInfo dco_decode_call_info(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
-    return CallInfo(
-      callId: dco_decode_i_32(arr[0]),
-      callUrl: dco_decode_String(arr[1]),
-      state: dco_decode_call_state(arr[2]),
-    );
-  }
+        TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
+            debugName: "init_pjsua",
+            argNames: ["localPort", "transportMode", "incomingCallStrategy", "stunSrv", "uri"],
+        );
+        
 
-  @protected
-  CallState dco_decode_call_state(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    switch (raw[0]) {
-      case 0:
-        return CallState_Null();
-      case 1:
-        return CallState_Early();
-      case 2:
-        return CallState_Incoming();
-      case 3:
-        return CallState_Calling();
-      case 4:
-        return CallState_Connecting();
-      case 5:
-        return CallState_Confirmed();
-      case 6:
-        return CallState_Disconnected();
-      case 7:
-        return CallState_Error(dco_decode_String(raw[1]));
-      default:
-        throw Exception("unreachable");
-    }
-  }
+@override Future<int> crateApiSimpleMakeCall({required String phoneNumber , required String domain })  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_String(phoneNumber, serializer);
+sse_encode_String(domain, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
+          decodeSuccessData: sse_decode_i_32,
+          decodeErrorData: sse_decode_pjsua_error,
+        )
+        ,
+            constMeta: kCrateApiSimpleMakeCallConstMeta,
+            argValues: [phoneNumber, domain],
+            apiImpl: this,
+        )); }
 
-  @protected
-  int dco_decode_i_32(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
 
-  @protected
-  int dco_decode_i_8(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
+        TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
+            debugName: "make_call",
+            argNames: ["phoneNumber", "domain"],
+        );
+        
 
-  @protected
-  Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as Uint8List;
-  }
+@override Future<void> crateApiSimpleMarkCallAlive({required int callId })  { return handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_i_32(callId, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        )
+        ,
+            constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
+            argValues: [callId],
+            apiImpl: this,
+        )); }
 
-  @protected
-  OnIncommingCall dco_decode_on_incomming_call(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return OnIncommingCall.values[raw as int];
-  }
 
-  @protected
-  PJSUAError dco_decode_pjsua_error(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    switch (raw[0]) {
-      case 0:
-        return PJSUAError_CreationError(dco_decode_String(raw[1]));
-      case 1:
-        return PJSUAError_ConfigError(dco_decode_String(raw[1]));
-      case 2:
-        return PJSUAError_InitializationError(dco_decode_String(raw[1]));
-      case 3:
-        return PJSUAError_TransportError(dco_decode_String(raw[1]));
-      case 4:
-        return PJSUAError_DTMFError(dco_decode_String(raw[1]));
-      case 5:
-        return PJSUAError_CallCreationError(dco_decode_String(raw[1]));
-      case 6:
-        return PJSUAError_CallStatusUpdateError(dco_decode_String(raw[1]));
-      case 7:
-        return PJSUAError_AccountCreationError(dco_decode_String(raw[1]));
-      case 8:
-        return PJSUAError_PJSUAStartError(dco_decode_String(raw[1]));
-      case 9:
-        return PJSUAError_PJSUADestroyError(dco_decode_String(raw[1]));
-      case 10:
-        return PJSUAError_InputValueError(dco_decode_String(raw[1]));
-      default:
-        throw Exception("unreachable");
-    }
-  }
+        TaskConstMeta get kCrateApiSimpleMarkCallAliveConstMeta => const TaskConstMeta(
+            debugName: "mark_call_alive",
+            argNames: ["callId"],
+        );
+        
 
-  @protected
-  TransportMode dco_decode_transport_mode(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return TransportMode.values[raw as int];
-  }
+@override Stream<CallInfo> crateApiSimpleRegisterCallStream()  { 
+            final callSink = RustStreamSink<CallInfo>();
+            unawaited(handler.executeNormal(NormalTask(
+            callFfi: (port_) {
+              
+            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_StreamSink_call_info_Sse(callSink, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7, port: port_);
+            
+            },
+            codec: 
+        SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_pjsua_error,
+        )
+        ,
+            constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
+            argValues: [callSink],
+            apiImpl: this,
+        )));
+            return callSink.stream;
+             }
 
-  @protected
-  int dco_decode_u_32(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
 
-  @protected
-  int dco_decode_u_8(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
-  }
+        TaskConstMeta get kCrateApiSimpleRegisterCallStreamConstMeta => const TaskConstMeta(
+            debugName: "register_call_stream",
+            argNames: ["callSink"],
+        );
+        
 
-  @protected
-  void dco_decode_unit(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return;
-  }
 
-  @protected
-  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_String(deserializer);
-    return AnyhowException(inner);
-  }
 
-  @protected
-  RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    throw UnimplementedError('Unreachable ()');
-  }
+                  @protected AnyhowException dco_decode_AnyhowException(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return AnyhowException(raw as String); }
 
-  @protected
-  String sse_decode_String(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_list_prim_u_8_strict(deserializer);
-    return utf8.decoder.convert(inner);
-  }
+@protected RustStreamSink<CallInfo> dco_decode_StreamSink_call_info_Sse(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+throw UnimplementedError(); }
 
-  @protected
-  CallInfo sse_decode_call_info(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_callId = sse_decode_i_32(deserializer);
-    var var_callUrl = sse_decode_String(deserializer);
-    var var_state = sse_decode_call_state(deserializer);
-    return CallInfo(callId: var_callId, callUrl: var_callUrl, state: var_state);
-  }
+@protected String dco_decode_String(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as String; }
 
-  @protected
-  CallState sse_decode_call_state(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
+@protected CallInfo dco_decode_call_info(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+final arr = raw as List<dynamic>;
+                if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+                return CallInfo(callId: dco_decode_i_32(arr[0]),
+callUrl: dco_decode_String(arr[1]),
+state: dco_decode_call_state(arr[2]),); }
 
-    var tag_ = sse_decode_i_32(deserializer);
-    switch (tag_) {
-      case 0:
-        return CallState_Null();
-      case 1:
-        return CallState_Early();
-      case 2:
-        return CallState_Incoming();
-      case 3:
-        return CallState_Calling();
-      case 4:
-        return CallState_Connecting();
-      case 5:
-        return CallState_Confirmed();
-      case 6:
-        return CallState_Disconnected();
-      case 7:
-        var var_field0 = sse_decode_String(deserializer);
-        return CallState_Error(var_field0);
-      default:
-        throw UnimplementedError('');
-    }
-  }
+@protected CallState dco_decode_call_state(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+switch (raw[0]) {
+                case 0: return CallState_Null();
+case 1: return CallState_Early();
+case 2: return CallState_Incoming();
+case 3: return CallState_Calling();
+case 4: return CallState_Connecting();
+case 5: return CallState_Confirmed();
+case 6: return CallState_Disconnected();
+case 7: return CallState_Error(dco_decode_String(raw[1]),);
+                default: throw Exception("unreachable");
+            } }
 
-  @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
-  }
+@protected int dco_decode_i_32(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as int; }
 
-  @protected
-  int sse_decode_i_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt8();
-  }
+@protected int dco_decode_i_8(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as int; }
 
-  @protected
-  Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var len_ = sse_decode_i_32(deserializer);
-    return deserializer.buffer.getUint8List(len_);
-  }
+@protected Uint8List dco_decode_list_prim_u_8_strict(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as Uint8List; }
 
-  @protected
-  OnIncommingCall sse_decode_on_incomming_call(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_i_32(deserializer);
-    return OnIncommingCall.values[inner];
-  }
+@protected OnIncommingCall dco_decode_on_incomming_call(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return OnIncommingCall.values[raw as int]; }
 
-  @protected
-  PJSUAError sse_decode_pjsua_error(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
+@protected PJSUAError dco_decode_pjsua_error(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+switch (raw[0]) {
+                case 0: return PJSUAError_CreationError(dco_decode_String(raw[1]),);
+case 1: return PJSUAError_ConfigError(dco_decode_String(raw[1]),);
+case 2: return PJSUAError_InitializationError(dco_decode_String(raw[1]),);
+case 3: return PJSUAError_TransportError(dco_decode_String(raw[1]),);
+case 4: return PJSUAError_DTMFError(dco_decode_String(raw[1]),);
+case 5: return PJSUAError_CallCreationError(dco_decode_String(raw[1]),);
+case 6: return PJSUAError_CallStatusUpdateError(dco_decode_String(raw[1]),);
+case 7: return PJSUAError_AccountCreationError(dco_decode_String(raw[1]),);
+case 8: return PJSUAError_PJSUAStartError(dco_decode_String(raw[1]),);
+case 9: return PJSUAError_PJSUADestroyError(dco_decode_String(raw[1]),);
+case 10: return PJSUAError_InputValueError(dco_decode_String(raw[1]),);
+                default: throw Exception("unreachable");
+            } }
 
-    var tag_ = sse_decode_i_32(deserializer);
-    switch (tag_) {
-      case 0:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_CreationError(var_field0);
-      case 1:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_ConfigError(var_field0);
-      case 2:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_InitializationError(var_field0);
-      case 3:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_TransportError(var_field0);
-      case 4:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_DTMFError(var_field0);
-      case 5:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_CallCreationError(var_field0);
-      case 6:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_CallStatusUpdateError(var_field0);
-      case 7:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_AccountCreationError(var_field0);
-      case 8:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_PJSUAStartError(var_field0);
-      case 9:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_PJSUADestroyError(var_field0);
-      case 10:
-        var var_field0 = sse_decode_String(deserializer);
-        return PJSUAError_InputValueError(var_field0);
-      default:
-        throw UnimplementedError('');
-    }
-  }
+@protected TransportMode dco_decode_transport_mode(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return TransportMode.values[raw as int]; }
 
-  @protected
-  TransportMode sse_decode_transport_mode(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_i_32(deserializer);
-    return TransportMode.values[inner];
-  }
+@protected int dco_decode_u_32(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as int; }
 
-  @protected
-  int sse_decode_u_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint32();
-  }
+@protected int dco_decode_u_8(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return raw as int; }
 
-  @protected
-  int sse_decode_u_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8();
-  }
+@protected void dco_decode_unit(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
+return; }
 
-  @protected
-  void sse_decode_unit(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-  }
+@protected AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var inner = sse_decode_String(deserializer);
+        return AnyhowException(inner); }
 
-  @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
+@protected RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+throw UnimplementedError('Unreachable ()'); }
 
-  @protected
-  void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.message, serializer);
-  }
+@protected String sse_decode_String(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var inner = sse_decode_list_prim_u_8_strict(deserializer);
+        return utf8.decoder.convert(inner); }
 
-  @protected
-  void sse_encode_StreamSink_call_info_Sse(
-    RustStreamSink<CallInfo> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(
-      self.setupAndSerialize(
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_call_info,
-          decodeErrorData: sse_decode_AnyhowException,
-        ),
-      ),
-      serializer,
-    );
-  }
+@protected CallInfo sse_decode_call_info(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var var_callId = sse_decode_i_32(deserializer);
+var var_callUrl = sse_decode_String(deserializer);
+var var_state = sse_decode_call_state(deserializer);
+return CallInfo(callId: var_callId, callUrl: var_callUrl, state: var_state); }
 
-  @protected
-  void sse_encode_String(String self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
-  }
+@protected CallState sse_decode_call_state(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
 
-  @protected
-  void sse_encode_call_info(CallInfo self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.callId, serializer);
-    sse_encode_String(self.callUrl, serializer);
-    sse_encode_call_state(self.state, serializer);
-  }
+            var tag_ = sse_decode_i_32(deserializer);
+            switch (tag_) { case 0: return CallState_Null();case 1: return CallState_Early();case 2: return CallState_Incoming();case 3: return CallState_Calling();case 4: return CallState_Connecting();case 5: return CallState_Confirmed();case 6: return CallState_Disconnected();case 7: var var_field0 = sse_decode_String(deserializer);
+return CallState_Error(var_field0); default: throw UnimplementedError(''); }
+             }
 
-  @protected
-  void sse_encode_call_state(CallState self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    switch (self) {
-      case CallState_Null():
-        sse_encode_i_32(0, serializer);
-      case CallState_Early():
-        sse_encode_i_32(1, serializer);
-      case CallState_Incoming():
-        sse_encode_i_32(2, serializer);
-      case CallState_Calling():
-        sse_encode_i_32(3, serializer);
-      case CallState_Connecting():
-        sse_encode_i_32(4, serializer);
-      case CallState_Confirmed():
-        sse_encode_i_32(5, serializer);
-      case CallState_Disconnected():
-        sse_encode_i_32(6, serializer);
-      case CallState_Error(field0: final field0):
-        sse_encode_i_32(7, serializer);
-        sse_encode_String(field0, serializer);
-    }
-  }
+@protected int sse_decode_i_32(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+return deserializer.buffer.getInt32(); }
 
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
-  }
+@protected int sse_decode_i_8(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+return deserializer.buffer.getInt8(); }
 
-  @protected
-  void sse_encode_i_8(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt8(self);
-  }
+@protected Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var len_ = sse_decode_i_32(deserializer);
+                return deserializer.buffer.getUint8List(len_); }
 
-  @protected
-  void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    serializer.buffer.putUint8List(self);
-  }
+@protected OnIncommingCall sse_decode_on_incomming_call(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var inner = sse_decode_i_32(deserializer);
+        return OnIncommingCall.values[inner]; }
 
-  @protected
-  void sse_encode_on_incomming_call(
-    OnIncommingCall self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.index, serializer);
-  }
+@protected PJSUAError sse_decode_pjsua_error(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
 
-  @protected
-  void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    switch (self) {
-      case PJSUAError_CreationError(field0: final field0):
-        sse_encode_i_32(0, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_ConfigError(field0: final field0):
-        sse_encode_i_32(1, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_InitializationError(field0: final field0):
-        sse_encode_i_32(2, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_TransportError(field0: final field0):
-        sse_encode_i_32(3, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_DTMFError(field0: final field0):
-        sse_encode_i_32(4, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_CallCreationError(field0: final field0):
-        sse_encode_i_32(5, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_CallStatusUpdateError(field0: final field0):
-        sse_encode_i_32(6, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_AccountCreationError(field0: final field0):
-        sse_encode_i_32(7, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_PJSUAStartError(field0: final field0):
-        sse_encode_i_32(8, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_PJSUADestroyError(field0: final field0):
-        sse_encode_i_32(9, serializer);
-        sse_encode_String(field0, serializer);
-      case PJSUAError_InputValueError(field0: final field0):
-        sse_encode_i_32(10, serializer);
-        sse_encode_String(field0, serializer);
-    }
-  }
+            var tag_ = sse_decode_i_32(deserializer);
+            switch (tag_) { case 0: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_CreationError(var_field0);case 1: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_ConfigError(var_field0);case 2: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_InitializationError(var_field0);case 3: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_TransportError(var_field0);case 4: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_DTMFError(var_field0);case 5: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_CallCreationError(var_field0);case 6: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_CallStatusUpdateError(var_field0);case 7: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_AccountCreationError(var_field0);case 8: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_PJSUAStartError(var_field0);case 9: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_PJSUADestroyError(var_field0);case 10: var var_field0 = sse_decode_String(deserializer);
+return PJSUAError_InputValueError(var_field0); default: throw UnimplementedError(''); }
+             }
 
-  @protected
-  void sse_encode_transport_mode(TransportMode self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.index, serializer);
-  }
+@protected TransportMode sse_decode_transport_mode(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+var inner = sse_decode_i_32(deserializer);
+        return TransportMode.values[inner]; }
 
-  @protected
-  void sse_encode_u_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint32(self);
-  }
+@protected int sse_decode_u_32(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+return deserializer.buffer.getUint32(); }
 
-  @protected
-  void sse_encode_u_8(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self);
-  }
+@protected int sse_decode_u_8(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+return deserializer.buffer.getUint8(); }
 
-  @protected
-  void sse_encode_unit(void self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-  }
+@protected void sse_decode_unit(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+ }
 
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
-  }
-}
+@protected bool sse_decode_bool(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+return deserializer.buffer.getUint8() != 0; }
+
+@protected void sse_encode_AnyhowException(AnyhowException self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_String(self.message, serializer); }
+
+@protected void sse_encode_StreamSink_call_info_Sse(RustStreamSink<CallInfo> self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_String(self.setupAndSerialize(codec: SseCodec(
+            decodeSuccessData: sse_decode_call_info,
+            decodeErrorData: sse_decode_AnyhowException,
+        )), serializer); }
+
+@protected void sse_encode_String(String self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer); }
+
+@protected void sse_encode_call_info(CallInfo self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_i_32(self.callId, serializer);
+sse_encode_String(self.callUrl, serializer);
+sse_encode_call_state(self.state, serializer);
+ }
+
+@protected void sse_encode_call_state(CallState self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+switch (self) { case CallState_Null(): sse_encode_i_32(0, serializer); case CallState_Early(): sse_encode_i_32(1, serializer); case CallState_Incoming(): sse_encode_i_32(2, serializer); case CallState_Calling(): sse_encode_i_32(3, serializer); case CallState_Connecting(): sse_encode_i_32(4, serializer); case CallState_Confirmed(): sse_encode_i_32(5, serializer); case CallState_Disconnected(): sse_encode_i_32(6, serializer); case CallState_Error(field0: final field0): sse_encode_i_32(7, serializer); sse_encode_String(field0, serializer);
+  } }
+
+@protected void sse_encode_i_32(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+serializer.buffer.putInt32(self); }
+
+@protected void sse_encode_i_8(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+serializer.buffer.putInt8(self); }
+
+@protected void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_i_32(self.length, serializer);
+                    serializer.buffer.putUint8List(self); }
+
+@protected void sse_encode_on_incomming_call(OnIncommingCall self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_i_32(self.index, serializer); }
+
+@protected void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+switch (self) { case PJSUAError_CreationError(field0: final field0): sse_encode_i_32(0, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_ConfigError(field0: final field0): sse_encode_i_32(1, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_InitializationError(field0: final field0): sse_encode_i_32(2, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_TransportError(field0: final field0): sse_encode_i_32(3, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_DTMFError(field0: final field0): sse_encode_i_32(4, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_CallCreationError(field0: final field0): sse_encode_i_32(5, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_CallStatusUpdateError(field0: final field0): sse_encode_i_32(6, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_AccountCreationError(field0: final field0): sse_encode_i_32(7, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_PJSUAStartError(field0: final field0): sse_encode_i_32(8, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_PJSUADestroyError(field0: final field0): sse_encode_i_32(9, serializer); sse_encode_String(field0, serializer);
+case PJSUAError_InputValueError(field0: final field0): sse_encode_i_32(10, serializer); sse_encode_String(field0, serializer);
+  } }
+
+@protected void sse_encode_transport_mode(TransportMode self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+sse_encode_i_32(self.index, serializer); }
+
+@protected void sse_encode_u_32(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+serializer.buffer.putUint32(self); }
+
+@protected void sse_encode_u_8(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+serializer.buffer.putUint8(self); }
+
+@protected void sse_encode_unit(void self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+ }
+
+@protected void sse_encode_bool(bool self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+serializer.buffer.putUint8(self ? 1 : 0); }
+                }
+                
