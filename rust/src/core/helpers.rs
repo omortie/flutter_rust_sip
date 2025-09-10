@@ -9,7 +9,7 @@ use std::convert::TryInto;
 
 use pjsip::pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
 
-use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, TelephonyError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
+use crate::{core::{managers::{push_call_state_update}, types::{OnIncommingCall, PJSUAError, TransportMode}}, utils::{error_exit, make_pj_str_t}};
 
 pub fn ensure_pj_thread_registered() {
     thread_local! {
@@ -28,7 +28,7 @@ pub fn ensure_pj_thread_registered() {
     });
 }
 
-pub fn initialize_telephony(incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode, stun_srv: String) -> Result<i8,TelephonyError> {
+pub fn initialize_pjsua(incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode, stun_srv: String) -> Result<i8,PJSUAError> {
 
     // INIT
     let initResult = init(incommingCallBehaviour, stun_srv);
@@ -45,7 +45,7 @@ pub fn initialize_telephony(incommingCallBehaviour:OnIncommingCall, port:u32, tr
     };
 
     // START
-    let startResult = start_telephony();
+    let startResult = start_pjsua();
     match startResult{
         Ok(_) => (),
         Err(x) => return Err(x),
@@ -53,7 +53,7 @@ pub fn initialize_telephony(incommingCallBehaviour:OnIncommingCall, port:u32, tr
     Ok(0)
 }                                                                      
 
-pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Result<i8,TelephonyError> { 
+pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Result<i8,PJSUAError> { 
         
     let status : pj_sys::pj_status_t;
 
@@ -62,7 +62,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 { 
         println!("Error in pjsua_create, status:= {}",status);
         error_exit("Error in pjsua_create");
-        return Err(TelephonyError::CreationError("Could not Create Telephony Instance".to_string()));
+        return Err(PJSUAError::CreationError("Could not Create PJSUA Instance".to_string()));
     }
 
     let status : pj_sys::pj_status_t;    
@@ -105,12 +105,12 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 { 
         error_exit("Error in pjsua_init");
         println!("Error in pjsua_init, status:= {}",status);
-        return Err(TelephonyError::InitializationError("Error in pjsua_init".to_string()));
+        return Err(PJSUAError::InitializationError("Error in pjsua_init".to_string()));
     }
     return Ok(0);
 }
 
-pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyError>{
+pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,PJSUAError>{
      /* Add UDP transport. */
     println!("INIT TRANSPORT CFG");
 
@@ -136,22 +136,22 @@ pub fn add_transport(port: u32, mode: TransportMode ) -> Result <i8,TelephonyErr
     };
 
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        return Err(TelephonyError::TransportError("Error of some kind".to_string()));
+        return Err(PJSUAError::TransportError("Error of some kind".to_string()));
     }
     return Ok(0);
 }
 
-pub fn start_telephony() -> Result <i8,TelephonyError>{
+pub fn start_pjsua() -> Result <i8,PJSUAError>{
     let status = unsafe{pj_sys::pjsua_start()};
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         println!("Error starting pjsua, status = {}",status);
         error_exit("Error starting pjsua");
-        return Err(TelephonyError::TelephonyStartError("Could not Start Telephony".to_string()));
+        return Err(PJSUAError::PJSUAStartError("Could not Start PJSUA".to_string()));
         };
     Ok(0)
 }
 
-pub fn account_setup(uri : String) -> Result<i32,TelephonyError> {
+pub fn account_setup(uri : String) -> Result<i32,PJSUAError> {
     println!("ACCOUNT SETUP");
     let status : pj_sys::pj_status_t;
     let mut acc_cfg =  unsafe {
@@ -190,7 +190,7 @@ pub fn account_setup(uri : String) -> Result<i32,TelephonyError> {
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32  { 
         println!("Error Adding Account, status = {}", status);
         error_exit("Error Adding Account");
-        return Err(TelephonyError::AccountCreationError("Error Adding Account".to_string()));
+        return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
     return Ok(acc_id);
 }
@@ -232,7 +232,7 @@ extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsi
     push_call_state_update(call_id, ci).unwrap_or(());
 }
 
-pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,TelephonyError>{
+pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,PJSUAError>{
 
     // TODO: Check Phone number isnt garbage string
     let call_extension: String = if phone_number.is_empty() {
@@ -243,7 +243,7 @@ pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,T
     let len = call_extension.len() as ::std::os::raw::c_long;
     let call_extension_c_string = CString::new(call_extension);
     let call_extension_c_string_ok = match call_extension_c_string {
-        Err(_y) => return Err(TelephonyError::CallCreationError("Phone number or Domain supplied could not be represented as a C-String".to_string())),
+        Err(_y) => return Err(PJSUAError::CallCreationError("Phone number or Domain supplied could not be represented as a C-String".to_string())),
         Ok(x) => x
     };
 
@@ -256,16 +256,16 @@ pub fn make_call(acc_id: i32, phone_number: &str, domain : &str) -> Result<i32,T
     let mut call_id: pj_sys::pjsua_call_id = 0;
     let make_call_restult = unsafe {pj_sys::pjsua_call_make_call( acc_id , ptr_call_extension_pj_str_t , opt, user_data_null, 0 as *mut  pj_sys::pjsua_msg_data , &mut call_id)};
     if make_call_restult!=0 {
-        return Err(TelephonyError::CallCreationError("Could not place Call".to_string()));
+        return Err(PJSUAError::CallCreationError("Could not place Call".to_string()));
     }
     return Ok(call_id);
 }
 
-pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {
+pub fn send_dtmf(digit:u32) -> Result<i8,PJSUAError> {
 
     let digits : String       = digit.to_string();
     let digits_pj_str_t = match make_pj_str_t(digits){
-        Err(_e) => return Err(TelephonyError::DTMFError("Cannot Send DTMF Tone, digits contain Null Somehow".to_string())),
+        Err(_e) => return Err(PJSUAError::DTMFError("Cannot Send DTMF Tone, digits contain Null Somehow".to_string())),
         Ok(v) => v
     };
 
@@ -276,15 +276,15 @@ pub fn send_dtmf(digit:u32) -> Result<i8,TelephonyError> {
     };
     let status = unsafe{ pj_sys::pjsua_call_send_dtmf(0, &dtmf_tones )};
     if status!=0{
-        return Err(TelephonyError::DTMFError("Cannot Send DTMF Tone".to_string()));  
+        return Err(PJSUAError::DTMFError("Cannot Send DTMF Tone".to_string()));  
     }
     return Ok(0); 
 }
 
-pub fn hangup_call(call_id:i32) -> Result<(),TelephonyError>{
+pub fn hangup_call(call_id:i32) -> Result<(),PJSUAError>{
     let status = unsafe{ pj_sys::pjsua_call_hangup(call_id, 0, std::ptr::null(), std::ptr::null())};
     if status!=0{
-        return Err(TelephonyError::CallStatusUpdateError("Could not Hangup Call".to_string()));
+        return Err(PJSUAError::CallStatusUpdateError("Could not Hangup Call".to_string()));
     }
     Ok(())
 }
@@ -293,11 +293,11 @@ pub fn hangup_calls(){
     unsafe{ pj_sys::pjsua_call_hangup_all()}; 
 }
 
-pub fn destroy_telephony()-> Result<i8,TelephonyError>{
-    println!("Destroy telephony");
+pub fn destroy_pjsua()-> Result<i8,PJSUAError>{
+    println!("Destroy PJSUA");
     let status = unsafe{pj_sys::pjsua_destroy()};
     if status!=0{
-        return Err(TelephonyError::TelephonyDestroyError("Error Occured during Telephony Destruction".to_string()));
+        return Err(PJSUAError::PJSUADestroyError("Error Occured during PJSUA Destruction".to_string()));
     }
     Ok(0)
 }

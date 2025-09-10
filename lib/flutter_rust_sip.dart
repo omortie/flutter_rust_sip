@@ -14,12 +14,14 @@ Future<void> init({
   TransportMode transportMode = TransportMode.udp,
   OnIncommingCall incomingCallStrategy = OnIncommingCall.autoAnswer,
   String stunSrv = "stun.l.google.com:19302",
+  String uri = "sip:username@domain.com",
 }) async {
   await rlib_gen.RustLib.init();
-  await rlib.initTelephony(
+  await rlib.initPjsua(
     localPort: localPort,
     transportMode: transportMode,
     incomingCallStrategy: incomingCallStrategy,
     stunSrv: stunSrv,
+    uri: uri,
   );
 }

@@ -48,7 +48,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OnIncommingCall dco_decode_on_incomming_call(dynamic raw);
 
   @protected
-  TelephonyError dco_decode_telephony_error(dynamic raw);
+  PJSUAError dco_decode_pjsua_error(dynamic raw);
 
   @protected
   TransportMode dco_decode_transport_mode(dynamic raw);
@@ -92,7 +92,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OnIncommingCall sse_decode_on_incomming_call(SseDeserializer deserializer);
 
   @protected
-  TelephonyError sse_decode_telephony_error(SseDeserializer deserializer);
+  PJSUAError sse_decode_pjsua_error(SseDeserializer deserializer);
 
   @protected
   TransportMode sse_decode_transport_mode(SseDeserializer deserializer);
@@ -149,10 +149,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_telephony_error(
-    TelephonyError self,
-    SseSerializer serializer,
-  );
+  void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer);
 
   @protected
   void sse_encode_transport_mode(TransportMode self, SseSerializer serializer);

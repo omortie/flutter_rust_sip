@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1405273398;
+  int get rustContentHash => 724596204;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -81,7 +81,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 abstract class RustLibApi extends BaseApi {
   Future<int> crateApiSimpleAccountSetup({required String uri});
 
-  Future<int> crateApiSimpleDestroyTelephony();
+  Future<int> crateApiSimpleDestroyPjsua();
 
   Future<void> crateApiSimpleHangupCall({required int callId});
 
@@ -89,11 +89,12 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiSimpleInitApp();
 
-  Future<int> crateApiSimpleInitTelephony({
+  Future<int> crateApiSimpleInitPjsua({
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
+    required String uri,
   });
 
   Future<int> crateApiSimpleMakeCall({
@@ -131,7 +132,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_telephony_error,
+          decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleAccountSetupConstMeta,
         argValues: [uri],
@@ -144,7 +145,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "account_setup", argNames: ["uri"]);
 
   @override
-  Future<int> crateApiSimpleDestroyTelephony() {
+  Future<int> crateApiSimpleDestroyPjsua() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -158,17 +159,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_telephony_error,
+          decodeErrorData: sse_decode_pjsua_error,
         ),
-        constMeta: kCrateApiSimpleDestroyTelephonyConstMeta,
+        constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
         argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleDestroyTelephonyConstMeta =>
-      const TaskConstMeta(debugName: "destroy_telephony", argNames: []);
+  TaskConstMeta get kCrateApiSimpleDestroyPjsuaConstMeta =>
+      const TaskConstMeta(debugName: "destroy_pjsua", argNames: []);
 
   @override
   Future<void> crateApiSimpleHangupCall({required int callId}) {
@@ -186,7 +187,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_telephony_error,
+          decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleHangupCallConstMeta,
         argValues: [callId],
@@ -253,11 +254,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Future<int> crateApiSimpleInitTelephony({
+  Future<int> crateApiSimpleInitPjsua({
     required int localPort,
     required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
+    required String uri,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -267,6 +269,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_transport_mode(transportMode, serializer);
           sse_encode_on_incomming_call(incomingCallStrategy, serializer);
           sse_encode_String(stunSrv, serializer);
+          sse_encode_String(uri, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -275,26 +278,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_telephony_error,
+          decodeSuccessData: sse_decode_i_32,
+          decodeErrorData: sse_decode_pjsua_error,
         ),
-        constMeta: kCrateApiSimpleInitTelephonyConstMeta,
-        argValues: [localPort, transportMode, incomingCallStrategy, stunSrv],
+        constMeta: kCrateApiSimpleInitPjsuaConstMeta,
+        argValues: [
+          localPort,
+          transportMode,
+          incomingCallStrategy,
+          stunSrv,
+          uri,
+        ],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleInitTelephonyConstMeta =>
-      const TaskConstMeta(
-        debugName: "init_telephony",
-        argNames: [
-          "localPort",
-          "transportMode",
-          "incomingCallStrategy",
-          "stunSrv",
-        ],
-      );
+  TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
+    debugName: "init_pjsua",
+    argNames: [
+      "localPort",
+      "transportMode",
+      "incomingCallStrategy",
+      "stunSrv",
+      "uri",
+    ],
+  );
 
   @override
   Future<int> crateApiSimpleMakeCall({
@@ -318,7 +327,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_telephony_error,
+          decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleMakeCallConstMeta,
         argValues: [accId, phoneNumber, domain],
@@ -377,7 +386,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
-            decodeErrorData: sse_decode_telephony_error,
+            decodeErrorData: sse_decode_pjsua_error,
           ),
           constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
           argValues: [callSink],
@@ -475,31 +484,31 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  TelephonyError dco_decode_telephony_error(dynamic raw) {
+  PJSUAError dco_decode_pjsua_error(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return TelephonyError_CreationError(dco_decode_String(raw[1]));
+        return PJSUAError_CreationError(dco_decode_String(raw[1]));
       case 1:
-        return TelephonyError_ConfigError(dco_decode_String(raw[1]));
+        return PJSUAError_ConfigError(dco_decode_String(raw[1]));
       case 2:
-        return TelephonyError_InitializationError(dco_decode_String(raw[1]));
+        return PJSUAError_InitializationError(dco_decode_String(raw[1]));
       case 3:
-        return TelephonyError_TransportError(dco_decode_String(raw[1]));
+        return PJSUAError_TransportError(dco_decode_String(raw[1]));
       case 4:
-        return TelephonyError_DTMFError(dco_decode_String(raw[1]));
+        return PJSUAError_DTMFError(dco_decode_String(raw[1]));
       case 5:
-        return TelephonyError_CallCreationError(dco_decode_String(raw[1]));
+        return PJSUAError_CallCreationError(dco_decode_String(raw[1]));
       case 6:
-        return TelephonyError_CallStatusUpdateError(dco_decode_String(raw[1]));
+        return PJSUAError_CallStatusUpdateError(dco_decode_String(raw[1]));
       case 7:
-        return TelephonyError_AccountCreationError(dco_decode_String(raw[1]));
+        return PJSUAError_AccountCreationError(dco_decode_String(raw[1]));
       case 8:
-        return TelephonyError_TelephonyStartError(dco_decode_String(raw[1]));
+        return PJSUAError_PJSUAStartError(dco_decode_String(raw[1]));
       case 9:
-        return TelephonyError_TelephonyDestroyError(dco_decode_String(raw[1]));
+        return PJSUAError_PJSUADestroyError(dco_decode_String(raw[1]));
       case 10:
-        return TelephonyError_InputValueError(dco_decode_String(raw[1]));
+        return PJSUAError_InputValueError(dco_decode_String(raw[1]));
       default:
         throw Exception("unreachable");
     }
@@ -615,44 +624,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  TelephonyError sse_decode_telephony_error(SseDeserializer deserializer) {
+  PJSUAError sse_decode_pjsua_error(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_CreationError(var_field0);
+        return PJSUAError_CreationError(var_field0);
       case 1:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_ConfigError(var_field0);
+        return PJSUAError_ConfigError(var_field0);
       case 2:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_InitializationError(var_field0);
+        return PJSUAError_InitializationError(var_field0);
       case 3:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_TransportError(var_field0);
+        return PJSUAError_TransportError(var_field0);
       case 4:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_DTMFError(var_field0);
+        return PJSUAError_DTMFError(var_field0);
       case 5:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_CallCreationError(var_field0);
+        return PJSUAError_CallCreationError(var_field0);
       case 6:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_CallStatusUpdateError(var_field0);
+        return PJSUAError_CallStatusUpdateError(var_field0);
       case 7:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_AccountCreationError(var_field0);
+        return PJSUAError_AccountCreationError(var_field0);
       case 8:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_TelephonyStartError(var_field0);
+        return PJSUAError_PJSUAStartError(var_field0);
       case 9:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_TelephonyDestroyError(var_field0);
+        return PJSUAError_PJSUADestroyError(var_field0);
       case 10:
         var var_field0 = sse_decode_String(deserializer);
-        return TelephonyError_InputValueError(var_field0);
+        return PJSUAError_InputValueError(var_field0);
       default:
         throw UnimplementedError('');
     }
@@ -784,43 +793,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_telephony_error(
-    TelephonyError self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
-      case TelephonyError_CreationError(field0: final field0):
+      case PJSUAError_CreationError(field0: final field0):
         sse_encode_i_32(0, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_ConfigError(field0: final field0):
+      case PJSUAError_ConfigError(field0: final field0):
         sse_encode_i_32(1, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_InitializationError(field0: final field0):
+      case PJSUAError_InitializationError(field0: final field0):
         sse_encode_i_32(2, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_TransportError(field0: final field0):
+      case PJSUAError_TransportError(field0: final field0):
         sse_encode_i_32(3, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_DTMFError(field0: final field0):
+      case PJSUAError_DTMFError(field0: final field0):
         sse_encode_i_32(4, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_CallCreationError(field0: final field0):
+      case PJSUAError_CallCreationError(field0: final field0):
         sse_encode_i_32(5, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_CallStatusUpdateError(field0: final field0):
+      case PJSUAError_CallStatusUpdateError(field0: final field0):
         sse_encode_i_32(6, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_AccountCreationError(field0: final field0):
+      case PJSUAError_AccountCreationError(field0: final field0):
         sse_encode_i_32(7, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_TelephonyStartError(field0: final field0):
+      case PJSUAError_PJSUAStartError(field0: final field0):
         sse_encode_i_32(8, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_TelephonyDestroyError(field0: final field0):
+      case PJSUAError_PJSUADestroyError(field0: final field0):
         sse_encode_i_32(9, serializer);
         sse_encode_String(field0, serializer);
-      case TelephonyError_InputValueError(field0: final field0):
+      case PJSUAError_InputValueError(field0: final field0):
         sse_encode_i_32(10, serializer);
         sse_encode_String(field0, serializer);
     }

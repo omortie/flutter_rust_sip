@@ -3,7 +3,7 @@ extern crate pjsip as pj;
 use std::{sync::{atomic::{AtomicBool, AtomicU64, Ordering}, Arc, Mutex}, time::Duration};
 
 use crate::{core::{
-    dart_types::{CallInfo, CallState}, types::{DartCallStream, TelephonyError}
+    dart_types::{CallInfo, CallState}, types::{DartCallStream, PJSUAError}
 }, utils::pj_str_to_string};
 
 // Global registry of call manager
@@ -41,19 +41,19 @@ impl CallStateManager {
     pub fn push_event(
         &self,
         ci: CallInfo,
-    ) -> Result<(), TelephonyError> {
+    ) -> Result<(), PJSUAError> {
         self.update_stream
             .add(ci)
             .map_err(|_| {
-                TelephonyError::CallStatusUpdateError(
+                PJSUAError::CallStatusUpdateError(
                     "Failed to push call state update".to_string(),
                 )
             })
     }
 
-    pub fn destroy_telephony(&self) -> Result<i8, TelephonyError> {
+    pub fn destroy_pjsua(&self) -> Result<i8, PJSUAError> {
         self.kill_sig.store(true, Ordering::Relaxed);
-        crate::core::helpers::destroy_telephony()
+        crate::core::helpers::destroy_pjsua()
     }
 }
 
@@ -67,7 +67,7 @@ fn now_ms() -> u64 {
 pub fn push_call_state_update(
     call_id: pj::pjsua_call_id,
     ci: pj::pjsua_call_info,
-) -> Result<(), TelephonyError> {
+) -> Result<(), PJSUAError> {
     // convert to your CallState enum
     let state = match ci.state {
         s if s == pj::pjsip_inv_state_PJSIP_INV_STATE_NULL => CallState::Null,
@@ -94,7 +94,7 @@ pub fn push_call_state_update(
             }
         )
     } else {
-        Err(TelephonyError::CallStatusUpdateError(
+        Err(PJSUAError::CallStatusUpdateError(
             "Call manager not initialized".to_string(),
         ))
     }
@@ -125,22 +125,22 @@ pub fn sip_alive_tester_task() {
             let elapsed_ms = now_ms().saturating_sub(last_ms);
             if elapsed_ms > Duration::from_secs(5).as_millis() as u64 {
                 println!("SIP not marked alive for over 5 seconds, attempting to close it...");
-                manager.destroy_telephony().ok();
+                manager.destroy_pjsua().ok();
             }
             std::thread::sleep(std::time::Duration::from_secs(1));
         }
     }
 }
 
-pub fn destroy_telephony_manager() -> Result<i8, TelephonyError> {
+pub fn destroy_pjsua_manager() -> Result<i8, PJSUAError> {
     let guard = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
     let maybe_manager = guard.as_ref().cloned();
     drop(guard);
 
     if let Some(manager) = maybe_manager {
-        manager.destroy_telephony()
+        manager.destroy_pjsua()
     } else {
-        Err(TelephonyError::TelephonyDestroyError(
+        Err(PJSUAError::PJSUADestroyError(
             "Call manager not initialized".to_string(),
         ))
     }

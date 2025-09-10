@@ -61,7 +61,7 @@ class SIPService {
     initialized = false;
     await originalSub.cancel();
     await stateBroadcast.close();
-    await destroyTelephony();
+    await destroyPjsua();
     debugPrint('SIPService disposed');
   }
 
