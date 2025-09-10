@@ -38,7 +38,7 @@ pub fn mark_call_alive(call_id: i32) {
 
 pub async fn make_call(phone_number: String, domain: String) -> Result<i32, PJSUAError> {
     ensure_pj_thread_registered();
-    crate::core::helpers::make_call(&phone_number, &domain)
+    crate::core::managers::make_call(phone_number, domain)
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {

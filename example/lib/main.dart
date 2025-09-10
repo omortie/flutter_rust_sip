@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
+
 import 'package:flutter_rust_sip/sip_service.dart';
 import 'package:flutter_rust_sip_example/call_status_card.dart';
 
@@ -8,19 +9,14 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
+        appBar: AppBar(title: const Text('flutter_rust_sip example')),
         body: Center(
           child: FutureBuilder(
               future: SIPService.init(),

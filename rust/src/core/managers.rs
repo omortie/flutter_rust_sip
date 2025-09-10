@@ -96,6 +96,7 @@ pub fn call_alive_tester_task() {
 
         let call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
         for (&call_id, heartbeat) in call_registry.iter() {
+            println!("Checking call {} for heartbeat", call_id);
             if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                 if elapsed > Duration::from_secs(5) {
                     // Call is considered dead, hang up
@@ -113,6 +114,17 @@ pub fn call_alive_tester_task() {
                 call_registry.remove(&call_id);
             }
         }
+
+        std::thread::sleep(Duration::from_secs(1));
     }
 }
 
+pub fn make_call(phone_number: String, domain: String) -> Result<i32, crate::core::types::PJSUAError> {
+    crate::core::helpers::make_call(&phone_number, &domain).map(|call_id| {
+        let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
+        call_registry.insert(call_id, CallHeartbeat {
+            last_live_mark: std::time::SystemTime::now(),
+        });
+        call_id
+    })
+}
