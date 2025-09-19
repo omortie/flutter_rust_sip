@@ -10,11 +10,11 @@ export 'rust/core/types.dart'
     show TransportMode, OnIncommingCall;
 
 Future<void> init({
-  int localPort = 5060,
-  TransportMode transportMode = TransportMode.udp,
-  OnIncommingCall incomingCallStrategy = OnIncommingCall.autoAnswer,
-  String stunSrv = "stun.l.google.com:19302",
-  String uri = "127.0.0.1",
+  required int localPort,
+  required TransportMode transportMode,
+  required OnIncommingCall incomingCallStrategy,
+  required String stunSrv,
+  required String uri,
 }) async {
   await rlib_gen.RustLib.init();
   await rlib.initPjsua(

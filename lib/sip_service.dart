@@ -35,11 +35,23 @@ class SIPService {
     initialized = true;
   }
 
-  static Future<SIPService> init() async {
+  static Future<SIPService> init({
+    int localPort = 5060,
+    TransportMode transportMode = TransportMode.udp,
+    OnIncommingCall incomingCallStrategy = OnIncommingCall.ignore,
+    String stunSrv = 'stun.l.google.com:19302',
+    String uri = '127.0.0.1',
+  }) async {
     if (_instance != null) return _instance!;
 
     try {
-      await frs.init();
+      await frs.init(
+        localPort: localPort,
+        transportMode: transportMode,
+        incomingCallStrategy: incomingCallStrategy,
+        stunSrv: stunSrv,
+        uri: uri,
+      );
       final stream = registerCallStream();
 
       final service = SIPService(updateStream: stream);

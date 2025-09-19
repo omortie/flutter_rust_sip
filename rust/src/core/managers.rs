@@ -48,8 +48,19 @@ impl CallManager {
     }
 
     pub fn push_event(&self, ci: CallInfo) {
+        // if new state is disconnected then remove from registry
+        if let CallState::Disconnected = ci.state {
+            remove_call_from_registry(ci.call_id);
+        }
+
         self.update_stream.add(ci).unwrap_or(());
     }
+}
+
+fn remove_call_from_registry(call_id: i32) -> () {
+    let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
+    call_registry.remove(&call_id);
+    info!("Removed call {} from registry", call_id);
 }
 
 pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_call_info) {
@@ -126,14 +137,7 @@ pub fn make_call(
 
 pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
     super::helpers::ensure_pj_thread_registered();
-    crate::core::helpers::hangup_call(call_id).map(|_| {
-        let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
-        if call_registry.remove(&call_id).is_some() {
-            info!("Removed call {} from registry", call_id);
-        } else {
-            info!("Call {} not found in registry", call_id);
-        }
-    })
+    crate::core::helpers::hangup_call(call_id).map(|_| remove_call_from_registry(call_id))
 }
 
 pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {
