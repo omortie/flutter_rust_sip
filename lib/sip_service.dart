@@ -8,7 +8,7 @@ import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
-  final List<int> callIds = [];
+  final Map<int, CallInfo> callIds = {};
   late rx.BehaviorSubject<CallInfo> stateBroadcast;
   final Stream<CallInfo> updateStream;
 
@@ -25,6 +25,8 @@ class SIPService {
 
       if (event.state == CallState.disconnected()) {
         callIds.remove(event.callId);
+      } else {
+        callIds[event.callId] = event;
       }
 
       if (!stateBroadcast.isClosed) {
@@ -81,10 +83,9 @@ class SIPService {
         domain: domain,
       );
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
-      callIds.add(callId);
 
       Future.microtask(() async {
-        while (callIds.contains(callId) && initialized) {
+        while (callIds.containsKey(callId) && initialized) {
           await markCallAlive(callId: callId);
           debugPrint('Pinging outgoing call $callId to keep alive...');
           await Future.delayed(const Duration(seconds: 1));
