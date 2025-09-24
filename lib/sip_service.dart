@@ -21,8 +21,6 @@ class SIPService {
     required this.updateStream}) {
     stateBroadcast = rx.BehaviorSubject<CallInfo>();
     updateStream.listen((event) {
-      debugPrint('Call State Changed: ${event.state}');
-
       if (event.state == CallState.disconnected()) {
         callIds.remove(event.callId);
       } else {

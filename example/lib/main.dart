@@ -29,7 +29,8 @@ class MyApp extends StatelessWidget {
             child: TabBarView(
               children: [
                 FutureBuilder(
-                    future: SIPService.init(),
+                    future: SIPService.init(
+                        incomingCallStrategy: OnIncommingCall.autoAnswer),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final service = snapshot.data!;
