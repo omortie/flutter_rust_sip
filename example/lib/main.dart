@@ -67,14 +67,14 @@ class SIPWidget extends StatefulWidget {
 }
 
 class _SIPWidgetState extends State<SIPWidget> {
-  final Map<int, CallInfo> activeCalls = {};
+  Map<int, CallInfo> activeCalls = {};
 
   @override
   void initState() {
     widget.service.stateBroadcast.listen((state) {
       if (!widget.service.initialized) return;
       setState(() {
-        activeCalls[state.callId] = state;
+        activeCalls = widget.service.callIds;
       });
     });
     super.initState();
