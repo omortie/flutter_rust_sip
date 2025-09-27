@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::core::{helpers::*, init_logger, managers::{CallManager}, types::{DartCallStream, OnIncommingCall, PJSUAError, TransportMode}};
+use crate::core::{helpers::*, init_logger, managers::{CallManager}, types::{DartCallStream, OnIncommingCall, PJSUAError}};
 
 #[frb(init)]
 pub fn init_app() {
@@ -11,13 +11,12 @@ pub fn init_app() {
 
 pub fn init_pjsua(
     local_port: u32,
-    transport_mode: TransportMode,
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
     uri: String,
 ) -> Result<i32, PJSUAError> {
     // initialize pjsua
-    initialize_pjsua(incoming_call_strategy, local_port, transport_mode, stun_srv).and_then(|_| {
+    initialize_pjsua(incoming_call_strategy, local_port, stun_srv).and_then(|_| {
         // Start SIP alive tester task to check alive flag periodically as destroy management
         std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
 

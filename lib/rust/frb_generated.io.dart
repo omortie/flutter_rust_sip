@@ -51,9 +51,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PJSUAError dco_decode_pjsua_error(dynamic raw);
 
   @protected
-  TransportMode dco_decode_transport_mode(dynamic raw);
-
-  @protected
   int dco_decode_u_32(dynamic raw);
 
   @protected
@@ -93,9 +90,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PJSUAError sse_decode_pjsua_error(SseDeserializer deserializer);
-
-  @protected
-  TransportMode sse_decode_transport_mode(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -150,9 +144,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_transport_mode(TransportMode self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);

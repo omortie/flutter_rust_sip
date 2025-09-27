@@ -87,7 +87,6 @@ abstract class RustLibApi extends BaseApi {
 
   Future<int> crateApiSimpleInitPjsua({
     required int localPort,
-    required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
     required String uri,
@@ -196,7 +195,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Future<int> crateApiSimpleInitPjsua({
     required int localPort,
-    required TransportMode transportMode,
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
     required String uri,
@@ -206,7 +204,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_u_32(localPort, serializer);
-          sse_encode_transport_mode(transportMode, serializer);
           sse_encode_on_incomming_call(incomingCallStrategy, serializer);
           sse_encode_String(stunSrv, serializer);
           sse_encode_String(uri, serializer);
@@ -222,13 +219,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleInitPjsuaConstMeta,
-        argValues: [
-          localPort,
-          transportMode,
-          incomingCallStrategy,
-          stunSrv,
-          uri,
-        ],
+        argValues: [localPort, incomingCallStrategy, stunSrv, uri],
         apiImpl: this,
       ),
     );
@@ -236,13 +227,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
     debugName: "init_pjsua",
-    argNames: [
-      "localPort",
-      "transportMode",
-      "incomingCallStrategy",
-      "stunSrv",
-      "uri",
-    ],
+    argNames: ["localPort", "incomingCallStrategy", "stunSrv", "uri"],
   );
 
   @override
@@ -454,12 +439,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  TransportMode dco_decode_transport_mode(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return TransportMode.values[raw as int];
-  }
-
-  @protected
   int dco_decode_u_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -604,13 +583,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       default:
         throw UnimplementedError('');
     }
-  }
-
-  @protected
-  TransportMode sse_decode_transport_mode(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_i_32(deserializer);
-    return TransportMode.values[inner];
   }
 
   @protected
@@ -769,12 +741,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_i_32(10, serializer);
         sse_encode_String(field0, serializer);
     }
-  }
-
-  @protected
-  void sse_encode_transport_mode(TransportMode self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.index, serializer);
   }
 
   @protected

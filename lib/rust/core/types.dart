@@ -35,5 +35,3 @@ sealed class PJSUAError with _$PJSUAError implements FrbException {
   const factory PJSUAError.inputValueError(String field0) =
       PJSUAError_InputValueError;
 }
-
-enum TransportMode { tcp, udp, tls, udp6, tcp6, tls6 }

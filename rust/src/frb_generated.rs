@@ -167,8 +167,6 @@ fn wire__crate__api__simple__init_pjsua_impl(
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_local_port = <u32>::sse_decode(&mut deserializer);
-            let api_transport_mode =
-                <crate::core::types::TransportMode>::sse_decode(&mut deserializer);
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
             let api_stun_srv = <String>::sse_decode(&mut deserializer);
@@ -178,7 +176,6 @@ fn wire__crate__api__simple__init_pjsua_impl(
                 transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
                     let output_ok = crate::api::simple::init_pjsua(
                         api_local_port,
-                        api_transport_mode,
                         api_incoming_call_strategy,
                         api_stun_srv,
                         api_uri,
@@ -472,22 +469,6 @@ impl SseDecode for crate::core::types::PJSUAError {
     }
 }
 
-impl SseDecode for crate::core::types::TransportMode {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <i32>::sse_decode(deserializer);
-        return match inner {
-            0 => crate::core::types::TransportMode::TCP,
-            1 => crate::core::types::TransportMode::UDP,
-            2 => crate::core::types::TransportMode::TLS,
-            3 => crate::core::types::TransportMode::UDP6,
-            4 => crate::core::types::TransportMode::TCP6,
-            5 => crate::core::types::TransportMode::TLS6,
-            _ => unreachable!("Invalid variant for TransportMode: {}", inner),
-        };
-    }
-}
-
 impl SseDecode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -676,31 +657,6 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::types::PJSUAError>
         self
     }
 }
-// Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::core::types::TransportMode {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        match self {
-            Self::TCP => 0.into_dart(),
-            Self::UDP => 1.into_dart(),
-            Self::TLS => 2.into_dart(),
-            Self::UDP6 => 3.into_dart(),
-            Self::TCP6 => 4.into_dart(),
-            Self::TLS6 => 5.into_dart(),
-            _ => unreachable!(),
-        }
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::core::types::TransportMode
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::core::types::TransportMode>
-    for crate::core::types::TransportMode
-{
-    fn into_into_dart(self) -> crate::core::types::TransportMode {
-        self
-    }
-}
 
 impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -862,26 +818,6 @@ impl SseEncode for crate::core::types::PJSUAError {
                 unimplemented!("");
             }
         }
-    }
-}
-
-impl SseEncode for crate::core::types::TransportMode {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <i32>::sse_encode(
-            match self {
-                crate::core::types::TransportMode::TCP => 0,
-                crate::core::types::TransportMode::UDP => 1,
-                crate::core::types::TransportMode::TLS => 2,
-                crate::core::types::TransportMode::UDP6 => 3,
-                crate::core::types::TransportMode::TCP6 => 4,
-                crate::core::types::TransportMode::TLS6 => 5,
-                _ => {
-                    unimplemented!("");
-                }
-            },
-            serializer,
-        );
     }
 }
 

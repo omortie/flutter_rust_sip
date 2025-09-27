@@ -10,13 +10,11 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 Future<int> initPjsua({
   required int localPort,
-  required TransportMode transportMode,
   required OnIncommingCall incomingCallStrategy,
   required String stunSrv,
   required String uri,
 }) => RustLib.instance.api.crateApiSimpleInitPjsua(
   localPort: localPort,
-  transportMode: transportMode,
   incomingCallStrategy: incomingCallStrategy,
   stunSrv: stunSrv,
   uri: uri,

@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
               children: [
                 FutureBuilder(
                     future: SIPService.init(
-                        incomingCallStrategy: OnIncommingCall.autoAnswer),
+                      incomingCallStrategy: OnIncommingCall.autoAnswer,
+                    ),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final service = snapshot.data!;

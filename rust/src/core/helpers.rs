@@ -28,7 +28,7 @@ pub fn ensure_pj_thread_registered() {
     });
 }
 
-pub fn initialize_pjsua(incommingCallBehaviour:OnIncommingCall, port:u32, transportmode :TransportMode, stun_srv: String) -> Result<i8,PJSUAError> {
+pub fn initialize_pjsua(incommingCallBehaviour:OnIncommingCall, port:u32, stun_srv: String) -> Result<i8,PJSUAError> {
 
     // INIT
     let initResult = init(incommingCallBehaviour, stun_srv);
@@ -37,8 +37,14 @@ pub fn initialize_pjsua(incommingCallBehaviour:OnIncommingCall, port:u32, transp
         Err(x) => return Err(x),
     };
 
-    // ADD TRANSPORT
-    let transportResult = add_transport(port,transportmode);
+    // ADD UDP TRANSPORT
+    let transportResult = add_transport(port,TransportMode::UDP);
+    match transportResult{
+        Ok(_) => (),
+        Err(x) => return Err(x),
+    };
+    // ADD TDCP TRANSPORT
+    let transportResult = add_transport(port,TransportMode::TCP);
     match transportResult{
         Ok(_) => (),
         Err(x) => return Err(x),
