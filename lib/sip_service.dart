@@ -21,10 +21,11 @@ class SIPService {
     required this.updateStream}) {
     stateBroadcast = rx.BehaviorSubject<CallInfo>();
     updateStream.listen((event) {
-      if (event.state == CallState.disconnected()) {
-        callIds.remove(event.callId);
-      } else {
-        callIds[event.callId] = event;
+      switch (event.state) {
+        case const CallState.disconnected():
+          callIds.remove(event.callId);
+        default:
+          callIds[event.callId] = event;
       }
 
       if (!stateBroadcast.isClosed) {
@@ -33,6 +34,16 @@ class SIPService {
     });
 
     initialized = true;
+
+    Future.microtask(() async {
+      while (initialized) {
+        for (final call in callIds.values) {
+          await markCallAlive(callId: call.callId);
+          debugPrint('Pinging outgoing call ${call.callId} to keep alive...');
+        }
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    });
   }
 
   static Future<SIPService> init({
@@ -81,14 +92,6 @@ class SIPService {
         domain: domain,
       );
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
-
-      Future.microtask(() async {
-        while (callIds.containsKey(callId) && initialized) {
-          await markCallAlive(callId: callId);
-          debugPrint('Pinging outgoing call $callId to keep alive...');
-          await Future.delayed(const Duration(seconds: 1));
-        }
-      });
 
       return callId;
     } catch (e) {

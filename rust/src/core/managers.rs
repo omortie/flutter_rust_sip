@@ -53,6 +53,11 @@ impl CallManager {
             remove_call_from_registry(ci.call_id);
         }
 
+        info!(
+            "Pushing call event: id={}, state={:?}",
+            ci.call_id,
+            ci.state
+        );
         self.update_stream.add(ci).unwrap_or(());
     }
 }
@@ -137,7 +142,7 @@ pub fn make_call(
 
 pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
     super::helpers::ensure_pj_thread_registered();
-    crate::core::helpers::hangup_call(call_id).map(|_| remove_call_from_registry(call_id))
+    crate::core::helpers::hangup_call(call_id)
 }
 
 pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {

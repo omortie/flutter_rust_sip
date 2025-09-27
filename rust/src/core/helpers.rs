@@ -174,6 +174,9 @@ pub fn account_setup(uri : String) -> Result<i32,PJSUAError> {
     acc_cfg_ref.register_on_acc_add = true as i32;
     acc_cfg_ref.cred_count = 0;
     acc_cfg_ref.media_stun_use = pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
+    acc_cfg_ref.allow_contact_rewrite = true as i32;
+    acc_cfg_ref.allow_via_rewrite = true as i32;
+    acc_cfg_ref.allow_sdp_nat_rewrite = true as i32;
 
     let acc_id : pj_sys::pjsua_acc_id;
     acc_id = 0 ;
