@@ -37,7 +37,7 @@ class SIPService {
 
     Future.microtask(() async {
       while (initialized) {
-        for (final call in callIds.values) {
+        for (final call in callIds.values.toList()) {
           await markCallAlive(callId: call.callId);
           debugPrint('Pinging outgoing call ${call.callId} to keep alive...');
         }

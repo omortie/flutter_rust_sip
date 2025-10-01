@@ -10,10 +10,10 @@ export 'rust/core/types.dart'
     show OnIncommingCall;
 
 Future<void> init({
-  required int localPort,
-  required OnIncommingCall incomingCallStrategy,
-  required String stunSrv,
-  required String uri,
+  int localPort = 5060,
+  OnIncommingCall incomingCallStrategy = OnIncommingCall.autoAnswer,
+  String stunSrv = "stun:stun.l.google.com:19302",
+  String uri = "sip:example@domain.com",
 }) async {
   await rlib_gen.RustLib.init();
   await rlib.initPjsua(
