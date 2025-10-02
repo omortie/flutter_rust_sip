@@ -1,6 +1,5 @@
 library;
 
-import 'rust/frb_generated.dart' as rlib_gen;
 import 'rust/api/simple.dart' as rlib;
 import 'rust/core/types.dart' show OnIncommingCall;
 
@@ -15,7 +14,6 @@ Future<void> init({
   String stunSrv = "stun:stun.l.google.com:19302",
   String uri = "sip:example@domain.com",
 }) async {
-  await rlib_gen.RustLib.init();
   await rlib.initPjsua(
     localPort: localPort,
     incomingCallStrategy: incomingCallStrategy,

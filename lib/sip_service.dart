@@ -13,7 +13,6 @@ class SIPService {
   final Stream<CallInfo> updateStream;
 
   bool initialized = false;
-  static SIPService? _instance;
 
   String? error;
 
@@ -52,8 +51,6 @@ class SIPService {
     String stunSrv = 'stun.l.google.com:19302',
     String uri = '127.0.0.1',
   }) async {
-    if (_instance != null) return _instance!;
-
     try {
       await frs.init(
         localPort: localPort,
@@ -64,7 +61,6 @@ class SIPService {
       final stream = registerCallStream();
 
       final service = SIPService(updateStream: stream);
-      _instance = service;
 
       return service;
     } catch (e) {

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rust_sip/flutter_rust_sip.dart';
-
-
+import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 import 'package:flutter_rust_sip/sip_service.dart';
 import 'package:flutter_rust_sip_example/call_status_card.dart';
 
 void main() async {
+  await frs.RustLib.init();
   runApp(const MyApp());
 }
 
@@ -25,33 +24,42 @@ class MyApp extends StatelessWidget {
               Tab(icon: Icon(Icons.settings), text: "Settings"),
             ]),
           ),
-          body: Center(
+          body: const Center(
             child: TabBarView(
               children: [
-                FutureBuilder(
-                    future: SIPService.init(
-                      incomingCallStrategy: OnIncommingCall.autoAnswer,
-                    ),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final service = snapshot.data!;
-                        return SIPWidget(service: service);
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        return const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator());
-                      }
-                    }),
-                const Text("Settings"),
+                SIPWidgetBuilder(),
+                Text("Settings"),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class SIPWidgetBuilder extends StatelessWidget {
+  const SIPWidgetBuilder({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: SIPService.init(
+          incomingCallStrategy: frs.OnIncommingCall.autoAnswer,
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final service = snapshot.data!;
+            return SIPWidget(service: service);
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return const SizedBox(
+                width: 20, height: 20, child: CircularProgressIndicator());
+          }
+        });
   }
 }
 
@@ -68,7 +76,7 @@ class SIPWidget extends StatefulWidget {
 }
 
 class _SIPWidgetState extends State<SIPWidget> {
-  Map<int, CallInfo> activeCalls = {};
+  Map<int, frs.CallInfo> activeCalls = {};
 
   @override
   void initState() {
