@@ -14,6 +14,8 @@ pub fn init_pjsua(
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
     uri: String,
+    username: String,
+    password: String,
 ) -> Result<i32, PJSUAError> {
     // initialize pjsua
     initialize_pjsua(incoming_call_strategy, local_port, stun_srv).and_then(|_| {
@@ -21,7 +23,7 @@ pub fn init_pjsua(
         std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
 
         ensure_pj_thread_registered();
-        crate::core::helpers::account_setup(uri)
+        crate::core::helpers::account_setup(uri, username, password)
     })
 }
 

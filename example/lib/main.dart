@@ -47,7 +47,11 @@ class SIPWidgetBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: SIPService.init(
+            uri: "127.0.0.1",
+            username: "client",
+            password: "client",
           incomingCallStrategy: frs.OnIncommingCall.autoAnswer,
+            localPort: 5061
         ),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
