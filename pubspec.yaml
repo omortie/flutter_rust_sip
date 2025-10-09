@@ -1,7 +1,7 @@
 name: flutter_rust_sip
 description: "Use PJSIP in Flutter via Rust FFI"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.7.2
