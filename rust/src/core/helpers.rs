@@ -7,7 +7,7 @@ use std::convert::TryInto;
 use std::ffi::CString;
 use std::mem::MaybeUninit;
 
-use pjsip::{pj_constants__PJ_SUCCESS, pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE};
+use pjsip::{pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE};
 
 use crate::{
     core::{
@@ -349,7 +349,7 @@ pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
     println!("Hanging up call id: {}", call_id);
     let status =
         unsafe { pj_sys::pjsua_call_hangup(call_id, 0, std::ptr::null(), std::ptr::null()) };
-    if status != pj_constants__PJ_SUCCESS {
+    if status != 0 {
         return Err(PJSUAError::CallStatusUpdateError(
             "Could not Hangup Call".to_string(),
         ));
