@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::core::{helpers::*, init_logger, managers::{CallManager}, types::{DartCallStream, OnIncommingCall, PJSUAError}};
+use crate::core::{helpers::*, init_logger, managers::CallManager, pj_worker::get_pjsip_worker, types::{DartCallStream, OnIncommingCall, PJSUAError}};
 
 #[frb(init)]
 pub fn init_app() {
@@ -22,8 +22,11 @@ pub fn init_pjsua(
         // Start SIP alive tester task to check alive flag periodically as destroy management
         std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
 
-        ensure_pj_thread_registered();
-        crate::core::helpers::account_setup(uri, username, password)
+        // Setup account
+        let worker = get_pjsip_worker();
+        worker.execute_sync(move || {
+            crate::core::helpers::account_setup(uri)
+        })
     })
 }
 
@@ -34,18 +37,30 @@ pub fn register_call_stream(call_sink: DartCallStream) -> Result<(), PJSUAError>
 }
 
 pub fn mark_call_alive(call_id: i32) {
+    // Directly mark the call alive via the CallManager; remove use of undefined `sender`.
     crate::core::managers::mark_call_alive(call_id);
 }
 
 pub async fn make_call(phone_number: String, domain: String) -> Result<i32, PJSUAError> {
-    ensure_pj_thread_registered();
-    crate::core::managers::make_call(phone_number, domain)
+    let worker = get_pjsip_worker();
+
+    worker.execute_sync(move || {
+        crate::core::managers::make_call(phone_number, domain)
+    })
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
-    crate::core::managers::hangup_call(call_id)
+    let worker = get_pjsip_worker();
+
+    worker.execute_sync(move || {
+        crate::core::managers::hangup_call(call_id)
+    })
 }
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
-    crate::core::managers::destroy_pjsua()
+    let worker = get_pjsip_worker();
+    
+    worker.execute_sync(move || {
+        crate::core::managers::destroy_pjsua()
+    })
 }
