@@ -21,7 +21,10 @@ impl PjWorker {
         let (sender, receiver) = mpsc::channel::<Job>();
 
         std::thread::spawn(move || {
+            // Ensure this thread is registered with PJSIP
             super::helpers::ensure_pj_thread_registered();
+
+            // Continuously receive and execute jobs
             while let Ok(job) = receiver.recv() {
                 job();
             }
