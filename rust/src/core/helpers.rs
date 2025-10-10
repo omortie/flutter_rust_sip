@@ -17,6 +17,9 @@ use crate::{
     utils::{error_exit, make_pj_str_t},
 };
 
+// GLOBAL VARS
+static REALM_GLOBAL: &'static str = "*";
+
 pub fn ensure_pj_thread_registered() {
     thread_local! {
         static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
@@ -171,7 +174,7 @@ pub fn start_pjsua() -> Result<i8, PJSUAError> {
     Ok(0)
 }
 
-pub fn account_setup(uri: String) -> Result<i32, PJSUAError> {
+pub fn account_setup(uri : String, username: String, password: String) -> Result<i32,PJSUAError> {
     println!("ACCOUNT SETUP");
     let status: pj_sys::pj_status_t;
     let mut acc_cfg = unsafe {
@@ -182,26 +185,71 @@ pub fn account_setup(uri: String) -> Result<i32, PJSUAError> {
     };
     let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
-    let reg_uri: String = "".to_string();
+    let reg_uri : String    = ["sip:".to_string(), uri.clone()].concat();
 
-    let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
-        Err(x) => return Err(x),
-        Ok(y) => y,
-    };
     let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
         Err(x) => return Err(x),
         Ok(y) => y,
     };
 
     // Setting members of the struct
-    acc_cfg_ref.id = acc_id_pj_str_t;
+    
     acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
-    acc_cfg_ref.register_on_acc_add = true as i32;
-    acc_cfg_ref.cred_count = 0;
+    
+    // check if username and password are not empty strings
+    if !username.is_empty() && !password.is_empty(){
+        let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
+
+
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
+
+        println!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
+        let realm : String      = REALM_GLOBAL.to_owned();
+        let scheme : String     = uri;
+        let username : String   = username;
+        let data : String       = password;
+
+        let realm_pj_str_t = match(make_pj_str_t(realm)){
+            Err(x)=> return Err(x),
+            Ok(y)=>y 
+        }; 
+        let scheme_pj_str_t = match(make_pj_str_t(scheme)){
+            Err(x)=> return Err(x),
+            Ok(y)=>y 
+        }; 
+        let username_pj_str_t = match(make_pj_str_t(username)){
+            Err(x)=> return Err(x),
+            Ok(y)=>y 
+        };
+        let data_pj_str_t = match(make_pj_str_t(data)){
+            Err(x)=> return Err(x),
+            Ok(y)=>y 
+        };
+
+        // configuring credentials to work with SIP servers 
+        acc_cfg_ref.cred_count = 1;
+        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
+        acc_cfg_ref.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
+        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+    } else {
+        let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
+        
+        acc_cfg_ref.cred_count = 0;
+    }
+    
+    // better NAT traversal settings
     acc_cfg_ref.media_stun_use = pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
-    acc_cfg_ref.allow_contact_rewrite = true as i32;
-    acc_cfg_ref.allow_via_rewrite = true as i32;
     acc_cfg_ref.allow_sdp_nat_rewrite = true as i32;
 
     let acc_id: pj_sys::pjsua_acc_id;

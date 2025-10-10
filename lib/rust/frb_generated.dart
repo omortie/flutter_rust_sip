@@ -90,6 +90,8 @@ abstract class RustLibApi extends BaseApi {
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
     required String uri,
+    required String username,
+    required String password,
   });
 
   Future<int> crateApiSimpleMakeCall({
@@ -198,6 +200,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
     required String uri,
+    required String username,
+    required String password,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -207,6 +211,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_on_incomming_call(incomingCallStrategy, serializer);
           sse_encode_String(stunSrv, serializer);
           sse_encode_String(uri, serializer);
+          sse_encode_String(username, serializer);
+          sse_encode_String(password, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -219,7 +225,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_pjsua_error,
         ),
         constMeta: kCrateApiSimpleInitPjsuaConstMeta,
-        argValues: [localPort, incomingCallStrategy, stunSrv, uri],
+        argValues: [
+          localPort,
+          incomingCallStrategy,
+          stunSrv,
+          uri,
+          username,
+          password,
+        ],
         apiImpl: this,
       ),
     );
@@ -227,7 +240,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
     debugName: "init_pjsua",
-    argNames: ["localPort", "incomingCallStrategy", "stunSrv", "uri"],
+    argNames: [
+      "localPort",
+      "incomingCallStrategy",
+      "stunSrv",
+      "uri",
+      "username",
+      "password",
+    ],
   );
 
   @override

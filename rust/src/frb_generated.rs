@@ -171,6 +171,8 @@ fn wire__crate__api__simple__init_pjsua_impl(
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
             let api_stun_srv = <String>::sse_decode(&mut deserializer);
             let api_uri = <String>::sse_decode(&mut deserializer);
+            let api_username = <String>::sse_decode(&mut deserializer);
+            let api_password = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
@@ -179,6 +181,8 @@ fn wire__crate__api__simple__init_pjsua_impl(
                         api_incoming_call_strategy,
                         api_stun_srv,
                         api_uri,
+                        api_username,
+                        api_password,
                     )?;
                     Ok(output_ok)
                 })())

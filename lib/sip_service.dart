@@ -50,6 +50,8 @@ class SIPService {
     OnIncommingCall incomingCallStrategy = OnIncommingCall.ignore,
     String stunSrv = 'stun.l.google.com:19302',
     String uri = '127.0.0.1',
+    String username = '',
+    String password = '',
   }) async {
     try {
       await frs.init(
@@ -57,6 +59,8 @@ class SIPService {
         incomingCallStrategy: incomingCallStrategy,
         stunSrv: stunSrv,
         uri: uri,
+        username: username,
+        password: password,
       );
       final stream = registerCallStream();
 
