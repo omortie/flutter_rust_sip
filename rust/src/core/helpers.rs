@@ -185,25 +185,28 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
     };
     let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
-    let reg_uri: String = "".to_string();
+    let reg_uri : String    = ["sip:".to_string(), uri.clone()].concat();
 
-    let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
-        Err(x) => return Err(x),
-        Ok(y) => y,
-    };
     let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
         Err(x) => return Err(x),
         Ok(y) => y,
     };
 
     // Setting members of the struct
-    acc_cfg_ref.id = acc_id_pj_str_t;
+    
     acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
-    acc_cfg_ref.register_on_acc_add = true as i32;
     
     // check if username and password are not empty strings
     if !username.is_empty() && !password.is_empty(){
+        let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
+
+
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
+
         println!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
         let realm : String      = REALM_GLOBAL.to_owned();
         let scheme : String     = uri;
@@ -235,13 +238,18 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
         acc_cfg_ref.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
         acc_cfg_ref.cred_info[0].data = data_pj_str_t;
     } else {
+        let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
+        
         acc_cfg_ref.cred_count = 0;
     }
     
     // better NAT traversal settings
     acc_cfg_ref.media_stun_use = pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
-    acc_cfg_ref.allow_contact_rewrite = true as i32;
-    acc_cfg_ref.allow_via_rewrite = true as i32;
     acc_cfg_ref.allow_sdp_nat_rewrite = true as i32;
 
     let acc_id: pj_sys::pjsua_acc_id;
