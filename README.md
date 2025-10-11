@@ -30,3 +30,4 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 
 ### Acknowledgement
 used [sip-phone-rs](https://github.com/Charles-Schleich/sip-phone-rs) sources as helper inspiration
+used [pjsip-sys](https://github.com/omortie/pjsip-sys) as the base Rust binding
