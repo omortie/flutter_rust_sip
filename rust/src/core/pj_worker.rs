@@ -8,14 +8,19 @@ lazy_static::lazy_static! {
     static ref PJSIP_WORKER: PjWorker = PjWorker::new();
 }
 
+// Auxiliary function to get a reference to the global PjWorker
 pub fn get_pjsip_worker() -> &'static PjWorker {
     &PJSIP_WORKER
 }
 
+// The PjWorker struct encapsulates a worker thread that processes jobs sent to it.
+// It uses a channel to receive jobs and execute them sequentially.
+// The worker thread is registered with PJSIP to ensure thread safety and to avoid registering thread everytime.
 pub struct PjWorker {
     sender: mpsc::Sender<Job>,
 }
 
+// Implementation of PjWorker
 impl PjWorker {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel::<Job>();

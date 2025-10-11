@@ -196,7 +196,7 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
     
     acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
     
-    // check if username and password are not empty strings
+    // check if username and password provided
     if !username.is_empty() && !password.is_empty(){
         let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
 
@@ -238,6 +238,7 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
         acc_cfg_ref.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
         acc_cfg_ref.cred_info[0].data = data_pj_str_t;
     } else {
+        // empty account id using only uri without username part
         let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
         let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
             Err(x) => return Err(x),
@@ -368,29 +369,6 @@ pub fn make_call(phone_number: &str, domain: &str) -> Result<i32, PJSUAError> {
         ));
     }
     return Ok(call_id);
-}
-
-pub fn send_dtmf(digit: u32) -> Result<i8, PJSUAError> {
-    let digits: String = digit.to_string();
-    let digits_pj_str_t = match make_pj_str_t(digits) {
-        Err(_e) => {
-            return Err(PJSUAError::DTMFError(
-                "Cannot Send DTMF Tone, digits contain Null Somehow".to_string(),
-            ))
-        }
-        Ok(v) => v,
-    };
-
-    let dtmf_tones = pj_sys::pjsua_call_send_dtmf_param {
-        method: pj_sys::pjsua_dtmf_method_PJSUA_DTMF_METHOD_RFC2833,
-        duration: pj_sys::PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT,
-        digits: digits_pj_str_t,
-    };
-    let status = unsafe { pj_sys::pjsua_call_send_dtmf(0, &dtmf_tones) };
-    if status != 0 {
-        return Err(PJSUAError::DTMFError("Cannot Send DTMF Tone".to_string()));
-    }
-    return Ok(0);
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
