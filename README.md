@@ -10,6 +10,16 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 
 ## Getting Started
 
+### Dependencies
+
+Linux: Make sure that these packages are installed on your system
+
+- crypto
+- z
+- asound
+- ssl
+- uuid
+
 1. Clone the repository:
     ```sh
     git clone https://github.com/yourusername/flutter_rust_sip.git
