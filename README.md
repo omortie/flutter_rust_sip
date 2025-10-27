@@ -11,6 +11,7 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 ## Getting Started
 
 ### Dependencies
+- https://github.com/omortie/pjsip-sys
 
 Linux: Make sure that these packages are installed on your system
 
