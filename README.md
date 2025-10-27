@@ -22,7 +22,7 @@ Linux: Make sure that these packages are installed on your system
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/flutter_rust_sip.git
+    git clone https://github.com/omortie/flutter_rust_sip.git
     cd flutter_rust_sip
     ```
 
