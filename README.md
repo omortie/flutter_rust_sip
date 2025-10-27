@@ -16,7 +16,7 @@ Linux: Make sure that these packages are installed on your system
 
 - crypto
 - z
-- asound
+- asound (on arch it is called `alsa-lib`)
 - ssl
 - uuid
 
