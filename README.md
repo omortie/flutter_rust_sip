@@ -11,18 +11,19 @@ A cross-platform SIP (Session Initiation Protocol) client built with Flutter and
 ## Getting Started
 
 ### Dependencies
+- https://github.com/omortie/pjsip-sys
 
 Linux: Make sure that these packages are installed on your system
 
 - crypto
 - z
-- asound
+- asound (on arch it is called `alsa-lib`)
 - ssl
 - uuid
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/flutter_rust_sip.git
+    git clone https://github.com/omortie/flutter_rust_sip.git
     cd flutter_rust_sip
     ```
 
