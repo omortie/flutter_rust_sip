@@ -20,6 +20,19 @@ Linux: Make sure that these packages are installed on your system
 - asound (on arch it is called `alsa-lib`)
 - ssl
 - uuid
+- cmake
+- ninja
+- clang
+- pkgconfig
+- gtk
+
+#### Ubuntu
+
+```
+sudo apt install cmake build-essential ninja-build clang pkg-config libgtk-3-dev openssl libssl-dev libasound2-dev
+```
+
+### Build the example
 
 1. Clone the repository:
     ```sh
