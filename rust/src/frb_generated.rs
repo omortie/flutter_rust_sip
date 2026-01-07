@@ -321,8 +321,10 @@ fn wire__crate__api__simple__register_account_stream_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
-                    let output_ok = crate::api::simple::register_account_stream(api_account_sink)?;
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::simple::register_account_stream(api_account_sink);
+                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -357,8 +359,10 @@ fn wire__crate__api__simple__register_call_stream_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
-                    let output_ok = crate::api::simple::register_call_stream(api_call_sink)?;
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::simple::register_call_stream(api_call_sink);
+                    })?;
                     Ok(output_ok)
                 })())
             }

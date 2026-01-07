@@ -351,7 +351,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
-            decodeErrorData: sse_decode_pjsua_error,
+            decodeErrorData: null,
           ),
           constMeta: kCrateApiSimpleRegisterAccountStreamConstMeta,
           argValues: [accountSink],
@@ -386,7 +386,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
-            decodeErrorData: sse_decode_pjsua_error,
+            decodeErrorData: null,
           ),
           constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
           argValues: [callSink],

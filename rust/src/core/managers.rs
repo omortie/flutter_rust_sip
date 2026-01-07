@@ -129,7 +129,6 @@ pub fn push_account_status_update(_acc_id: i32, status_code: pj_sys::pjsip_statu
 
     if let Some(account_manager) = maybe_manager {
         // Push the update if manager exists
-        println!("Pushing account status update: acc_id={}, status_code={}", _acc_id, status_code);
         account_manager.push_event(AccountInfo { acc_id: _acc_id, status_code: status_code });
     }
 }

@@ -11,19 +11,25 @@ import 'package:rxdart/subjects.dart' as rx;
 class SIPService {
   final Map<int, CallInfo> callIds = {};
   late rx.BehaviorSubject<CallInfo> callStateBroadcast;
-  late rx.BehaviorSubject<AccountInfo> accountStateBroadcast;
-  final Stream<CallInfo> callStream;
-  final Stream<AccountInfo> accountStream;
+  late Stream<CallInfo> callStream;
+  late Stream<AccountInfo> accountStream;
 
-  bool initialized = false;
-
+  static bool? initialized;
+  static String? initializeErr;
+  bool registered = false;
   String? error;
 
-  SIPService({
-    required this.callStream, required this.accountStream}) {
+  SIPService() {
+    // connect to update streams
+    callStream = registerCallStream();
+    accountStream = registerAccountStream();
+
     callStateBroadcast = rx.BehaviorSubject<CallInfo>();
+
+    // analyze call stream changes so we can update the calls list
     callStream.listen((event) {
       switch (event.state) {
+        // remove the disconnected call from call list
         case const CallState.disconnected():
           callIds.remove(event.callId);
         default:
@@ -34,17 +40,13 @@ class SIPService {
         callStateBroadcast.add(event);
       }
     });
-    accountStateBroadcast = rx.BehaviorSubject<AccountInfo>();
+
     accountStream.listen((event) {
-      if (!accountStateBroadcast.isClosed) {
-        accountStateBroadcast.add(event);
-      }
+      registered = event.statusCode == 200;
     });
 
-    initialized = true;
-
     Future.microtask(() async {
-      while (initialized) {
+      while (initialized == true) {
         for (final call in callIds.values.toList()) {
           await markCallAlive(callId: call.callId);
           debugPrint('Pinging outgoing call ${call.callId} to keep alive...');
@@ -58,11 +60,13 @@ class SIPService {
     int localPort = 5060,
     OnIncommingCall incomingCallStrategy = OnIncommingCall.ignore,
     String stunSrv = 'stun.l.google.com:19302',
-    String uri = '127.0.0.1',
-    String username = '',
-    String password = '',
   }) async {
     try {
+      if (initialized == false) {
+        // we have tried but we couldn't initialize before
+        // so avoid initializing again
+        return Future.error('SIPService not initialized (err: $initializeErr)');
+      }
       final initResult = await frs.init(
         localPort: localPort,
         incomingCallStrategy: incomingCallStrategy,
@@ -73,28 +77,14 @@ class SIPService {
         throw 'Failed to initialize PJSUA with error code: $initResult';
       }
 
-      final callStream = registerCallStream();
-      final accountStream = registerAccountStream();
+      initialized = true;
 
-      final setupResult = await accountSetup(
-        uri: uri,
-        username: username,
-        password: password,
-      );
-      if (setupResult != 0) {
-        // throw error
-        throw 'Failed to set up account with error code: $setupResult';
-      }
-
-      final service = SIPService(
-        callStream: callStream,
-        accountStream: accountStream,
-      );
-
-      return service;
+      return SIPService();
     } catch (e) {
-      debugPrint('Error initializing SIPService: $e');
-      return Future.error(e.toString());
+      // set initialized to false on error so we would not try again, that will crash the app
+      initialized = false;
+      initializeErr = e.toString();
+      return Future.error(initializeErr.toString());
     }
   }
  
@@ -105,8 +95,30 @@ class SIPService {
     debugPrint('SIPService disposed');
   }
 
+  Future<int> registerAccount({
+    required String uri,
+    required String username,
+    required String password,
+  }) async {
+    try {
+      if (initialized == false) {
+        throw 'SIPService not initialized';
+      }
+      final accId = await accountSetup(
+        uri: uri,
+        username: username,
+        password: password,
+      );
+      return accId;
+    } catch (e) {
+      debugPrint('Error registering account: $e');
+      error = e.toString();
+      return Future.error(error.toString());
+    }
+  }
+
   Future<int> call(String phoneNumber, String domain) async {
-    if (!initialized) {
+    if (initialized == false) {
       error = 'SIPService not initialized';
     }
     try {
@@ -120,12 +132,12 @@ class SIPService {
     } catch (e) {
       debugPrint('Error making call to $phoneNumber: $e');
       error = e.toString();
-      return -1;
+      return Future.error(error.toString());
     }
   }
 
   Future<void> hangup(int callId) async {
-    if (!initialized) {
+    if (initialized == false) {
       error = 'SIPService not initialized';
     }
     try {
@@ -135,6 +147,7 @@ class SIPService {
     } catch (e) {
       debugPrint('Error hanging up call with ID $callId: $e');
       error = e.toString();
+      return Future.error(error.toString());
     }
   }
 }
