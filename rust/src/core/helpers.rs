@@ -117,7 +117,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         log_cfg.assume_init()
     };
 
-    log_cfg.console_level = 4;
+    log_cfg.console_level = 0;
 
     status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -317,7 +317,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
     };
     println!("\nRegistration update: acc_id={}, status={}", acc_id, ai.status);
     // Push registration status update to AccountManager stream
-    super::managers::push_account_status_update(acc_id as i32, ai);
+    super::managers::push_account_status_update(acc_id as i32, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {

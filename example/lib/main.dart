@@ -47,7 +47,7 @@ class SIPWidgetBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: SIPService.init(
-            uri: "194.87.106.201",
+            uri: "localhost",
             username: "client2",
             password: "client2pwd",
           incomingCallStrategy: frs.OnIncommingCall.autoAnswer,
@@ -133,17 +133,27 @@ class CallerWidget extends StatefulWidget {
 
 class _CallerWidgetState extends State<CallerWidget> {
   String? error;
+  int registrationStatusCode = -1;
   String phoneNumber = '';
   String domain = "127.0.0.1";
 
   @override
   Widget build(BuildContext context) {
+    widget.service.accountStateBroadcast.listen((state) {
+      if (!widget.service.initialized) return;
+      setState(() {
+        registrationStatusCode = state.statusCode;
+      });
+    });
+    
     return Column(
       spacing: 16,
       children: [
         Text(
           'Initialization state: ${error == null ? "Initialized" : "Not initialized, error: $error"}',
         ),
+        Text(
+            'Registration state: ${registrationStatusCode == 200 ? "Registered" : "Not registered (err code: $registrationStatusCode)"}'),
         TextField(
           decoration: const InputDecoration(hintText: 'Phone Number'),
           onChanged: (value) async {

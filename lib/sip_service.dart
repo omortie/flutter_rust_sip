@@ -63,18 +63,28 @@ class SIPService {
     String password = '',
   }) async {
     try {
-      final result = await frs.init(
+      final initResult = await frs.init(
         localPort: localPort,
         incomingCallStrategy: incomingCallStrategy,
         stunSrv: stunSrv,
       );
-      if (result != 0) {
+      if (initResult != 0) {
         // throw error
-        throw 'Failed to initialize PJSUA with error code: $result';
+        throw 'Failed to initialize PJSUA with error code: $initResult';
       }
 
       final callStream = registerCallStream();
       final accountStream = registerAccountStream();
+
+      final setupResult = await accountSetup(
+        uri: uri,
+        username: username,
+        password: password,
+      );
+      if (setupResult != 0) {
+        // throw error
+        throw 'Failed to set up account with error code: $setupResult';
+      }
 
       final service = SIPService(
         callStream: callStream,

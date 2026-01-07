@@ -411,7 +411,7 @@ impl SseDecode for crate::core::dart_types::AccountInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_accId = <i32>::sse_decode(deserializer);
-        let mut var_statusCode = <i32>::sse_decode(deserializer);
+        let mut var_statusCode = <u32>::sse_decode(deserializer);
         return crate::core::dart_types::AccountInfo {
             acc_id: var_accId,
             status_code: var_statusCode,
@@ -820,7 +820,7 @@ impl SseEncode for crate::core::dart_types::AccountInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.acc_id, serializer);
-        <i32>::sse_encode(self.status_code, serializer);
+        <u32>::sse_encode(self.status_code, serializer);
     }
 }
 

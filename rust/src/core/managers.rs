@@ -120,13 +120,17 @@ pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_
     }
 }
 
-pub fn push_account_status_update(_acc_id: i32, account_info: pj_sys::pjsua_acc_info) {
+pub fn push_account_status_update(_acc_id: i32, status_code: pj_sys::pjsip_status_code) {
+    println!("Preparing to push account status update: acc_id={}, status_code={}", _acc_id, status_code);
+
     let guard = ACCOUNT_MANAGER.lock().expect("ACCOUNT_MANAGER lock poisoned");
     let maybe_manager = guard.as_ref().cloned();
     drop(guard);
 
     if let Some(account_manager) = maybe_manager {
-        account_manager.push_event(AccountInfo { acc_id: _acc_id, status_code: account_info.status as i32 });
+        // Push the update if manager exists
+        println!("Pushing account status update: acc_id={}, status_code={}", _acc_id, status_code);
+        account_manager.push_event(AccountInfo { acc_id: _acc_id, status_code: status_code });
     }
 }
 

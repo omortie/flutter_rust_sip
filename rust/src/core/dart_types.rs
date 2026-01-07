@@ -29,5 +29,5 @@ pub enum SessionState {
 #[derive(Debug, Clone)]
 pub struct AccountInfo {
     pub acc_id: i32,
-    pub status_code: i32,
+    pub status_code: u32,
 }
