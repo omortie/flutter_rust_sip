@@ -47,11 +47,11 @@ class SIPWidgetBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: SIPService.init(
-            uri: "127.0.0.1",
-            username: "client",
-            password: "client",
+            uri: "194.87.106.201",
+            username: "client2",
+            password: "client2pwd",
           incomingCallStrategy: frs.OnIncommingCall.autoAnswer,
-            localPort: 5061
+            localPort: 5062
         ),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -84,7 +84,7 @@ class _SIPWidgetState extends State<SIPWidget> {
 
   @override
   void initState() {
-    widget.service.stateBroadcast.listen((state) {
+    widget.service.callStateBroadcast.listen((state) {
       if (!widget.service.initialized) return;
       setState(() {
         activeCalls = widget.service.callIds;

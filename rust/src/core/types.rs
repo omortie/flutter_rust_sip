@@ -1,5 +1,5 @@
 use thiserror::Error;
-use crate::{core::dart_types::{CallInfo}, frb_generated::StreamSink};
+use crate::{core::dart_types::{AccountInfo, CallInfo}, frb_generated::StreamSink};
                                  
 #[derive(Error, Debug)]
 pub enum PJSUAError {
@@ -51,3 +51,5 @@ pub enum StreamExitResult {
 
 
 pub type DartCallStream = StreamSink<CallInfo>;
+// For simplicity and to avoid additional codegen, stream status code only.
+pub type DartAccountStream = StreamSink<AccountInfo>;

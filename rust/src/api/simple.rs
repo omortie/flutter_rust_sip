@@ -2,7 +2,7 @@
 
 use flutter_rust_bridge::{frb};
 
-use crate::core::{helpers::*, init_logger, managers::CallManager, pj_worker::get_pjsip_worker, types::{DartCallStream, OnIncommingCall, PJSUAError}};
+use crate::core::{helpers::*, init_logger, managers::{CallManager, AccountManager}, pj_worker::get_pjsip_worker, types::{DartCallStream, DartAccountStream, OnIncommingCall, PJSUAError}};
 
 #[frb(init)]
 pub fn init_app() {
@@ -13,25 +13,35 @@ pub fn init_pjsua(
     local_port: u32,
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
+) -> Result<i8, PJSUAError> {
+    // initialize pjsua
+    initialize_pjsua(incoming_call_strategy, local_port, stun_srv).map(|result| {
+        // Start SIP alive tester task to check alive flag periodically as destroy management
+        std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
+
+        result
+    })
+}
+
+pub fn account_setup(
     uri: String,
     username: String,
     password: String,
 ) -> Result<i32, PJSUAError> {
-    // initialize pjsua
-    initialize_pjsua(incoming_call_strategy, local_port, stun_srv).and_then(|_| {
-        // Start SIP alive tester task to check alive flag periodically as destroy management
-        std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
-
-        // Setup account
-        get_pjsip_worker().execute_sync(move || {
-            crate::core::helpers::account_setup(uri, username, password)
-        })
+    get_pjsip_worker().execute_sync(move || {
+        crate::core::managers::account_setup(uri, username, password)
     })
 }
 
 pub fn register_call_stream(call_sink: DartCallStream) -> Result<(), PJSUAError> {
     // Initialize the call state manager singleton
     CallManager::init(call_sink);
+    Ok(())
+}
+
+pub fn register_account_stream(account_sink: DartAccountStream) -> Result<(), PJSUAError> {
+    // Initialize the account registration manager singleton
+    AccountManager::init(account_sink);
     Ok(())
 }
 

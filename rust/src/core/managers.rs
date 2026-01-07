@@ -10,8 +10,8 @@ use log::info;
 
 use crate::{
     core::{
-        dart_types::{CallInfo, CallState},
-        types::DartCallStream,
+        dart_types::{AccountInfo, CallInfo, CallState},
+        types::{DartAccountStream, DartCallStream},
     },
     utils::pj_str_to_string,
 };
@@ -24,6 +24,8 @@ pub struct CallHeartbeat {
 lazy_static::lazy_static! {
     static ref CALL_MANAGER: Mutex<Option<Arc<CallManager>>> = Mutex::new(None);
     static ref CALL_REGISTRY: Mutex<HashMap<i32, CallHeartbeat>> = Mutex::new(HashMap::new());
+    static ref ACCOUNT_MANAGER: Mutex<Option<Arc<AccountManager>>> = Mutex::new(None);
+    static ref ACCOUNT_REGISTRY: Mutex<HashMap<i32, AccountInfo>> = Mutex::new(HashMap::new());
 }
 
 pub struct CallManager {
@@ -62,6 +64,29 @@ impl CallManager {
     }
 }
 
+pub struct AccountManager {
+    pub update_stream: DartAccountStream,
+}
+
+impl AccountManager {
+    pub fn init(update_stream: DartAccountStream) -> Arc<Self> {
+        let mut registry = ACCOUNT_MANAGER.lock().expect("ACCOUNT_MANAGER lock poisoned");
+
+        if let Some(existing) = registry.as_ref() {
+            return existing.clone();
+        }
+
+        let manager = Arc::new(AccountManager { update_stream });
+        *registry = Some(manager.clone());
+        manager
+    }
+
+    pub fn push_event(&self, account_info: AccountInfo) {
+        info!("Pushing account registration status: {}", account_info.status_code);
+        self.update_stream.add(account_info).unwrap_or(());
+    }
+}
+
 fn remove_call_from_registry(call_id: i32) -> () {
     let mut call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
     call_registry.remove(&call_id);
@@ -92,6 +117,16 @@ pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_
             call_url: pj_str_to_string(ci.remote_contact),
             state,
         });
+    }
+}
+
+pub fn push_account_status_update(_acc_id: i32, account_info: pj_sys::pjsua_acc_info) {
+    let guard = ACCOUNT_MANAGER.lock().expect("ACCOUNT_MANAGER lock poisoned");
+    let maybe_manager = guard.as_ref().cloned();
+    drop(guard);
+
+    if let Some(account_manager) = maybe_manager {
+        account_manager.push_event(AccountInfo { acc_id: _acc_id, status_code: account_info.status as i32 });
     }
 }
 
@@ -143,6 +178,15 @@ pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
     crate::core::helpers::hangup_call(call_id)
 }
 
+// add a helper function here so any successful account setup would be added to account registry
+pub fn account_setup(
+    uri: String,
+    username: String,
+    password: String,
+) -> Result<i32, crate::core::types::PJSUAError> {
+    crate::core::helpers::account_setup(uri, username, password)
+}
+
 pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {
     crate::core::helpers::hangup_calls();
     crate::core::helpers::destroy_pjsua().inspect(|_| {
@@ -151,3 +195,4 @@ pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {
         info!("Cleared call registry on PJSUA destroy");
     })
 }
+

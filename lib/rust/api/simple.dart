@@ -12,13 +12,17 @@ Future<int> initPjsua({
   required int localPort,
   required OnIncommingCall incomingCallStrategy,
   required String stunSrv,
-  required String uri,
-  required String username,
-  required String password,
 }) => RustLib.instance.api.crateApiSimpleInitPjsua(
   localPort: localPort,
   incomingCallStrategy: incomingCallStrategy,
   stunSrv: stunSrv,
+);
+
+Future<int> accountSetup({
+  required String uri,
+  required String username,
+  required String password,
+}) => RustLib.instance.api.crateApiSimpleAccountSetup(
   uri: uri,
   username: username,
   password: password,
@@ -26,6 +30,9 @@ Future<int> initPjsua({
 
 Stream<CallInfo> registerCallStream() =>
     RustLib.instance.api.crateApiSimpleRegisterCallStream();
+
+Stream<AccountInfo> registerAccountStream() =>
+    RustLib.instance.api.crateApiSimpleRegisterAccountStream();
 
 Future<void> markCallAlive({required int callId}) =>
     RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);

@@ -5,21 +5,24 @@ import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
 import 'package:flutter_rust_sip/rust/api/simple.dart';
+import 'package:flutter_rust_sip/rust/core/dart_types.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
   final Map<int, CallInfo> callIds = {};
-  late rx.BehaviorSubject<CallInfo> stateBroadcast;
-  final Stream<CallInfo> updateStream;
+  late rx.BehaviorSubject<CallInfo> callStateBroadcast;
+  late rx.BehaviorSubject<AccountInfo> accountStateBroadcast;
+  final Stream<CallInfo> callStream;
+  final Stream<AccountInfo> accountStream;
 
   bool initialized = false;
 
   String? error;
 
   SIPService({
-    required this.updateStream}) {
-    stateBroadcast = rx.BehaviorSubject<CallInfo>();
-    updateStream.listen((event) {
+    required this.callStream, required this.accountStream}) {
+    callStateBroadcast = rx.BehaviorSubject<CallInfo>();
+    callStream.listen((event) {
       switch (event.state) {
         case const CallState.disconnected():
           callIds.remove(event.callId);
@@ -27,8 +30,14 @@ class SIPService {
           callIds[event.callId] = event;
       }
 
-      if (!stateBroadcast.isClosed) {
-        stateBroadcast.add(event);
+      if (!callStateBroadcast.isClosed) {
+        callStateBroadcast.add(event);
+      }
+    });
+    accountStateBroadcast = rx.BehaviorSubject<AccountInfo>();
+    accountStream.listen((event) {
+      if (!accountStateBroadcast.isClosed) {
+        accountStateBroadcast.add(event);
       }
     });
 
@@ -54,17 +63,23 @@ class SIPService {
     String password = '',
   }) async {
     try {
-      await frs.init(
+      final result = await frs.init(
         localPort: localPort,
         incomingCallStrategy: incomingCallStrategy,
         stunSrv: stunSrv,
-        uri: uri,
-        username: username,
-        password: password,
       );
-      final stream = registerCallStream();
+      if (result != 0) {
+        // throw error
+        throw 'Failed to initialize PJSUA with error code: $result';
+      }
 
-      final service = SIPService(updateStream: stream);
+      final callStream = registerCallStream();
+      final accountStream = registerAccountStream();
+
+      final service = SIPService(
+        callStream: callStream,
+        accountStream: accountStream,
+      );
 
       return service;
     } catch (e) {
@@ -75,7 +90,7 @@ class SIPService {
  
   Future<void> dispose() async {
     initialized = false;
-    await stateBroadcast.close();
+    await callStateBroadcast.close();
     await destroyPjsua();
     debugPrint('SIPService disposed');
   }

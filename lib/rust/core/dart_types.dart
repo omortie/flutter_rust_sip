@@ -8,6 +8,24 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'dart_types.freezed.dart';
 
+class AccountInfo {
+  final int accId;
+  final int statusCode;
+
+  const AccountInfo({required this.accId, required this.statusCode});
+
+  @override
+  int get hashCode => accId.hashCode ^ statusCode.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountInfo &&
+          runtimeType == other.runtimeType &&
+          accId == other.accId &&
+          statusCode == other.statusCode;
+}
+
 class CallInfo {
   final int callId;
   final String callUrl;
