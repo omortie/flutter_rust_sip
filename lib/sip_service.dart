@@ -21,8 +21,8 @@ class SIPService {
 
   SIPService() {
     // connect to update streams
-    callStream = registerCallStream();
-    accountStream = registerAccountStream();
+    callStream = registerCallStream().asBroadcastStream();
+    accountStream = registerAccountStream().asBroadcastStream();
 
     callStateBroadcast = rx.BehaviorSubject<CallInfo>();
 
@@ -66,6 +66,10 @@ class SIPService {
         // we have tried but we couldn't initialize before
         // so avoid initializing again
         return Future.error('SIPService not initialized (err: $initializeErr)');
+      }
+      if (initialized == true) {
+        // already initialized
+        return SIPService();
       }
       final initResult = await frs.init(
         localPort: localPort,

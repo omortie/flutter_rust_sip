@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
+import 'package:flutter_rust_sip_example/login_widget.dart';
 import 'package:flutter_rust_sip_example/sip_widget_builder.dart';
 
 void main() async {
@@ -21,14 +22,14 @@ class MyApp extends StatelessWidget {
             title: const Text('flutter_rust_sip example'),
             bottom: const TabBar(tabs: [
               Tab(icon: Icon(Icons.call), text: "SIP Calls"),
-              Tab(icon: Icon(Icons.settings), text: "Settings"),
+              Tab(icon: Icon(Icons.settings), text: "Register"),
             ]),
           ),
           body: const Center(
             child: TabBarView(
               children: [
                 SIPWidgetBuilder(),
-                Text("Settings"),
+                LoginWidget(),
               ],
             ),
           ),

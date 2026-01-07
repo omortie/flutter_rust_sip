@@ -30,11 +30,6 @@ class _CallerWidgetState extends State<CallerWidget> {
     return Column(
       spacing: 16,
       children: [
-        Text(
-          'Initialization state: ${accountID != null ? "Initialized" : "Not initialized, error: ${widget.service.error}"}',
-        ),
-        Text(
-            'Registration state: ${registrationStatusCode == 200 ? "Registered" : "Not registered (err code: $registrationStatusCode)"}'),
         TextField(
           decoration: const InputDecoration(hintText: 'Phone Number'),
           onChanged: (value) async {

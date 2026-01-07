@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_rust_sip_example/caller_widget.dart';
+import 'package:flutter_rust_sip_example/call_widget.dart';
 import 'package:flutter_rust_sip_example/di.dart';
 
 class SIPWidgetBuilder extends ConsumerWidget {
@@ -20,33 +20,19 @@ class SIPWidgetBuilder extends ConsumerWidget {
               children: [
                 const Text('SIP Service Initialized'),
                 if (service.registered)
-                  CallerWidget(service: service)
+                    SIPServiceWidget(service: service)
                 else
-                  const LoginWidget(),
+                    const Text('SIP Service not registered yet'),
               ],
             );
           }, error: (error, _) {
             return Text('Error initializing SIP Service: $error');
-          }, loading: () {
-            return Column(
-              children: [
-                if (service.hasError)
-                  Text('Error initializing: ${service.error}, retrying...'),
+            },
+            loading: () =>
                 const CircularProgressIndicator(),
-              ],
-            );
-          }),
+          ),
         ),
       ],
     );
-  }
-}
-
-class LoginWidget extends StatelessWidget {
-  const LoginWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text('Please register to make calls.');
   }
 }

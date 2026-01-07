@@ -4,8 +4,8 @@ import 'package:flutter_rust_sip/sip_service.dart';
 import 'package:flutter_rust_sip_example/call_status_card.dart';
 import 'package:flutter_rust_sip_example/caller_widget.dart';
 
-class CallWidget extends StatefulWidget {
-  const CallWidget({
+class SIPServiceWidget extends StatefulWidget {
+  const SIPServiceWidget({
     required this.service,
     super.key,
   });
@@ -13,10 +13,10 @@ class CallWidget extends StatefulWidget {
   final SIPService service;
 
   @override
-  State<CallWidget> createState() => _CallWidgetState();
+  State<SIPServiceWidget> createState() => _SIPServiceWidgetState();
 }
 
-class _CallWidgetState extends State<CallWidget> {
+class _SIPServiceWidgetState extends State<SIPServiceWidget> {
   Map<int, frs.CallInfo> activeCalls = {};
   late int accountID;
 
@@ -32,25 +32,22 @@ class _CallWidgetState extends State<CallWidget> {
   }
 
   @override
-  void dispose() {
-    Future.microtask(() async => await widget.service.dispose());
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         CallerWidget(
           service: widget.service,
         ),
-        Wrap(
-          children: activeCalls.entries
-              .map((e) => CallStatusCard(
-                    callInfo: e.value,
-                    service: widget.service,
-                  ))
-              .toList(),
+        Flexible(
+          child: Wrap(
+            children: activeCalls.entries
+                .map((e) => CallStatusCard(
+                      callInfo: e.value,
+                      service: widget.service,
+                    ))
+                .toList(),
+          ),
         ),
       ],
     );
