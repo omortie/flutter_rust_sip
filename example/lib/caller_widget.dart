@@ -15,20 +15,13 @@ class CallerWidget extends StatefulWidget {
 
 class _CallerWidgetState extends State<CallerWidget> {
   int? accountID;
-  int registrationStatusCode = -1;
   String phoneNumber = 'client';
   String domain = "localhost";
 
   @override
   Widget build(BuildContext context) {
-    widget.service.accountStream.listen((state) {
-      setState(() {
-        registrationStatusCode = state.statusCode;
-      });
-    });
-    
     return Column(
-      spacing: 16,
+      mainAxisSize: MainAxisSize.min,
       children: [
         TextField(
           decoration: const InputDecoration(hintText: 'Phone Number'),
