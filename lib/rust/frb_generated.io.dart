@@ -24,10 +24,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
+  RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(
+    dynamic raw,
+  );
+
+  @protected
   RustStreamSink<CallInfo> dco_decode_StreamSink_call_info_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
+
+  @protected
+  AccountInfo dco_decode_account_info(dynamic raw);
 
   @protected
   CallInfo dco_decode_call_info(dynamic raw);
@@ -63,12 +71,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
+  RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
     SseDeserializer deserializer,
   );
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
+
+  @protected
+  AccountInfo sse_decode_account_info(SseDeserializer deserializer);
 
   @protected
   CallInfo sse_decode_call_info(SseDeserializer deserializer);
@@ -110,6 +126,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_account_info_Sse(
+    RustStreamSink<AccountInfo> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_StreamSink_call_info_Sse(
     RustStreamSink<CallInfo> self,
     SseSerializer serializer,
@@ -117,6 +139,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_account_info(AccountInfo self, SseSerializer serializer);
 
   @protected
   void sse_encode_call_info(CallInfo self, SseSerializer serializer);

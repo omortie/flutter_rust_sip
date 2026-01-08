@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rust_sip/flutter_rust_sip.dart';
+import 'package:flutter_rust_sip/flutter_rust_sip.dart'
+    show
+        CallInfo,
+        CallState,
+        CallState_Calling,
+        CallState_Connecting,
+        CallState_Confirmed;
 import 'package:flutter_rust_sip/sip_service.dart';
 
 extension CallInfoExtension on CallState {
   bool get isActive {
-    return maybeWhen(
-      calling: () => true,
-      connecting: () => true,
-      confirmed: () => true,
-      orElse: () => false,
-    );
+    return this is CallState_Calling ||
+        this is CallState_Connecting ||
+        this is CallState_Confirmed;
   }
 }
 

@@ -7,8 +7,6 @@ use std::convert::TryInto;
 use std::ffi::CString;
 use std::mem::MaybeUninit;
 
-use pjsip::{pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE};
-
 use crate::{
     core::{
         managers::push_call_state_update,
@@ -104,6 +102,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     cfg.cb.on_call_media_state = Some(on_call_media_state);
     cfg.cb.on_call_state = Some(on_call_state);
+    cfg.cb.on_reg_state2 = Some(on_reg_state2);
 
     let stun_srv_pj_str_t = match make_pj_str_t(stun_srv) {
         Err(x) => return Err(x),
@@ -209,7 +208,7 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
 
         println!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
         let realm : String      = REALM_GLOBAL.to_owned();
-        let scheme : String     = uri;
+        let scheme : String     = "Digest".to_string();
         let username : String   = username;
         let data : String       = password;
 
@@ -248,24 +247,23 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
         
         acc_cfg_ref.cred_count = 0;
     }
-    
-    // better NAT traversal settings
-    acc_cfg_ref.media_stun_use = pjsua_stun_use_PJSUA_STUN_RETRY_ON_FAILURE;
-    acc_cfg_ref.allow_sdp_nat_rewrite = true as i32;
 
-    let acc_id: pj_sys::pjsua_acc_id;
-    acc_id = 0;
+    let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();;
     status = unsafe {
         pj_sys::pjsua_acc_add(
             acc_cfg_ref,
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
-            acc_id as *mut i32,
+            acc_id_out.as_mut_ptr(),
         )
     };
 
+    let acc_id = unsafe { acc_id_out.assume_init() };
+
+    println!("account id: {}", acc_id);
+
     // let acc_id_c_string_fromraw = unsafe {CString::from_raw( acc_id_myptr)}; // Might need this at a later stage
 
-    println!("Status of pjsua Acc add : {}", status);
+    println!("Status of pjsua Acc add : {}, account ID: {}", status, acc_id);
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         println!("Error Adding Account, status = {}", status);
         error_exit("Error Adding Account");
@@ -308,6 +306,18 @@ extern "C" fn on_call_media_state(call_id: pj_sys::pjsua_call_id) {
             pj_sys::pjsua_conf_connect(0, ci.conf_slot);
         }
     }
+}
+
+extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pjsua_reg_info) {
+    // Query current account info to see registration status/code
+    let ai = unsafe {
+        let mut ai: MaybeUninit<pj_sys::pjsua_acc_info> = MaybeUninit::uninit();
+        pj_sys::pjsua_acc_get_info(acc_id, ai.as_mut_ptr());
+        ai.assume_init()
+    };
+    println!("\nRegistration update: acc_id={}, status={}", acc_id, ai.status);
+    // Push registration status update to AccountManager stream
+    super::managers::push_account_status_update(acc_id as i32, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {
