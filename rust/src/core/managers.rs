@@ -150,7 +150,7 @@ pub fn call_alive_tester_task() {
                 if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                     if elapsed > Duration::from_secs(5) {
                         // Call is considered dead, hang up
-                        get_pjsip_worker().execute_sync(move || 
+                        get_pjsip_worker().execute(move || 
                             hangup_call(call_id).unwrap_or(())
                         )
                     }
