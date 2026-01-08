@@ -17,7 +17,7 @@ class _CallerWidgetState extends State<CallerWidget> {
   int? accountID;
   int registrationStatusCode = -1;
   String phoneNumber = '';
-  String domain = "127.0.0.1";
+  String domain = "localhost";
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +46,11 @@ class _CallerWidgetState extends State<CallerWidget> {
             });
           },
         ),
-        Text('Action: Call `("$phoneNumber")`'),
         ElevatedButton(
           onPressed: () {
             widget.service.call(phoneNumber, domain);
           },
-          child: Text('Call $phoneNumber'),
+          child: Text('Call $phoneNumber@$domain'),
         ),
       ],
     );

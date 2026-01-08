@@ -10,8 +10,7 @@ use log::info;
 
 use crate::{
     core::{
-        dart_types::{AccountInfo, CallInfo, CallState},
-        types::{DartAccountStream, DartCallStream},
+        dart_types::{AccountInfo, CallInfo, CallState}, pj_worker::get_pjsip_worker, types::{DartAccountStream, DartCallStream}
     },
     utils::pj_str_to_string,
 };
@@ -178,7 +177,9 @@ pub fn make_call(
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
-    crate::core::helpers::hangup_call(call_id)
+    get_pjsip_worker().execute_sync(move || {
+        crate::core::helpers::hangup_call(call_id)
+    })
 }
 
 // add a helper function here so any successful account setup would be added to account registry

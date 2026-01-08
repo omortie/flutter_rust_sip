@@ -15,6 +15,7 @@ class SIPService {
   late Stream<AccountInfo> accountStream;
 
   static bool? initialized;
+  static SIPService? _instance;
   static String? initializeErr;
   bool registered = false;
   String? error;
@@ -67,9 +68,9 @@ class SIPService {
         // so avoid initializing again
         return Future.error('SIPService not initialized (err: $initializeErr)');
       }
-      if (initialized == true) {
+      if (initialized == true && _instance != null) {
         // already initialized
-        return SIPService();
+        return _instance!;
       }
       final initResult = await frs.init(
         localPort: localPort,
@@ -81,9 +82,11 @@ class SIPService {
         throw 'Failed to initialize PJSUA with error code: $initResult';
       }
 
+      final service = SIPService();
       initialized = true;
+      _instance = service;
 
-      return SIPService();
+      return service;
     } catch (e) {
       // set initialized to false on error so we would not try again, that will crash the app
       initialized = false;

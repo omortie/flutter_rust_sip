@@ -22,6 +22,7 @@ pub fn init_pjsua(
 ) -> Result<i8, PJSUAError> {
     // initialize pjsua
     get_pjsip_worker().execute_sync(move || {
+        println!("init flag");
         initialize_pjsua(incoming_call_strategy, local_port, stun_srv).map(|result| {
             // Start SIP alive tester task to check alive flag periodically as destroy management
             std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
@@ -32,6 +33,7 @@ pub fn init_pjsua(
 }
 
 pub fn account_setup(uri: String, username: String, password: String) -> Result<i32, PJSUAError> {
+    println!("account setup flag");
     get_pjsip_worker()
         .execute_sync(move || crate::core::managers::account_setup(uri, username, password))
 }
@@ -52,13 +54,16 @@ pub fn mark_call_alive(call_id: i32) {
 }
 
 pub async fn make_call(phone_number: String, domain: String) -> Result<i32, PJSUAError> {
+    println!("make call flag");
     get_pjsip_worker().execute_sync(move || crate::core::managers::make_call(phone_number, domain))
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
+    println!("hang up flag");
     get_pjsip_worker().execute_sync(move || crate::core::managers::hangup_call(call_id))
 }
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
+    println!("destroy flag");
     get_pjsip_worker().execute_sync(move || crate::core::managers::destroy_pjsua())
 }

@@ -6,9 +6,9 @@ import 'package:flutter_rust_sip/sip_service.dart';
 extension CallInfoExtension on CallInfo {
   bool get isActive {
     return switch (state) {
-      CallState_Calling _ => true,
-      CallState_Connecting _ => true,
-      CallState_Confirmed _ => true,
+      CallState_Calling() => true,
+      CallState_Connecting() => true,
+      CallState_Confirmed() => true,
       _ => false,
     };
   }

@@ -16,15 +16,15 @@ class SIPWidgetBuilder extends ConsumerWidget {
       children: [
         Center(
           child: service.when(data: (service) {
-            return Column(
-              children: [
-                const Text('SIP Service Initialized'),
-                if (service.registered)
+              return Column(
+                children: [
+                  const Text('SIP Service Initialized'),
+                  if (service.registered)
                     SIPServiceWidget(service: service)
-                else
+                  else
                     const Text('SIP Service not registered yet'),
-              ],
-            );
+                ],
+              );
           }, error: (error, _) {
             return Text('Error initializing SIP Service: $error');
             },
