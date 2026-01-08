@@ -5,7 +5,6 @@ import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
 import 'package:flutter_rust_sip/rust/api/simple.dart';
-import 'package:flutter_rust_sip/rust/core/dart_types.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
@@ -17,6 +16,7 @@ class SIPService {
   static bool? initialized;
   static SIPService? _instance;
   static String? initializeErr;
+  late int accountID;
   bool registered = false;
   String? error;
 
@@ -43,7 +43,8 @@ class SIPService {
     });
 
     accountStream.listen((event) {
-      registered = event.statusCode == 200;
+      // check for new account updates, if the account ID is ours and status code is 200, the registration succeeded
+      registered = (event.accId == accountID && event.statusCode == 200);
     });
 
     Future.microtask(() async {
@@ -116,7 +117,10 @@ class SIPService {
         username: username,
         password: password,
       );
-      return accId;
+      // save account ID so we check for its registration updates in account stream
+      accountID = accId;
+      debugPrint('Account registered with ID: $accId');
+      return accountID;
     } catch (e) {
       debugPrint('Error registering account: $e');
       error = e.toString();

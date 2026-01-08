@@ -150,7 +150,9 @@ pub fn call_alive_tester_task() {
                 if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                     if elapsed > Duration::from_secs(5) {
                         // Call is considered dead, hang up
-                        hangup_call(call_id).unwrap_or(());
+                        get_pjsip_worker().execute_sync(move || 
+                            hangup_call(call_id).unwrap_or(())
+                        )
                     }
                 }
             }
@@ -177,9 +179,7 @@ pub fn make_call(
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), crate::core::types::PJSUAError> {
-    get_pjsip_worker().execute_sync(move || {
-        crate::core::helpers::hangup_call(call_id)
-    })
+    crate::core::helpers::hangup_call(call_id)
 }
 
 // add a helper function here so any successful account setup would be added to account registry

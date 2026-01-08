@@ -7,7 +7,7 @@ import 'package:flutter_rust_sip/sip_service.dart';
 final sipServiceProvider =
     FutureProvider<SIPService>((ref) {
   final service = SIPService.init(
-      localPort: 5061, incomingCallStrategy: OnIncommingCall.autoAnswer);
+      localPort: 5062, incomingCallStrategy: OnIncommingCall.autoAnswer);
 
   return service;
 }, retry: (_, __) => null, isAutoDispose: false);
