@@ -4,7 +4,7 @@ import 'rust/api/simple.dart' as rlib;
 import 'rust/core/types.dart' show OnIncommingCall;
 
 export 'rust/frb_generated.dart' show RustLib;
-export 'rust/core/dart_types.dart' show CallInfo, CallState;
+export 'rust/core/dart_types.dart';
 export 'rust/core/types.dart'
     show OnIncommingCall;
 

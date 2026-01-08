@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rust_sip/flutter_rust_sip.dart';
-import 'package:flutter_rust_sip/rust/dart_types.dart';
+import 'package:flutter_rust_sip/flutter_rust_sip.dart'
+    show
+        CallInfo,
+        CallState,
+        CallState_Calling,
+        CallState_Connecting,
+        CallState_Confirmed;
 import 'package:flutter_rust_sip/sip_service.dart';
 
-extension CallInfoExtension on CallInfo {
+extension CallInfoExtension on CallState {
   bool get isActive {
-    return switch (state) {
-      CallState_Calling() => true,
-      CallState_Connecting() => true,
-      CallState_Confirmed() => true,
-      _ => false,
-    };
+    return this is CallState_Calling ||
+        this is CallState_Connecting ||
+        this is CallState_Confirmed;
   }
 }
 
@@ -29,7 +31,7 @@ class CallStatusCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: callInfo.isActive ? Colors.green : Colors.grey,
+          color: callInfo.state.isActive ? Colors.green : Colors.grey,
           width: 2,
         ),
       ),
@@ -39,8 +41,8 @@ class CallStatusCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              callInfo.isActive ? Icons.phone_in_talk : Icons.phone,
-              color: callInfo.isActive ? Colors.green : Colors.grey,
+              callInfo.state.isActive ? Icons.phone_in_talk : Icons.phone,
+              color: callInfo.state.isActive ? Colors.green : Colors.grey,
               size: 32,
             ),
             const SizedBox(width: 16),
@@ -59,7 +61,7 @@ class CallStatusCard extends StatelessWidget {
                   callInfo.state.toString(),
                   style: TextStyle(
                     color:
-                        callInfo.isActive ? Colors.green : Colors.black54,
+                        callInfo.state.isActive ? Colors.green : Colors.black54,
                     fontSize: 16,
                   ),
                 ),
@@ -68,7 +70,7 @@ class CallStatusCard extends StatelessWidget {
             const SizedBox(width: 16),
             // Hangup button
             ElevatedButton.icon(
-              onPressed: callInfo.isActive
+              onPressed: callInfo.state.isActive
                   ? () async {
                       try {
                         service.hangup(callInfo.callId);
@@ -87,7 +89,7 @@ class CallStatusCard extends StatelessWidget {
               label: const Text('Hang Up'),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    callInfo.isActive ? Colors.red : Colors.grey,
+                    callInfo.state.isActive ? Colors.red : Colors.grey,
               ),
             ),
           ],

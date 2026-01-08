@@ -16,7 +16,7 @@ class CallerWidget extends StatefulWidget {
 class _CallerWidgetState extends State<CallerWidget> {
   int? accountID;
   int registrationStatusCode = -1;
-  String phoneNumber = '';
+  String phoneNumber = 'client';
   String domain = "localhost";
 
   @override
