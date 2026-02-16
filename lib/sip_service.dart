@@ -17,6 +17,7 @@ class SIPService {
   static SIPService? _instance;
   static String? initializeErr;
   late int accountID;
+  late String registrarUri;
   bool registered = false;
   String? error;
 
@@ -120,6 +121,9 @@ class SIPService {
       // save account ID so we check for its registration updates in account stream
       accountID = accId;
       debugPrint('Account registered with ID: $accId');
+
+      registrarUri = uri;
+
       return accountID;
     } catch (e) {
       debugPrint('Error registering account: $e');
