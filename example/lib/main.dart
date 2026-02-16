@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           body: const Center(
             child: TabBarView(
               children: [
-                SIPWidgetBuilder(),
+                Text('hi'),
                 LoginWidget(),
               ],
             ),
