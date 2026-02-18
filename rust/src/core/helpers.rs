@@ -8,10 +8,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 
 use crate::{
-    core::{
-        managers::push_call_state_update,
-        types::{OnIncommingCall, PJSUAError, TransportMode},
-    },
+    core::types::{OnIncommingCall, PJSUAError, TransportMode},
     utils::{error_exit, make_pj_str_t},
 };
 
@@ -121,7 +118,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         log_cfg.assume_init()
     };
 
-    log_cfg.console_level = 6;
+    log_cfg.console_level = 0;
 
     status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -339,7 +336,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
         acc_id, ai.status
     );
     // Push registration status update to AccountManager stream
-    // super::managers::push_account_status_update(acc_id, ai.status);
+    super::managers::push_account_status_update(acc_id, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {
@@ -352,7 +349,7 @@ extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsi
     println!("Call info: {:?}", ci.last_status);
 
     // push update to the relevant call manager
-    push_call_state_update(call_id, ci);
+    super::managers::push_call_state_update(call_id, ci);
 }
 
 pub fn make_call(phone_number: &str, domain: &str) -> Result<i32, PJSUAError> {
