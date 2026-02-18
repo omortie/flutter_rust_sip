@@ -141,7 +141,7 @@ pub fn push_account_status_update(_acc_id: i32, status_code: pj_sys::pjsip_statu
         // Push the update if manager exists
         account_manager.push_event(AccountInfo {
             acc_id: _acc_id,
-            status_code: status_code,
+            status_code: status_code as i32,
         });
     }
 }
