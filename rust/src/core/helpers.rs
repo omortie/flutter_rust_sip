@@ -20,22 +20,27 @@ static REALM_GLOBAL: &'static str = "*";
 
 pub fn ensure_pj_thread_registered() {
     thread_local! {
-        static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
+        static THREAD_DESC: std::cell::RefCell<Option<Box<[std::os::raw::c_long; 64]>>> =
+            std::cell::RefCell::new(None);
     }
-    REGISTERED.with(|reg| {
-        if !reg.get() {
-            let mut thread_desc: [std::os::raw::c_long; 64] = [0 as std::os::raw::c_long; 64];
-
+    THREAD_DESC.with(|desc| {
+        let mut desc = desc.borrow_mut();
+        if desc.is_none() {
+            let mut thread_desc: Box<[std::os::raw::c_long; 64]> =
+                Box::new([0 as std::os::raw::c_long; 64]);
             let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
-            unsafe {
+            let status = unsafe {
                 pj_sys::pj_thread_register(
                     thread_name.as_ptr(),
                     thread_desc.as_mut_ptr(),
                     &mut thread,
-                );
+                )
+            };
+
+            if status == pj_sys::pj_constants__PJ_SUCCESS as i32 {
+                *desc = Some(thread_desc);
             }
-            reg.set(true);
         }
     });
 }
@@ -94,7 +99,6 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         cfg.assume_init()
     };
 
-    // cfg.cb.on_incoming_call = Some(aux_on_incomming_call());
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
         OnIncommingCall::Ignore => cfg.cb.on_incoming_call = Some(on_incoming_call_ignore),
@@ -117,7 +121,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         log_cfg.assume_init()
     };
 
-    log_cfg.console_level = 0;
+    log_cfg.console_level = 6;
 
     status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -285,6 +289,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             "Error Adding Account".to_string(),
         ));
     }
+
     return Ok(acc_id);
 }
 
@@ -334,7 +339,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
         acc_id, ai.status
     );
     // Push registration status update to AccountManager stream
-    super::managers::push_account_status_update(acc_id, ai.status);
+    // super::managers::push_account_status_update(acc_id, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {
