@@ -8,10 +8,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 
 use crate::{
-    core::{
-        managers::push_call_state_update,
-        types::{OnIncommingCall, PJSUAError, TransportMode},
-    },
+    core::types::{OnIncommingCall, PJSUAError, TransportMode},
     utils::{error_exit, make_pj_str_t},
 };
 
@@ -20,22 +17,27 @@ static REALM_GLOBAL: &'static str = "*";
 
 pub fn ensure_pj_thread_registered() {
     thread_local! {
-        static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
+        static THREAD_DESC: std::cell::RefCell<Option<Box<[std::os::raw::c_long; 64]>>> =
+            std::cell::RefCell::new(None);
     }
-    REGISTERED.with(|reg| {
-        if !reg.get() {
-            let mut thread_desc: [std::os::raw::c_long; 64] = [0 as std::os::raw::c_long; 64];
-
+    THREAD_DESC.with(|desc| {
+        let mut desc = desc.borrow_mut();
+        if desc.is_none() {
+            let mut thread_desc: Box<[std::os::raw::c_long; 64]> =
+                Box::new([0 as std::os::raw::c_long; 64]);
             let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
-            unsafe {
+            let status = unsafe {
                 pj_sys::pj_thread_register(
                     thread_name.as_ptr(),
                     thread_desc.as_mut_ptr(),
                     &mut thread,
-                );
+                )
+            };
+
+            if status == pj_sys::pj_constants__PJ_SUCCESS as i32 {
+                *desc = Some(thread_desc);
             }
-            reg.set(true);
         }
     });
 }
@@ -94,7 +96,6 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         cfg.assume_init()
     };
 
-    // cfg.cb.on_incoming_call = Some(aux_on_incomming_call());
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
         OnIncommingCall::Ignore => cfg.cb.on_incoming_call = Some(on_incoming_call_ignore),
@@ -173,7 +174,7 @@ pub fn start_pjsua() -> Result<i8, PJSUAError> {
     Ok(0)
 }
 
-pub fn account_setup(uri : String, username: String, password: String) -> Result<i32,PJSUAError> {
+pub fn account_setup(uri: String, username: String, password: String) -> Result<i32, PJSUAError> {
     println!("ACCOUNT SETUP");
     let status: pj_sys::pj_status_t;
     let mut acc_cfg = unsafe {
@@ -184,7 +185,7 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
     };
     let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let reg_uri : String    = ["sip:".to_string(), uri.clone()].concat();
+    let reg_uri: String = ["sip:".to_string(), uri.clone()].concat();
 
     let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
         Err(x) => return Err(x),
@@ -192,13 +193,18 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
     };
 
     // Setting members of the struct
-    
-    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
-    
-    // check if username and password provided
-    if !username.is_empty() && !password.is_empty(){
-        let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
 
+    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
+
+    // check if username and password provided
+    if !username.is_empty() && !password.is_empty() {
+        let acc_id: String = [
+            "sip:".to_string(),
+            username.clone(),
+            "@".to_string(),
+            uri.clone(),
+        ]
+        .concat();
 
         let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
             Err(x) => return Err(x),
@@ -206,35 +212,41 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
         };
         acc_cfg_ref.id = acc_id_pj_str_t;
 
-        println!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
-        let realm : String      = REALM_GLOBAL.to_owned();
-        let scheme : String     = "Digest".to_string();
-        let username : String   = username;
-        let data : String       = password;
+        println!(
+            "Setting Credentials for Account: {} with username: {} and password: {}",
+            uri, username, password
+        );
+        let realm: String = REALM_GLOBAL.to_owned();
+        let scheme: String = "Digest".to_string();
+        let username: String = username;
+        let data: String = password;
 
-        let realm_pj_str_t = match(make_pj_str_t(realm)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        }; 
-        let scheme_pj_str_t = match(make_pj_str_t(scheme)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        }; 
-        let username_pj_str_t = match(make_pj_str_t(username)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
+        let realm_pj_str_t = match (make_pj_str_t(realm)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
         };
-        let data_pj_str_t = match(make_pj_str_t(data)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
+        let scheme_pj_str_t = match (make_pj_str_t(scheme)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        let username_pj_str_t = match (make_pj_str_t(username)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        let data_pj_str_t = match (make_pj_str_t(data)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
         };
 
-        // configuring credentials to work with SIP servers 
+        // configuring credentials to work with SIP servers
         acc_cfg_ref.cred_count = 1;
         acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
         acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
         acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-        acc_cfg_ref.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
+        acc_cfg_ref.cred_info[0].data_type =
+            pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
+                .try_into()
+                .unwrap();
         acc_cfg_ref.cred_info[0].data = data_pj_str_t;
     } else {
         // empty account id using only uri without username part
@@ -244,11 +256,11 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
             Ok(y) => y,
         };
         acc_cfg_ref.id = acc_id_pj_str_t;
-        
+
         acc_cfg_ref.cred_count = 0;
     }
 
-    let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();;
+    let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
     status = unsafe {
         pj_sys::pjsua_acc_add(
             acc_cfg_ref,
@@ -263,7 +275,10 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
 
     // let acc_id_c_string_fromraw = unsafe {CString::from_raw( acc_id_myptr)}; // Might need this at a later stage
 
-    println!("Status of pjsua Acc add : {}, account ID: {}", status, acc_id);
+    println!(
+        "Status of pjsua Acc add : {}, account ID: {}",
+        status, acc_id
+    );
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         println!("Error Adding Account, status = {}", status);
         error_exit("Error Adding Account");
@@ -271,6 +286,7 @@ pub fn account_setup(uri : String, username: String, password: String) -> Result
             "Error Adding Account".to_string(),
         ));
     }
+
     return Ok(acc_id);
 }
 
@@ -315,9 +331,12 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
         pj_sys::pjsua_acc_get_info(acc_id, ai.as_mut_ptr());
         ai.assume_init()
     };
-    println!("\nRegistration update: acc_id={}, status={}", acc_id, ai.status);
+    println!(
+        "\nRegistration update: acc_id={}, status={}",
+        acc_id, ai.status
+    );
     // Push registration status update to AccountManager stream
-    super::managers::push_account_status_update(acc_id as i32, ai.status);
+    super::managers::push_account_status_update(acc_id, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {
@@ -330,7 +349,7 @@ extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsi
     println!("Call info: {:?}", ci.last_status);
 
     // push update to the relevant call manager
-    push_call_state_update(call_id, ci);
+    super::managers::push_call_state_update(call_id, ci);
 }
 
 pub fn make_call(phone_number: &str, domain: &str) -> Result<i32, PJSUAError> {

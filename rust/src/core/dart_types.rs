@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone)]
 pub enum CallState {
     Null,
@@ -8,7 +7,7 @@ pub enum CallState {
     Connecting,
     Confirmed,
     Disconnected,
-    Error(String)
+    Error(String),
 }
 
 #[derive(Debug, Clone)]
@@ -23,11 +22,11 @@ pub enum SessionState {
     Initialized,
     Running,
     Stopped,
-    Error(String)
+    Error(String),
 }
 
 #[derive(Debug, Clone)]
 pub struct AccountInfo {
     pub acc_id: i32,
-    pub status_code: u32,
+    pub status_code: i32,
 }

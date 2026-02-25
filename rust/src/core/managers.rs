@@ -10,7 +10,9 @@ use log::info;
 
 use crate::{
     core::{
-        dart_types::{AccountInfo, CallInfo, CallState}, pj_worker::get_pjsip_worker, types::{DartAccountStream, DartCallStream}
+        dart_types::{AccountInfo, CallInfo, CallState},
+        pj_worker::get_pjsip_worker,
+        types::{DartAccountStream, DartCallStream},
     },
     utils::pj_str_to_string,
 };
@@ -56,8 +58,7 @@ impl CallManager {
 
         info!(
             "Pushing call event: id={}, state={:?}",
-            ci.call_id,
-            ci.state
+            ci.call_id, ci.state
         );
         self.update_stream.add(ci).unwrap_or(());
     }
@@ -69,7 +70,9 @@ pub struct AccountManager {
 
 impl AccountManager {
     pub fn init(update_stream: DartAccountStream) -> Arc<Self> {
-        let mut registry = ACCOUNT_MANAGER.lock().expect("ACCOUNT_MANAGER lock poisoned");
+        let mut registry = ACCOUNT_MANAGER
+            .lock()
+            .expect("ACCOUNT_MANAGER lock poisoned");
 
         if let Some(existing) = registry.as_ref() {
             return existing.clone();
@@ -81,7 +84,10 @@ impl AccountManager {
     }
 
     pub fn push_event(&self, account_info: AccountInfo) {
-        info!("Pushing account registration status: {}", account_info.status_code);
+        info!(
+            "Pushing account registration status: {}",
+            account_info.status_code
+        );
         self.update_stream.add(account_info).unwrap_or(());
     }
 }
@@ -120,15 +126,23 @@ pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_
 }
 
 pub fn push_account_status_update(_acc_id: i32, status_code: pj_sys::pjsip_status_code) {
-    println!("Preparing to push account status update: acc_id={}, status_code={}", _acc_id, status_code);
+    println!(
+        "Preparing to push account status update: acc_id={}, status_code={}",
+        _acc_id, status_code
+    );
 
-    let guard = ACCOUNT_MANAGER.lock().expect("ACCOUNT_MANAGER lock poisoned");
+    let guard = ACCOUNT_MANAGER
+        .lock()
+        .expect("ACCOUNT_MANAGER lock poisoned");
     let maybe_manager = guard.as_ref().cloned();
     drop(guard);
 
     if let Some(account_manager) = maybe_manager {
         // Push the update if manager exists
-        account_manager.push_event(AccountInfo { acc_id: _acc_id, status_code: status_code });
+        account_manager.push_event(AccountInfo {
+            acc_id: _acc_id,
+            status_code: status_code as i32,
+        });
     }
 }
 
@@ -150,9 +164,7 @@ pub fn call_alive_tester_task() {
                 if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                     if elapsed > Duration::from_secs(5) {
                         // Call is considered dead, hang up
-                        get_pjsip_worker().execute(move || 
-                            hangup_call(call_id).unwrap_or(())
-                        )
+                        get_pjsip_worker().execute(move || hangup_call(call_id).unwrap_or(()))
                     }
                 }
             }
@@ -199,4 +211,3 @@ pub fn destroy_pjsua() -> Result<i8, crate::core::types::PJSUAError> {
         info!("Cleared call registry on PJSUA destroy");
     })
 }
-
