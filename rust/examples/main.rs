@@ -1,5 +1,5 @@
 use flutter_rust_sip as sip;
-use sip::api::simple::{account_setup, destroy_pjsua, make_call, hangup_call};
+use sip::api::simple::{account_setup, destroy_pjsua, hangup_call, make_call};
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +21,7 @@ async fn main() {
     let username = String::from("USERNAME");
     let reg_uri = String::from("localhost");
     let password = String::from("PASSWORD");
-    
+
     match account_setup(reg_uri, username, password) {
         Ok(acc_id) => println!("Account setup successful, account ID: {}", acc_id),
         Err(e) => {
@@ -38,13 +38,13 @@ async fn main() {
         println!("Type: 'c' to call\n    : 'h' to hangup call (ID required)\n    : 'q' to quit");
         match io::stdin().read_line(&mut input) {
             Ok(_) => {
-                if input == "q\n" { 
-                    break; 
+                if input == "q\n" {
+                    break;
                 }
-                if input == "c\n" { 
+                if input == "c\n" {
                     let mut telNum = String::new();
                     println!("Type in telephone number:");
-                    
+
                     match io::stdin().read_line(&mut telNum) {
                         Ok(_) => {
                             let len = telNum.len();
@@ -57,7 +57,7 @@ async fn main() {
                         Err(error) => println!("error: {}", error),
                     }
                 }
-                if input == "h\n" { 
+                if input == "h\n" {
                     let mut call_id_str = String::new();
                     println!("Type in call ID to hangup:");
                     match io::stdin().read_line(&mut call_id_str) {

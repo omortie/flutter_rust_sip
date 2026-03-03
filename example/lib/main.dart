@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 import 'package:flutter_rust_sip_example/login_widget.dart';
-import 'package:flutter_rust_sip_example/sip_widget_builder.dart';
 
 void main() async {
   await frs.RustLib.init();
