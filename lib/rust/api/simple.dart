@@ -8,25 +8,21 @@ import '../core/types.dart';
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<int> initPjsua({
-  required int localPort,
-  required OnIncommingCall incomingCallStrategy,
-  required String stunSrv,
-}) => RustLib.instance.api.crateApiSimpleInitPjsua(
-  localPort: localPort,
-  incomingCallStrategy: incomingCallStrategy,
-  stunSrv: stunSrv,
-);
+Future<int> initPjsua(
+        {required int localPort,
+        required OnIncommingCall incomingCallStrategy,
+        required String stunSrv}) =>
+    RustLib.instance.api.crateApiSimpleInitPjsua(
+        localPort: localPort,
+        incomingCallStrategy: incomingCallStrategy,
+        stunSrv: stunSrv);
 
-Future<int> accountSetup({
-  required String uri,
-  required String username,
-  required String password,
-}) => RustLib.instance.api.crateApiSimpleAccountSetup(
-  uri: uri,
-  username: username,
-  password: password,
-);
+Future<int> accountSetup(
+        {required String uri,
+        required String username,
+        required String password}) =>
+    RustLib.instance.api.crateApiSimpleAccountSetup(
+        uri: uri, username: username, password: password);
 
 Stream<CallInfo> registerCallStream() =>
     RustLib.instance.api.crateApiSimpleRegisterCallStream();
@@ -38,10 +34,8 @@ Future<void> markCallAlive({required int callId}) =>
     RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>
-    RustLib.instance.api.crateApiSimpleMakeCall(
-      phoneNumber: phoneNumber,
-      domain: domain,
-    );
+    RustLib.instance.api
+        .crateApiSimpleMakeCall(phoneNumber: phoneNumber, domain: domain);
 
 Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);

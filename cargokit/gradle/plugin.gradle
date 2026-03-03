@@ -132,14 +132,14 @@ class CargoKitPlugin implements Plugin<Project> {
             def jniLibs = project.android.sourceSets.maybeCreate(buildType).jniLibs;
             jniLibs.srcDir(new File(cargoOutputDir))
 
-            def platforms = ["android-x64"]
-            // try {
-            //     platforms = com.flutter.gradle.FlutterPluginUtils.getTargetPlatforms(project).collect()
-            // } catch (Exception ignored) {
-            //     platforms = plugin.getTargetPlatforms().collect()
-            // }
+            def platforms = []
+            try {
+                platforms = com.flutter.gradle.FlutterPluginUtils.getTargetPlatforms(project).collect()
+            } catch (Exception ignored) {
+                platforms = plugin.getTargetPlatforms().collect()
+            }
 
-            // // Same thing addFlutterDependencies does in flutter.gradle
+            // Same thing addFlutterDependencies does in flutter.gradle
             // if (buildType == "debug") {
             //     platforms.add("android-x86")
             //     platforms.add("android-x64")
