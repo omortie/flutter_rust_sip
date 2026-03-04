@@ -188,6 +188,7 @@ pub fn account_setup(
     username: String,
     password: String,
 ) -> Result<i32, crate::core::types::PJSUAError> {
+    println!("Setting up account with URI: {}, username: {}", uri, username);
     crate::core::helpers::account_setup(uri, username, password)
 }
 
