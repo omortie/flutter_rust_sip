@@ -318,7 +318,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
         pj_sys::pjsua_acc_get_info(acc_id, ai.as_mut_ptr());
         ai.assume_init()
     };
-    debug!("\nRegistration update: acc_id={}, status={}", acc_id, ai.status);
+    debug!("Registration update: acc_id={}, status={}", acc_id, ai.status);
     // Push registration status update to AccountManager stream
     super::managers::push_account_status_update(acc_id as i32, ai.status);
 }
