@@ -90,6 +90,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         ));
     }
 
+    let status: pj_sys::pj_status_t;
     let mut cfg = unsafe {
         let mut cfg: MaybeUninit<pj_sys::pjsua_config> = MaybeUninit::uninit();
         pj_sys::pjsua_config_default(cfg.as_mut_ptr());
@@ -119,26 +120,17 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         log_cfg.assume_init()
     };
 
-    log_cfg.console_level = 6;
+    log_cfg.console_level = 0;
 
-    let mut media_cfg = unsafe {
-        let mut media_cfg: MaybeUninit<pj_sys::pjsua_media_config> = MaybeUninit::uninit();
-        pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr());
-        media_cfg.assume_init()
-    };
-
-    let init_status: pj_sys::pj_status_t;
-    init_status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, &media_cfg) };
-    if init_status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
+    status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
+    if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error in pjsua_init");
-        debug!("Error in pjsua_init, status:= {}", init_status);
+        println!("Error in pjsua_init, status:= {}", status);
         return Err(PJSUAError::InitializationError(
             "Error in pjsua_init".to_string(),
         ));
     }
-    debug!("pjsua_init done: {}", init_status);
-
-    Ok(0)
+    return Ok(0);
 }
 
 pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {

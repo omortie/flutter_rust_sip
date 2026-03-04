@@ -16,7 +16,6 @@ pub fn init_pjsua(
     incoming_call_strategy: OnIncommingCall,
     stun_srv: String,
 ) -> Result<i8, PJSUAError> {
-    println!("Initializing PJSUA with local_port: {}, incoming_call_strategy: {:?}, stun_srv: {}", local_port, incoming_call_strategy, stun_srv);
     // initialize pjsua
     get_pjsip_worker().execute_sync(move || {
         initialize_pjsua(incoming_call_strategy, local_port, stun_srv).map(|result| {
