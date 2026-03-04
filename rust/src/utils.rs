@@ -19,7 +19,7 @@ pub fn make_pj_str_t(input: String) -> Result<pj::pj_str_t, PJSUAError> {
         Ok(c_string) => {
             let input_ptr = c_string.into_raw();
             // If memory leak, This line below may be the fix
-            // let _ = unsafe{CString::from_raw(input_ptr)};
+            let _ = unsafe{CString::from_raw(input_ptr)};
             return Ok(pj::pj_str_t {
                 slen: len as _,
                 ptr: input_ptr,
