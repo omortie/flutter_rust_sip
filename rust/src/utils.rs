@@ -1,26 +1,34 @@
 extern crate pjsip as pj;
 
 use crate::core::types::PJSUAError;
-use std::{ffi::CString};
+use std::ffi::CString;
 
-pub fn make_pj_str_t(input: String) -> Result<pj::pj_str_t, PJSUAError> {
-    let len = input.len();
-    let input_c_string = CString::new(input.clone());
-    match input_c_string {
-        Err(_x) => {
-            let err_message = format!("Could not use input value: '{}' Contained Null Byte", input);
-            return Err(PJSUAError::InputValueError(err_message));
-        }
-        Ok(c_string) => {
-            let input_ptr = c_string.into_raw();
-            // If memory leak, This line below may be the fix
-            // let _ = unsafe{CString::from_raw(input_ptr)};
-            return Ok(pj::pj_str_t {
-                slen: len as _,
-                ptr: input_ptr,
-            });
-        }
+/// Owns a CString and exposes its pj_str_t. The CString is freed when this drops.
+/// Keep this alive until after the PJSIP call that uses the pj_str_t completes.
+pub struct PjStr {
+    _owner: CString,
+    pub raw: pj::pj_str_t,
+}
+
+impl PjStr {
+    pub fn new(input: String) -> Result<Self, PJSUAError> {
+        let len = input.len();
+        CString::new(input.clone())
+            .map(|cstring| {
+                let ptr = cstring.as_ptr() as *mut _;
+                PjStr {
+                    _owner: cstring,
+                    raw: pj::pj_str_t { ptr, slen: len as _ },
+                }
+            })
+            .map_err(|_| PJSUAError::InputValueError(
+                format!("Could not use input value: '{}' Contained Null Byte", input)
+            ))
     }
+}
+
+pub fn make_pj_str_t(input: String) -> Result<PjStr, PJSUAError> {
+    PjStr::new(input)
 }
 
 pub fn pj_str_to_string(p: pj::pj_str_t) -> String {

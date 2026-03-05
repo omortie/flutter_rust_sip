@@ -76,10 +76,11 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     let status: pj_sys::pj_status_t;
     let mut cfg = unsafe {
-        let mut cfg: MaybeUninit<pj_sys::pjsua_config> = MaybeUninit::uninit();
+        let mut cfg: Box<MaybeUninit<pj_sys::pjsua_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_config_default(cfg.as_mut_ptr());
-        cfg.assume_init()
+        cfg
     };
+    let cfg = unsafe { &mut *cfg.as_mut_ptr() };
 
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
@@ -90,25 +91,26 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_state = Some(on_call_state);
     cfg.cb.on_reg_state2 = Some(on_reg_state2);
 
-    let stun_srv_pj_str_t = make_pj_str_t(stun_srv)?;
+    let stun_srv_str = make_pj_str_t(stun_srv)?;
     cfg.stun_srv_cnt = 1;
-    cfg.stun_srv[0] = stun_srv_pj_str_t;
+    cfg.stun_srv[0] = stun_srv_str.raw;
 
     let mut log_cfg = unsafe {
-        let mut log_cfg: MaybeUninit<pj_sys::pjsua_logging_config> = MaybeUninit::uninit();
+        let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr());
-        log_cfg.assume_init()
+        log_cfg
     };
-
+    let log_cfg = unsafe { &mut *log_cfg.as_mut_ptr() };
     log_cfg.console_level = 0;
 
     let media_cfg = unsafe {
-        let mut media_cfg: MaybeUninit<pj_sys::pjsua_media_config> = MaybeUninit::uninit();
+        let mut media_cfg: Box<MaybeUninit<pj_sys::pjsua_media_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr());
-        media_cfg.assume_init()
+        media_cfg
     };
+    let media_cfg = unsafe { &*media_cfg.as_ptr() };
 
-    status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, &media_cfg) };
+    status = unsafe { pj_sys::pjsua_init(cfg, log_cfg, media_cfg) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error in pjsua_init");
         debug!("Error in pjsua_init, status:= {}", status);
@@ -124,11 +126,11 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
     debug!("INIT TRANSPORT CFG");
 
     let mut transport_cfg = unsafe {
-        let mut transport_cfg: MaybeUninit<pj_sys::pjsua_transport_config> = MaybeUninit::uninit();
+        let mut transport_cfg: Box<MaybeUninit<pj_sys::pjsua_transport_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_transport_config_default(transport_cfg.as_mut_ptr());
-        transport_cfg.assume_init()
+        transport_cfg
     };
-
+    let transport_cfg = unsafe { &mut *transport_cfg.as_mut_ptr() };
     transport_cfg.port = port;
     let transportMode = match mode {
         TransportMode::TCP => pj_sys::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
@@ -141,7 +143,7 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
 
     let status = unsafe {
         let mut transport_id: MaybeUninit<pj_sys::pjsua_transport_id> = MaybeUninit::uninit();
-        pj_sys::pjsua_transport_create(transportMode, &transport_cfg, transport_id.as_mut_ptr())
+        pj_sys::pjsua_transport_create(transportMode, transport_cfg, transport_id.as_mut_ptr())
     };
 
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -173,19 +175,33 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
     };
     let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    acc_cfg.reg_uri = make_pj_str_t(format!("sip:{}", uri))?;
+    let has_creds = !username.is_empty() && !password.is_empty();
 
-    if !username.is_empty() && !password.is_empty() {
-        debug!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
-        acc_cfg.id                     = make_pj_str_t(format!("sip:{}@{}", username, uri))?;
-        acc_cfg.cred_count             = 1;
-        acc_cfg.cred_info[0].realm     = make_pj_str_t(REALM_GLOBAL.to_owned())?;
-        acc_cfg.cred_info[0].scheme    = make_pj_str_t("Digest".to_string())?;
-        acc_cfg.cred_info[0].username  = make_pj_str_t(username)?;
-        acc_cfg.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
-        acc_cfg.cred_info[0].data      = make_pj_str_t(password)?;
+    // All PjStr values must be declared here to outlive the pjsua_acc_add call below.
+    // PJSIP copies the string data during pjsua_acc_add, after which they can be dropped.
+    let reg_uri = make_pj_str_t(format!("sip:{}", uri))?;
+    let id = make_pj_str_t(if has_creds {
+        format!("sip:{}@{}", username, uri)
     } else {
-        acc_cfg.id         = make_pj_str_t(format!("sip:{}", uri))?;
+        format!("sip:{}", uri)
+    })?;
+    let realm  = has_creds.then(|| make_pj_str_t(REALM_GLOBAL.to_owned())).transpose()?;
+    let scheme = has_creds.then(|| make_pj_str_t("Digest".to_string())).transpose()?;
+    let uname  = has_creds.then(|| make_pj_str_t(username.clone())).transpose()?;
+    let data   = has_creds.then(|| make_pj_str_t(password)).transpose()?;
+
+    acc_cfg.reg_uri = reg_uri.raw;
+    acc_cfg.id      = id.raw;
+
+    if has_creds {
+        debug!("Setting Credentials for Account: {} with username: {}", uri, username);
+        acc_cfg.cred_count             = 1;
+        acc_cfg.cred_info[0].realm     = realm.as_ref().unwrap().raw;
+        acc_cfg.cred_info[0].scheme    = scheme.as_ref().unwrap().raw;
+        acc_cfg.cred_info[0].username  = uname.as_ref().unwrap().raw;
+        acc_cfg.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
+        acc_cfg.cred_info[0].data      = data.as_ref().unwrap().raw;
+    } else {
         acc_cfg.cred_count = 0;
     }
 
@@ -204,7 +220,6 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         error_exit("Error Adding Account");
         return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
-
     Ok(acc_id)
 }
 
