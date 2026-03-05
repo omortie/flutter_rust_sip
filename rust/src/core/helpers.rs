@@ -97,7 +97,6 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         cfg.assume_init()
     };
 
-    // cfg.cb.on_incoming_call = Some(aux_on_incomming_call());
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
         OnIncommingCall::Ignore => cfg.cb.on_incoming_call = Some(on_incoming_call_ignore),
@@ -122,10 +121,16 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     log_cfg.console_level = 0;
 
-    status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
+    let media_cfg = unsafe {
+        let mut media_cfg: MaybeUninit<pj_sys::pjsua_media_config> = MaybeUninit::uninit();
+        pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr());
+        media_cfg.assume_init()
+    };
+
+    status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, &media_cfg) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error in pjsua_init");
-        println!("Error in pjsua_init, status:= {}", status);
+        debug!("Error in pjsua_init, status:= {}", status);
         return Err(PJSUAError::InitializationError(
             "Error in pjsua_init".to_string(),
         ));
