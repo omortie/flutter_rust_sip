@@ -8,12 +8,7 @@ pub fn make_pj_str_t(input: String) -> Result<pj::pj_str_t, PJSUAError> {
     let input_c_string = CString::new(input.clone());
     match input_c_string {
         Err(_x) => {
-            let err_message: String = [
-                "Could not use input value: '".to_string(),
-                input,
-                "' Contained Null Byte".to_string(),
-            ]
-            .concat();
+            let err_message = format!("Could not use input value: '{}' Contained Null Byte", input);
             return Err(PJSUAError::InputValueError(err_message));
         }
         Ok(c_string) => {

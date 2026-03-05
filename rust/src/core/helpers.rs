@@ -49,31 +49,15 @@ pub fn initialize_pjsua(
 ) -> Result<i8, PJSUAError> {
     debug!("initializing PJSIP");
     // INIT
-    let initResult = init(incommingCallBehaviour, stun_srv);
-    match initResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    init(incommingCallBehaviour, stun_srv)?;
 
     // ADD UDP TRANSPORT
-    let transportResult = add_transport(port, TransportMode::UDP);
-    match transportResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
-    // ADD TDCP TRANSPORT
-    let transportResult = add_transport(port, TransportMode::TCP);
-    match transportResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    add_transport(port, TransportMode::UDP)?;
+    // ADD TCP TRANSPORT
+    add_transport(port, TransportMode::TCP)?;
 
     // START
-    let startResult = start_pjsua();
-    match startResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    start_pjsua()?;
     Ok(0)
 }
 
@@ -106,10 +90,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_state = Some(on_call_state);
     cfg.cb.on_reg_state2 = Some(on_reg_state2);
 
-    let stun_srv_pj_str_t = match make_pj_str_t(stun_srv) {
-        Err(x) => return Err(x),
-        Ok(y) => y,
-    };
+    let stun_srv_pj_str_t = make_pj_str_t(stun_srv)?;
     cfg.stun_srv_cnt = 1;
     cfg.stun_srv[0] = stun_srv_pj_str_t;
 
@@ -181,105 +162,50 @@ pub fn start_pjsua() -> Result<i8, PJSUAError> {
     Ok(0)
 }
 
-pub fn account_setup(uri : String, username: String, password: String) -> Result<i32,PJSUAError> {
+pub fn account_setup(uri: String, username: String, password: String) -> Result<i32, PJSUAError> {
     debug!("ACCOUNT SETUP");
-    let status: pj_sys::pj_status_t;
+
     let mut acc_cfg = unsafe {
         let mut acc_cfg: Box<MaybeUninit<pj_sys::pjsua_acc_config>> =
-            Box::new(MaybeUninit::uninit());
+            Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_acc_config_default(acc_cfg.as_mut_ptr());
         acc_cfg
     };
-    let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
+    let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let reg_uri : String    = ["sip:".to_string(), uri.clone()].concat();
+    acc_cfg.reg_uri = make_pj_str_t(format!("sip:{}", uri))?;
 
-    let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
-        Err(x) => return Err(x),
-        Ok(y) => y,
-    };
-
-    // Setting members of the struct
-    
-    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
-    
-    // check if username and password provided
-    if !username.is_empty() && !password.is_empty(){
-        let acc_id : String      = ["sip:".to_string(), username.clone(), "@".to_string(),uri.clone()].concat();
-
-
-        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
-            Err(x) => return Err(x),
-            Ok(y) => y,
-        };
-        acc_cfg_ref.id = acc_id_pj_str_t;
-
+    if !username.is_empty() && !password.is_empty() {
         debug!("Setting Credentials for Account: {} with username: {} and password: {}", uri, username, password);
-        let realm : String      = REALM_GLOBAL.to_owned();
-        let scheme : String     = "Digest".to_string();
-        let username : String   = username;
-        let data : String       = password;
-
-        let realm_pj_str_t = match(make_pj_str_t(realm)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        }; 
-        let scheme_pj_str_t = match(make_pj_str_t(scheme)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        }; 
-        let username_pj_str_t = match(make_pj_str_t(username)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        };
-        let data_pj_str_t = match(make_pj_str_t(data)){
-            Err(x)=> return Err(x),
-            Ok(y)=>y 
-        };
-
-        // configuring credentials to work with SIP servers 
-        acc_cfg_ref.cred_count = 1;
-        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
-        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
-        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-        acc_cfg_ref.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
-        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+        acc_cfg.id                     = make_pj_str_t(format!("sip:{}@{}", username, uri))?;
+        acc_cfg.cred_count             = 1;
+        acc_cfg.cred_info[0].realm     = make_pj_str_t(REALM_GLOBAL.to_owned())?;
+        acc_cfg.cred_info[0].scheme    = make_pj_str_t("Digest".to_string())?;
+        acc_cfg.cred_info[0].username  = make_pj_str_t(username)?;
+        acc_cfg.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
+        acc_cfg.cred_info[0].data      = make_pj_str_t(password)?;
     } else {
-        // empty account id using only uri without username part
-        let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
-        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
-            Err(x) => return Err(x),
-            Ok(y) => y,
-        };
-        acc_cfg_ref.id = acc_id_pj_str_t;
-        
-        acc_cfg_ref.cred_count = 0;
+        acc_cfg.id         = make_pj_str_t(format!("sip:{}", uri))?;
+        acc_cfg.cred_count = 0;
     }
 
     let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
-    status = unsafe {
+    let status = unsafe {
         pj_sys::pjsua_acc_add(
-            acc_cfg_ref,
+            acc_cfg as _,
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
             acc_id_out.as_mut_ptr(),
         )
     };
-
     let acc_id = unsafe { acc_id_out.assume_init() };
-
-    debug!("account id: {}", acc_id);
-
-    // let acc_id_c_string_fromraw = unsafe {CString::from_raw( acc_id_myptr)}; // Might need this at a later stage
 
     debug!("Status of pjsua Acc add : {}, account ID: {}", status, acc_id);
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        debug!("Error Adding Account, status = {}", status);
         error_exit("Error Adding Account");
-        return Err(PJSUAError::AccountCreationError(
-            "Error Adding Account".to_string(),
-        ));
+        return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
-    return Ok(acc_id);
+
+    Ok(acc_id)
 }
 
 extern "C" fn on_incoming_call(
