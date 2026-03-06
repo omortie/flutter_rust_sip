@@ -18,11 +18,6 @@ use crate::{
 static REALM_GLOBAL: &'static str = "*";
 
 pub fn ensure_pj_thread_registered() {
-    // PJSIP requires that both the thread_desc buffer and the pj_thread_t pointer
-    // remain valid for the entire lifetime of the thread. They must NOT be local
-    // stack variables that get freed when this function returns — PJSIP holds raw
-    // pointers into them and reads/writes them on every subsequent PJSIP call.
-    // Using thread_local! ensures they live as long as the thread itself.
     thread_local! {
         static THREAD_DESC: std::cell::RefCell<Option<Box<[std::os::raw::c_long; 64]>>> =
             std::cell::RefCell::new(None);
@@ -100,7 +95,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     let stun_srv_str = make_pj_str_t(stun_srv)?;
     cfg.stun_srv_cnt = 1;
-    cfg.stun_srv[0] = stun_srv_str.raw;
+    cfg.stun_srv[0] = stun_srv_str;
 
     let mut log_cfg = unsafe {
         let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
@@ -191,7 +186,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
 
     // Setting members of the struct
 
-    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
+    acc_cfg.reg_uri = reg_uri_pj_str_t;
 
     // check if username and password provided
     if !username.is_empty() && !password.is_empty() {
@@ -207,9 +202,9 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg_ref.id = acc_id_pj_str_t;
+        acc_cfg.id = acc_id_pj_str_t;
 
-        println!(
+        debug!(
             "Setting Credentials for Account: {} with username: {} and password: {}",
             uri, username, password
         );
@@ -236,15 +231,15 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         };
 
         // configuring credentials to work with SIP servers
-        acc_cfg_ref.cred_count = 1;
-        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
-        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
-        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-        acc_cfg_ref.cred_info[0].data_type =
+        acc_cfg.cred_count = 1;
+        acc_cfg.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg.cred_info[0].username = username_pj_str_t;
+        acc_cfg.cred_info[0].data_type =
             pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
                 .try_into()
                 .unwrap();
-        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+        acc_cfg.cred_info[0].data = data_pj_str_t;
     } else {
         // empty account id using only uri without username part
         let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
@@ -252,13 +247,13 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg_ref.id = acc_id_pj_str_t;
+        acc_cfg.id = acc_id_pj_str_t;
 
-        acc_cfg_ref.cred_count = 0;
+        acc_cfg.cred_count = 0;
     }
 
     let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
-    status = unsafe {
+    let acc_add_status = unsafe {
         pj_sys::pjsua_acc_add(
             acc_cfg as _,
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
@@ -267,8 +262,8 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
     };
     let acc_id = unsafe { acc_id_out.assume_init() };
 
-    debug!("Status of pjsua Acc add : {}, account ID: {}", status, acc_id);
-    if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
+    debug!("Status of pjsua Acc add : {}, account ID: {}", acc_add_status, acc_id);
+    if acc_add_status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error Adding Account");
         return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
