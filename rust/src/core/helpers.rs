@@ -7,6 +7,8 @@ use std::convert::TryInto;
 use std::ffi::CString;
 use std::mem::MaybeUninit;
 
+use log::debug;
+
 use crate::{
     core::types::{OnIncommingCall, PJSUAError, TransportMode},
     utils::{error_exit, make_pj_str_t},
@@ -47,32 +49,17 @@ pub fn initialize_pjsua(
     port: u32,
     stun_srv: String,
 ) -> Result<i8, PJSUAError> {
+    debug!("initializing PJSIP");
     // INIT
-    let initResult = init(incommingCallBehaviour, stun_srv);
-    match initResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    init(incommingCallBehaviour, stun_srv)?;
 
     // ADD UDP TRANSPORT
-    let transportResult = add_transport(port, TransportMode::UDP);
-    match transportResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
-    // ADD TDCP TRANSPORT
-    let transportResult = add_transport(port, TransportMode::TCP);
-    match transportResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    add_transport(port, TransportMode::UDP)?;
+    // ADD TCP TRANSPORT
+    add_transport(port, TransportMode::TCP)?;
 
     // START
-    let startResult = start_pjsua();
-    match startResult {
-        Ok(_) => (),
-        Err(x) => return Err(x),
-    };
+    start_pjsua()?;
     Ok(0)
 }
 
@@ -82,7 +69,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     status = unsafe { pj_sys::pjsua_create() };
 
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        println!("Error in pjsua_create, status:= {}", status);
+        debug!("Error in pjsua_create, status:= {}", status);
         error_exit("Error in pjsua_create");
         return Err(PJSUAError::CreationError(
             "Could not Create PJSUA Instance".to_string(),
@@ -91,10 +78,11 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
     let status: pj_sys::pj_status_t;
     let mut cfg = unsafe {
-        let mut cfg: MaybeUninit<pj_sys::pjsua_config> = MaybeUninit::uninit();
+        let mut cfg: Box<MaybeUninit<pj_sys::pjsua_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_config_default(cfg.as_mut_ptr());
-        cfg.assume_init()
+        cfg
     };
+    let cfg = unsafe { &mut *cfg.as_mut_ptr() };
 
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
@@ -105,25 +93,29 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_state = Some(on_call_state);
     cfg.cb.on_reg_state2 = Some(on_reg_state2);
 
-    let stun_srv_pj_str_t = match make_pj_str_t(stun_srv) {
-        Err(x) => return Err(x),
-        Ok(y) => y,
-    };
+    let stun_srv_str = make_pj_str_t(stun_srv)?;
     cfg.stun_srv_cnt = 1;
-    cfg.stun_srv[0] = stun_srv_pj_str_t;
+    cfg.stun_srv[0] = stun_srv_str;
 
     let mut log_cfg = unsafe {
-        let mut log_cfg: MaybeUninit<pj_sys::pjsua_logging_config> = MaybeUninit::uninit();
+        let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr());
-        log_cfg.assume_init()
+        log_cfg
     };
-
+    let log_cfg = unsafe { &mut *log_cfg.as_mut_ptr() };
     log_cfg.console_level = 0;
 
-    status = unsafe { pj_sys::pjsua_init(&cfg, &log_cfg, std::ptr::null()) };
+    let media_cfg = unsafe {
+        let mut media_cfg: Box<MaybeUninit<pj_sys::pjsua_media_config>> = Box::new(MaybeUninit::zeroed());
+        pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr());
+        media_cfg
+    };
+    let media_cfg = unsafe { &*media_cfg.as_ptr() };
+
+    status = unsafe { pj_sys::pjsua_init(cfg, log_cfg, media_cfg) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error in pjsua_init");
-        println!("Error in pjsua_init, status:= {}", status);
+        debug!("Error in pjsua_init, status:= {}", status);
         return Err(PJSUAError::InitializationError(
             "Error in pjsua_init".to_string(),
         ));
@@ -133,14 +125,14 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
 
 pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
     /* Add UDP transport. */
-    println!("INIT TRANSPORT CFG");
+    debug!("INIT TRANSPORT CFG");
 
     let mut transport_cfg = unsafe {
-        let mut transport_cfg: MaybeUninit<pj_sys::pjsua_transport_config> = MaybeUninit::uninit();
+        let mut transport_cfg: Box<MaybeUninit<pj_sys::pjsua_transport_config>> = Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_transport_config_default(transport_cfg.as_mut_ptr());
-        transport_cfg.assume_init()
+        transport_cfg
     };
-
+    let transport_cfg = unsafe { &mut *transport_cfg.as_mut_ptr() };
     transport_cfg.port = port;
     let transportMode = match mode {
         TransportMode::TCP => pj_sys::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
@@ -153,7 +145,7 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
 
     let status = unsafe {
         let mut transport_id: MaybeUninit<pj_sys::pjsua_transport_id> = MaybeUninit::uninit();
-        pj_sys::pjsua_transport_create(transportMode, &transport_cfg, transport_id.as_mut_ptr())
+        pj_sys::pjsua_transport_create(transportMode, transport_cfg, transport_id.as_mut_ptr())
     };
 
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -165,7 +157,7 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
 pub fn start_pjsua() -> Result<i8, PJSUAError> {
     let status = unsafe { pj_sys::pjsua_start() };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        println!("Error starting pjsua, status = {}", status);
+        debug!("Error starting pjsua, status = {}", status);
         error_exit("Error starting pjsua");
         return Err(PJSUAError::PJSUAStartError(
             "Could not Start PJSUA".to_string(),
@@ -175,15 +167,15 @@ pub fn start_pjsua() -> Result<i8, PJSUAError> {
 }
 
 pub fn account_setup(uri: String, username: String, password: String) -> Result<i32, PJSUAError> {
-    println!("ACCOUNT SETUP");
-    let status: pj_sys::pj_status_t;
+    debug!("ACCOUNT SETUP");
+
     let mut acc_cfg = unsafe {
         let mut acc_cfg: Box<MaybeUninit<pj_sys::pjsua_acc_config>> =
-            Box::new(MaybeUninit::uninit());
+            Box::new(MaybeUninit::zeroed());
         pj_sys::pjsua_acc_config_default(acc_cfg.as_mut_ptr());
         acc_cfg
     };
-    let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
+    let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
     let reg_uri: String = ["sip:".to_string(), uri.clone()].concat();
 
@@ -194,7 +186,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
 
     // Setting members of the struct
 
-    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
+    acc_cfg.reg_uri = reg_uri_pj_str_t;
 
     // check if username and password provided
     if !username.is_empty() && !password.is_empty() {
@@ -210,9 +202,9 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg_ref.id = acc_id_pj_str_t;
+        acc_cfg.id = acc_id_pj_str_t;
 
-        println!(
+        debug!(
             "Setting Credentials for Account: {} with username: {} and password: {}",
             uri, username, password
         );
@@ -239,15 +231,15 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         };
 
         // configuring credentials to work with SIP servers
-        acc_cfg_ref.cred_count = 1;
-        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
-        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
-        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
-        acc_cfg_ref.cred_info[0].data_type =
+        acc_cfg.cred_count = 1;
+        acc_cfg.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg.cred_info[0].username = username_pj_str_t;
+        acc_cfg.cred_info[0].data_type =
             pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
                 .try_into()
                 .unwrap();
-        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
+        acc_cfg.cred_info[0].data = data_pj_str_t;
     } else {
         // empty account id using only uri without username part
         let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
@@ -255,39 +247,27 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg_ref.id = acc_id_pj_str_t;
+        acc_cfg.id = acc_id_pj_str_t;
 
-        acc_cfg_ref.cred_count = 0;
+        acc_cfg.cred_count = 0;
     }
 
     let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
-    status = unsafe {
+    let acc_add_status = unsafe {
         pj_sys::pjsua_acc_add(
-            acc_cfg_ref,
+            acc_cfg as _,
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
             acc_id_out.as_mut_ptr(),
         )
     };
-
     let acc_id = unsafe { acc_id_out.assume_init() };
 
-    println!("account id: {}", acc_id);
-
-    // let acc_id_c_string_fromraw = unsafe {CString::from_raw( acc_id_myptr)}; // Might need this at a later stage
-
-    println!(
-        "Status of pjsua Acc add : {}, account ID: {}",
-        status, acc_id
-    );
-    if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        println!("Error Adding Account, status = {}", status);
+    debug!("Status of pjsua Acc add : {}, account ID: {}", acc_add_status, acc_id);
+    if acc_add_status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error Adding Account");
-        return Err(PJSUAError::AccountCreationError(
-            "Error Adding Account".to_string(),
-        ));
+        return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
-
-    return Ok(acc_id);
+    Ok(acc_id)
 }
 
 extern "C" fn on_incoming_call(
@@ -298,7 +278,7 @@ extern "C" fn on_incoming_call(
     unsafe {
         pj_sys::pjsua_call_answer(call_id, 200, std::ptr::null(), std::ptr::null());
     }
-    println!("The accepted call id is: {}", call_id);
+    debug!("The accepted call id is: {}", call_id);
 }
 
 extern "C" fn on_incoming_call_ignore(
@@ -306,7 +286,7 @@ extern "C" fn on_incoming_call_ignore(
     call_id: pj_sys::pjsua_call_id,
     _rdata: *mut pj_sys::pjsip_rx_data,
 ) {
-    println!("The ignored call id is: {}", call_id);
+    debug!("The ignored call id is: {}", call_id);
 }
 
 extern "C" fn on_call_media_state(call_id: pj_sys::pjsua_call_id) {
@@ -331,10 +311,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
         pj_sys::pjsua_acc_get_info(acc_id, ai.as_mut_ptr());
         ai.assume_init()
     };
-    println!(
-        "\nRegistration update: acc_id={}, status={}",
-        acc_id, ai.status
-    );
+    debug!("Registration update: acc_id={}, status={}", acc_id, ai.status);
     // Push registration status update to AccountManager stream
     super::managers::push_account_status_update(acc_id, ai.status);
 }
@@ -346,7 +323,7 @@ extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsi
         ci.assume_init()
     };
     // log ci
-    println!("Call info: {:?}", ci.last_status);
+    debug!("Call info: {:?}", ci.last_status);
 
     // push update to the relevant call manager
     super::managers::push_call_state_update(call_id, ci);
@@ -401,7 +378,7 @@ pub fn make_call(phone_number: &str, domain: &str) -> Result<i32, PJSUAError> {
 }
 
 pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
-    println!("Hanging up call id: {}", call_id);
+    debug!("Hanging up call id: {}", call_id);
     let status =
         unsafe { pj_sys::pjsua_call_hangup(call_id, 0, std::ptr::null(), std::ptr::null()) };
     if status != 0 {
@@ -409,7 +386,7 @@ pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
             "Could not Hangup Call".to_string(),
         ));
     }
-    println!("Hanged up call id: {}", call_id);
+    debug!("Hanged up call id: {}", call_id);
     Ok(())
 }
 
@@ -418,7 +395,7 @@ pub fn hangup_calls() {
 }
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
-    println!("Destroy PJSUA");
+    debug!("Destroy PJSUA");
     let status = unsafe { pj_sys::pjsua_destroy() };
     if status != 0 {
         return Err(PJSUAError::PJSUADestroyError(

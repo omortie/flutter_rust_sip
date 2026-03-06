@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use log::info;
+use log::{debug, info};
 
 use crate::{
     core::{
@@ -126,10 +126,7 @@ pub fn push_call_state_update(call_id: pj_sys::pjsua_call_id, ci: pj_sys::pjsua_
 }
 
 pub fn push_account_status_update(_acc_id: i32, status_code: pj_sys::pjsip_status_code) {
-    println!(
-        "Preparing to push account status update: acc_id={}, status_code={}",
-        _acc_id, status_code
-    );
+    debug!("Preparing to push account status update: acc_id={}, status_code={}", _acc_id, status_code);
 
     let guard = ACCOUNT_MANAGER
         .lock()
@@ -160,7 +157,7 @@ pub fn call_alive_tester_task() {
         {
             let call_registry = CALL_REGISTRY.lock().expect("CALL_REGISTRY lock poisoned");
             for (&call_id, heartbeat) in call_registry.iter() {
-                println!("Checking call {} for heartbeat", call_id);
+                debug!("Checking call {} for heartbeat", call_id);
                 if let Ok(elapsed) = heartbeat.last_live_mark.elapsed() {
                     if elapsed > Duration::from_secs(5) {
                         // Call is considered dead, hang up
@@ -200,6 +197,7 @@ pub fn account_setup(
     username: String,
     password: String,
 ) -> Result<i32, crate::core::types::PJSUAError> {
+    debug!("Setting up account with URI: {}, username: {}", uri, username);
     crate::core::helpers::account_setup(uri, username, password)
 }
 
