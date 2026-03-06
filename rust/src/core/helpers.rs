@@ -102,10 +102,9 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_media_state = Some(on_call_media_state);
     cfg.cb.on_call_state = Some(on_call_state);
     cfg.cb.on_reg_state2 = Some(on_reg_state2);
-
-    // let stun_srv_str = make_pj_str_t(stun_srv)?;
-    // cfg.stun_srv_cnt = 1;
-    // cfg.stun_srv[0] = stun_srv_str.raw;
+    let stun_srv_str = make_pj_str_t(stun_srv)?;
+    cfg.stun_srv_cnt = 1;
+    cfg.stun_srv[0] = stun_srv_str.raw;
 
     let mut log_cfg = unsafe {
         let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
