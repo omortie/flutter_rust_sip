@@ -17,13 +17,11 @@ pub fn init_pjsua(
     stun_srv: String,
 ) -> Result<i8, PJSUAError> {
     // initialize pjsua
-    get_pjsip_worker().execute_sync(move || {
-        initialize_pjsua(incoming_call_strategy, local_port, stun_srv).map(|result| {
-            // Start SIP alive tester task to check alive flag periodically as destroy management
-            std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
+    initialize_pjsua(incoming_call_strategy, local_port, stun_srv).map(|result| {
+        // Start SIP alive tester task to check alive flag periodically as destroy management
+        std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
 
-            result
-        })
+        result
     })
 }
 

@@ -1,5 +1,7 @@
 extern crate pjsip as pj;
 
+use log::debug;
+
 use crate::core::types::PJSUAError;
 use std::ffi::CString;
 
@@ -41,7 +43,7 @@ pub fn pj_str_to_string(p: pj::pj_str_t) -> String {
 }
 
 pub fn error_exit(err_msg: &str) {
-    println!("Exiting PJSUA {}", err_msg);
+    debug!("Exiting PJSUA {}", err_msg);
     let err_cstring = CString::new("Error Here")
         .expect("CString::new failed");
     let err = err_cstring.as_ptr();

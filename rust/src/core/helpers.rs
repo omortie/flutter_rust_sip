@@ -21,22 +21,34 @@ use crate::{
 static REALM_GLOBAL: &'static str = "*";
 
 pub fn ensure_pj_thread_registered() {
+    // PJSIP requires that both the thread_desc buffer and the pj_thread_t pointer
+    // remain valid for the entire lifetime of the thread. They must NOT be local
+    // stack variables that get freed when this function returns — PJSIP holds raw
+    // pointers into them and reads/writes them on every subsequent PJSIP call.
+    // Using thread_local! ensures they live as long as the thread itself.
     thread_local! {
         static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
+        // 64 c_long slots as required by PJSIP for the thread descriptor.
+        static THREAD_DESC: std::cell::UnsafeCell<[std::os::raw::c_long; 64]> =
+            std::cell::UnsafeCell::new([0; 64]);
+        static THREAD_HANDLE: std::cell::UnsafeCell<*mut pj_sys::pj_thread_t> =
+            std::cell::UnsafeCell::new(std::ptr::null_mut());
     }
+
     REGISTERED.with(|reg| {
         if !reg.get() {
-            let mut thread_desc: [std::os::raw::c_long; 64] = [0 as std::os::raw::c_long; 64];
-
-            let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
-            unsafe {
-                pj_sys::pj_thread_register(
-                    thread_name.as_ptr(),
-                    thread_desc.as_mut_ptr(),
-                    &mut thread,
-                );
-            }
+            THREAD_DESC.with(|desc| {
+                THREAD_HANDLE.with(|handle| {
+                    unsafe {
+                        pj_sys::pj_thread_register(
+                            thread_name.as_ptr(),
+                            (*desc.get()).as_mut_ptr(),
+                            handle.get(),
+                        );
+                    }
+                });
+            });
             reg.set(true);
         }
     });
@@ -91,9 +103,9 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     cfg.cb.on_call_state = Some(on_call_state);
     cfg.cb.on_reg_state2 = Some(on_reg_state2);
 
-    let stun_srv_str = make_pj_str_t(stun_srv)?;
-    cfg.stun_srv_cnt = 1;
-    cfg.stun_srv[0] = stun_srv_str.raw;
+    // let stun_srv_str = make_pj_str_t(stun_srv)?;
+    // cfg.stun_srv_cnt = 1;
+    // cfg.stun_srv[0] = stun_srv_str.raw;
 
     let mut log_cfg = unsafe {
         let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
