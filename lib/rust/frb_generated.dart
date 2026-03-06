@@ -383,7 +383,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
     return AccountInfo(
       accId: dco_decode_i_32(arr[0]),
-      statusCode: dco_decode_u_32(arr[1]),
+      statusCode: dco_decode_i_32(arr[1]),
     );
   }
 
@@ -554,7 +554,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   AccountInfo sse_decode_account_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_accId = sse_decode_i_32(deserializer);
-    var var_statusCode = sse_decode_u_32(deserializer);
+    var var_statusCode = sse_decode_i_32(deserializer);
     return AccountInfo(accId: var_accId, statusCode: var_statusCode);
   }
 
@@ -731,7 +731,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_account_info(AccountInfo self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.accId, serializer);
-    sse_encode_u_32(self.statusCode, serializer);
+    sse_encode_i_32(self.statusCode, serializer);
   }
 
   @protected

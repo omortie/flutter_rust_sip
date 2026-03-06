@@ -10,10 +10,7 @@ use std::mem::MaybeUninit;
 use log::debug;
 
 use crate::{
-    core::{
-        managers::push_call_state_update,
-        types::{OnIncommingCall, PJSUAError, TransportMode},
-    },
+    core::types::{OnIncommingCall, PJSUAError, TransportMode},
     utils::{error_exit, make_pj_str_t},
 };
 
@@ -27,29 +24,27 @@ pub fn ensure_pj_thread_registered() {
     // pointers into them and reads/writes them on every subsequent PJSIP call.
     // Using thread_local! ensures they live as long as the thread itself.
     thread_local! {
-        static REGISTERED: std::cell::Cell<bool> = std::cell::Cell::new(false);
-        // 64 c_long slots as required by PJSIP for the thread descriptor.
-        static THREAD_DESC: std::cell::UnsafeCell<[std::os::raw::c_long; 64]> =
-            std::cell::UnsafeCell::new([0; 64]);
-        static THREAD_HANDLE: std::cell::UnsafeCell<*mut pj_sys::pj_thread_t> =
-            std::cell::UnsafeCell::new(std::ptr::null_mut());
+        static THREAD_DESC: std::cell::RefCell<Option<Box<[std::os::raw::c_long; 64]>>> =
+            std::cell::RefCell::new(None);
     }
-
-    REGISTERED.with(|reg| {
-        if !reg.get() {
+    THREAD_DESC.with(|desc| {
+        let mut desc = desc.borrow_mut();
+        if desc.is_none() {
+            let mut thread_desc: Box<[std::os::raw::c_long; 64]> =
+                Box::new([0 as std::os::raw::c_long; 64]);
+            let mut thread = std::ptr::null_mut();
             let thread_name = CString::new("rustffi").unwrap();
-            THREAD_DESC.with(|desc| {
-                THREAD_HANDLE.with(|handle| {
-                    unsafe {
-                        pj_sys::pj_thread_register(
-                            thread_name.as_ptr(),
-                            (*desc.get()).as_mut_ptr(),
-                            handle.get(),
-                        );
-                    }
-                });
-            });
-            reg.set(true);
+            let status = unsafe {
+                pj_sys::pj_thread_register(
+                    thread_name.as_ptr(),
+                    thread_desc.as_mut_ptr(),
+                    &mut thread,
+                )
+            };
+
+            if status == pj_sys::pj_constants__PJ_SUCCESS as i32 {
+                *desc = Some(thread_desc);
+            }
         }
     });
 }
@@ -187,38 +182,83 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
     };
     let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let has_creds = !username.is_empty() && !password.is_empty();
+    let reg_uri: String = ["sip:".to_string(), uri.clone()].concat();
 
-    // All PjStr values must be declared here to outlive the pjsua_acc_add call below.
-    // PJSIP copies the string data during pjsua_acc_add, after which they can be dropped.
-    let reg_uri = make_pj_str_t(format!("sip:{}", uri))?;
-    let id = make_pj_str_t(if has_creds {
-        format!("sip:{}@{}", username, uri)
+    let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
+        Err(x) => return Err(x),
+        Ok(y) => y,
+    };
+
+    // Setting members of the struct
+
+    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
+
+    // check if username and password provided
+    if !username.is_empty() && !password.is_empty() {
+        let acc_id: String = [
+            "sip:".to_string(),
+            username.clone(),
+            "@".to_string(),
+            uri.clone(),
+        ]
+        .concat();
+
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
+
+        println!(
+            "Setting Credentials for Account: {} with username: {} and password: {}",
+            uri, username, password
+        );
+        let realm: String = REALM_GLOBAL.to_owned();
+        let scheme: String = "Digest".to_string();
+        let username: String = username;
+        let data: String = password;
+
+        let realm_pj_str_t = match (make_pj_str_t(realm)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        let scheme_pj_str_t = match (make_pj_str_t(scheme)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        let username_pj_str_t = match (make_pj_str_t(username)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        let data_pj_str_t = match (make_pj_str_t(data)) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+
+        // configuring credentials to work with SIP servers
+        acc_cfg_ref.cred_count = 1;
+        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
+        acc_cfg_ref.cred_info[0].data_type =
+            pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
+                .try_into()
+                .unwrap();
+        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
     } else {
-        format!("sip:{}", uri)
-    })?;
-    let realm  = has_creds.then(|| make_pj_str_t(REALM_GLOBAL.to_owned())).transpose()?;
-    let scheme = has_creds.then(|| make_pj_str_t("Digest".to_string())).transpose()?;
-    let uname  = has_creds.then(|| make_pj_str_t(username.clone())).transpose()?;
-    let data   = has_creds.then(|| make_pj_str_t(password)).transpose()?;
+        // empty account id using only uri without username part
+        let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
+        let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
+            Err(x) => return Err(x),
+            Ok(y) => y,
+        };
+        acc_cfg_ref.id = acc_id_pj_str_t;
 
-    acc_cfg.reg_uri = reg_uri.raw;
-    acc_cfg.id      = id.raw;
-
-    if has_creds {
-        debug!("Setting Credentials for Account: {} with username: {}", uri, username);
-        acc_cfg.cred_count             = 1;
-        acc_cfg.cred_info[0].realm     = realm.as_ref().unwrap().raw;
-        acc_cfg.cred_info[0].scheme    = scheme.as_ref().unwrap().raw;
-        acc_cfg.cred_info[0].username  = uname.as_ref().unwrap().raw;
-        acc_cfg.cred_info[0].data_type = pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD.try_into().unwrap();
-        acc_cfg.cred_info[0].data      = data.as_ref().unwrap().raw;
-    } else {
-        acc_cfg.cred_count = 0;
+        acc_cfg_ref.cred_count = 0;
     }
 
     let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
-    let status = unsafe {
+    status = unsafe {
         pj_sys::pjsua_acc_add(
             acc_cfg as _,
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
@@ -278,7 +318,7 @@ extern "C" fn on_reg_state2(acc_id: pj_sys::pjsua_acc_id, _info: *mut pj_sys::pj
     };
     debug!("Registration update: acc_id={}, status={}", acc_id, ai.status);
     // Push registration status update to AccountManager stream
-    super::managers::push_account_status_update(acc_id as i32, ai.status);
+    super::managers::push_account_status_update(acc_id, ai.status);
 }
 
 extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsip_event) {
@@ -291,7 +331,7 @@ extern "C" fn on_call_state(call_id: pj_sys::pjsua_call_id, _: *mut pj_sys::pjsi
     debug!("Call info: {:?}", ci.last_status);
 
     // push update to the relevant call manager
-    push_call_state_update(call_id, ci);
+    super::managers::push_call_state_update(call_id, ci);
 }
 
 pub fn make_call(phone_number: &str, domain: &str) -> Result<i32, PJSUAError> {
