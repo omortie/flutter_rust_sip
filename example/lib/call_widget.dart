@@ -39,7 +39,7 @@ class _SIPServiceWidgetState extends State<SIPServiceWidget> {
         CallerWidget(
           service: widget.service,
         ),
-        Flexible(
+        Flexible( 
           child: Wrap(
             children: activeCalls.entries
                 .map((e) => CallStatusCard(
