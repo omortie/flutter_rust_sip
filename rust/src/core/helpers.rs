@@ -75,7 +75,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     // pjsua_config
     let mut cfg = MaybeUninit::<pj_sys::pjsua_config>::zeroed();
     unsafe { pj_sys::pjsua_config_default(cfg.as_mut_ptr()); }
-    let mut cfg_ref = unsafe { cfg.assume_init() };
+    let cfg_ref = unsafe { &mut *cfg.as_mut_ptr() };
 
     match incomming_call_behaviour {
         OnIncommingCall::AutoAnswer => cfg_ref.cb.on_incoming_call = Some(on_incoming_call),
@@ -92,7 +92,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     // pjsua_logging_config
     let mut log_cfg = MaybeUninit::<pj_sys::pjsua_logging_config>::zeroed();
     unsafe { pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr()); }
-    let mut log_cfg_ref = unsafe { log_cfg.assume_init() };
+    let log_cfg_ref = unsafe { &mut *log_cfg.as_mut_ptr() };
     log_cfg_ref.console_level = 7;
 
     // pjsua_media_config
@@ -171,7 +171,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
     };
     let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
-    let reg_uri: String = ["sip:".to_string(), uri.clone()].concat();
+    let reg_uri: String = format!("sip:{}", uri);
 
     let reg_uri_pj_str_t = match make_pj_str_t(reg_uri) {
         Err(x) => return Err(x),
@@ -184,13 +184,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
 
     // check if username and password provided
     if !username.is_empty() && !password.is_empty() {
-        let acc_id: String = [
-            "sip:".to_string(),
-            username.clone(),
-            "@".to_string(),
-            uri.clone(),
-        ]
-        .concat();
+        let acc_id: String = format!("sip:{}@{}", username, uri);
 
         let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
             Err(x) => return Err(x),
@@ -236,7 +230,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         acc_cfg.cred_info[0].data = data_pj_str_t;
     } else {
         // empty account id using only uri without username part
-        let acc_id: String = ["sip:".to_string(), uri.clone()].concat();
+        let acc_id: String = format!("sip:{}", uri);
         let acc_id_pj_str_t = match make_pj_str_t(acc_id) {
             Err(x) => return Err(x),
             Ok(y) => y,
