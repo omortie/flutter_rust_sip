@@ -14,6 +14,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
   final TextEditingController _passwordController = TextEditingController()..text = 'clientpwd';
   final TextEditingController _sipServerUrlController = TextEditingController()..text = 'localhost';
   final TextEditingController _portController = TextEditingController()..text = '5060';
+  String registrationStatusText = 'Not Registered yet';
 
   @override
   void dispose() {
@@ -26,14 +27,15 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final serviceRegistrationStatus = ref.watch(sipServiceRegistrationProvider);
+    ref.listen(sipServiceRegistrationProvider, (_, statusAsync) {
+      final status = statusAsync.value;
+      registrationStatusText = switch (status) {
+        200 => 'SIP Account Registered Successfully',
+        -1 => 'Not Registered yet (Error code: $status)',
+        _ => 'Registration failed... (Status code: $status)',
+      };
 
-    final status = serviceRegistrationStatus.value;
-    final registrationStatusText = switch (status) {
-      200 => 'SIP Account Registered Successfully',
-      -1 => 'Not Registered yet (Error code: $status)',
-      _ => 'Registration failed... (Status code: $status)',
-    };
+    });
     
     return Center(
       child: Column(
@@ -46,9 +48,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
               children: [
                 Text(
                   registrationStatusText,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: status == 200 ? Colors.red : Colors.red),
+                  style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -89,10 +89,20 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                 ElevatedButton(
                   onPressed: () async {
                     final service = await ref.read(sipServiceProvider.future);
-                    await service.registerAccount(
+                    service
+                        .registerAccount(
                         uri: _sipServerUrlController.text,
                         username: _usernameController.text,
-                        password: _passwordController.text);
+                            password: _passwordController.text)
+                        .then((accountId) {
+                      debugPrint('Account registered with ID: $accountId');
+                    }).catchError((e) {
+                      final errorText = 'Failed to register account: $e';
+                      setState(() {
+                        registrationStatusText = errorText;
+                      });
+                      debugPrint('Failed to register account: $e');
+                    });
                   },
                   child: const Text('Register'),
                 ),

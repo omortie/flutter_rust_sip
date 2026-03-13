@@ -113,7 +113,6 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
         return Err(PJSUAError::InitializationError("Error in pjsua_init".to_string()));
     }
 
-    unsafe { let _ = CString::from_raw(stun_srv_str.ptr); };
     Ok(0)
 }
 
@@ -126,8 +125,8 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
         pj_sys::pjsua_transport_config_default(transport_cfg.as_mut_ptr());
         transport_cfg
     };
-    let transport_cfg = unsafe { &mut *transport_cfg.as_mut_ptr() };
-    transport_cfg.port = port;
+    let transport_cfg_ref = unsafe { &mut *transport_cfg.as_mut_ptr() };
+    transport_cfg_ref.port = port;
     let transportMode = match mode {
         TransportMode::TCP => pj_sys::pjsip_transport_type_e_PJSIP_TRANSPORT_TCP,
         TransportMode::TLS => pj_sys::pjsip_transport_type_e_PJSIP_TRANSPORT_TLS,
@@ -139,7 +138,7 @@ pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
 
     let status = unsafe {
         let mut transport_id: MaybeUninit<pj_sys::pjsua_transport_id> = MaybeUninit::uninit();
-        pj_sys::pjsua_transport_create(transportMode, transport_cfg, transport_id.as_mut_ptr())
+        pj_sys::pjsua_transport_create(transportMode, transport_cfg.as_ptr(), transport_id.as_mut_ptr())
     };
 
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -169,7 +168,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         pj_sys::pjsua_acc_config_default(acc_cfg.as_mut_ptr());
         acc_cfg
     };
-    let acc_cfg = unsafe { &mut *acc_cfg.as_mut_ptr() };
+    let acc_cfg_ref = unsafe { &mut *acc_cfg.as_mut_ptr() };
 
     let reg_uri: String = format!("sip:{}", uri);
 
@@ -180,7 +179,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
 
     // Setting members of the struct
 
-    acc_cfg.reg_uri = reg_uri_pj_str_t;
+    acc_cfg_ref.reg_uri = reg_uri_pj_str_t;
 
     // check if username and password provided
     if !username.is_empty() && !password.is_empty() {
@@ -190,7 +189,7 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg.id = acc_id_pj_str_t;
+        acc_cfg_ref.id = acc_id_pj_str_t;
 
         debug!(
             "Setting Credentials for Account: {} with username: {} and password: {}",
@@ -219,15 +218,15 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         };
 
         // configuring credentials to work with SIP servers
-        acc_cfg.cred_count = 1;
-        acc_cfg.cred_info[0].realm = realm_pj_str_t;
-        acc_cfg.cred_info[0].scheme = scheme_pj_str_t;
-        acc_cfg.cred_info[0].username = username_pj_str_t;
-        acc_cfg.cred_info[0].data_type =
+        acc_cfg_ref.cred_count = 1;
+        acc_cfg_ref.cred_info[0].realm = realm_pj_str_t;
+        acc_cfg_ref.cred_info[0].scheme = scheme_pj_str_t;
+        acc_cfg_ref.cred_info[0].username = username_pj_str_t;
+        acc_cfg_ref.cred_info[0].data_type =
             pj_sys::pjsip_cred_data_type_PJSIP_CRED_DATA_PLAIN_PASSWD
                 .try_into()
                 .unwrap();
-        acc_cfg.cred_info[0].data = data_pj_str_t;
+        acc_cfg_ref.cred_info[0].data = data_pj_str_t;
     } else {
         // empty account id using only uri without username part
         let acc_id: String = format!("sip:{}", uri);
@@ -235,15 +234,15 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        acc_cfg.id = acc_id_pj_str_t;
+        acc_cfg_ref.id = acc_id_pj_str_t;
 
-        acc_cfg.cred_count = 0;
+        acc_cfg_ref.cred_count = 0;
     }
 
     let mut acc_id_out = MaybeUninit::<pj_sys::pjsua_acc_id>::uninit();
     let acc_add_status = unsafe {
         pj_sys::pjsua_acc_add(
-            acc_cfg as _,
+            acc_cfg.as_ptr(),
             pj_sys::pj_constants__PJ_TRUE.try_into().unwrap(),
             acc_id_out.as_mut_ptr(),
         )
@@ -252,7 +251,6 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
 
     debug!("Status of pjsua Acc add : {}, account ID: {}", acc_add_status, acc_id);
     if acc_add_status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
-        error_exit("Error Adding Account");
         return Err(PJSUAError::AccountCreationError("Error Adding Account".to_string()));
     }
     Ok(acc_id)
