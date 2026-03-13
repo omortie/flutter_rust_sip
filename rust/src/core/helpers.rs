@@ -64,63 +64,57 @@ pub fn initialize_pjsua(
 }
 
 pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Result<i8, PJSUAError> {
-    let status: pj_sys::pj_status_t;
-
-    status = unsafe { pj_sys::pjsua_create() };
-
+    // Create PJSUA instance
+    let status = unsafe { pj_sys::pjsua_create() };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         debug!("Error in pjsua_create, status:= {}", status);
         error_exit("Error in pjsua_create");
-        return Err(PJSUAError::CreationError(
-            "Could not Create PJSUA Instance".to_string(),
-        ));
+        return Err(PJSUAError::CreationError("Could not Create PJSUA Instance".to_string()));
     }
 
-    let status: pj_sys::pj_status_t;
-    let mut cfg = unsafe {
-        let mut cfg: Box<MaybeUninit<pj_sys::pjsua_config>> = Box::new(MaybeUninit::zeroed());
-        pj_sys::pjsua_config_default(cfg.as_mut_ptr());
-        cfg
-    };
-    let cfg = unsafe { &mut *cfg.as_mut_ptr() };
+    // pjsua_config
+    let mut cfg = MaybeUninit::<pj_sys::pjsua_config>::zeroed();
+    unsafe { pj_sys::pjsua_config_default(cfg.as_mut_ptr()); }
+    let mut cfg_ref = unsafe { cfg.assume_init() };
 
     match incomming_call_behaviour {
-        OnIncommingCall::AutoAnswer => cfg.cb.on_incoming_call = Some(on_incoming_call),
-        OnIncommingCall::Ignore => cfg.cb.on_incoming_call = Some(on_incoming_call_ignore),
+        OnIncommingCall::AutoAnswer => cfg_ref.cb.on_incoming_call = Some(on_incoming_call),
+        OnIncommingCall::Ignore => cfg_ref.cb.on_incoming_call = Some(on_incoming_call_ignore),
     }
-
-    cfg.cb.on_call_media_state = Some(on_call_media_state);
-    cfg.cb.on_call_state = Some(on_call_state);
-    cfg.cb.on_reg_state2 = Some(on_reg_state2);
+    cfg_ref.cb.on_call_media_state = Some(on_call_media_state);
+    cfg_ref.cb.on_call_state = Some(on_call_state);
+    cfg_ref.cb.on_reg_state2 = Some(on_reg_state2);
 
     let stun_srv_str = make_pj_str_t(stun_srv)?;
-    cfg.stun_srv_cnt = 1;
-    cfg.stun_srv[0] = stun_srv_str;
+    cfg_ref.stun_srv_cnt = 1;
+    cfg_ref.stun_srv[0] = stun_srv_str;
 
-    let mut log_cfg = unsafe {
-        let mut log_cfg: Box<MaybeUninit<pj_sys::pjsua_logging_config>> = Box::new(MaybeUninit::zeroed());
-        pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr());
-        log_cfg
+    // pjsua_logging_config
+    let mut log_cfg = MaybeUninit::<pj_sys::pjsua_logging_config>::zeroed();
+    unsafe { pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr()); }
+    let mut log_cfg_ref = unsafe { log_cfg.assume_init() };
+    log_cfg_ref.console_level = 7;
+
+    // pjsua_media_config
+    let mut media_cfg = MaybeUninit::<pj_sys::pjsua_media_config>::zeroed();
+    unsafe { pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr()); }
+
+    // Call pjsua_init with references
+    let status = unsafe {
+        pj_sys::pjsua_init(
+            cfg.as_mut_ptr(),
+            log_cfg.as_ptr(),
+            media_cfg.as_ptr(),
+        )
     };
-    let log_cfg = unsafe { &mut *log_cfg.as_mut_ptr() };
-    log_cfg.console_level = 0;
-
-    let media_cfg = unsafe {
-        let mut media_cfg: Box<MaybeUninit<pj_sys::pjsua_media_config>> = Box::new(MaybeUninit::zeroed());
-        pj_sys::pjsua_media_config_default(media_cfg.as_mut_ptr());
-        media_cfg
-    };
-    let media_cfg = unsafe { &*media_cfg.as_ptr() };
-
-    status = unsafe { pj_sys::pjsua_init(cfg, log_cfg, media_cfg) };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
         error_exit("Error in pjsua_init");
         debug!("Error in pjsua_init, status:= {}", status);
-        return Err(PJSUAError::InitializationError(
-            "Error in pjsua_init".to_string(),
-        ));
+        return Err(PJSUAError::InitializationError("Error in pjsua_init".to_string()));
     }
-    return Ok(0);
+
+    unsafe { let _ = CString::from_raw(stun_srv_str.ptr); };
+    Ok(0)
 }
 
 pub fn add_transport(port: u32, mode: TransportMode) -> Result<i8, PJSUAError> {
