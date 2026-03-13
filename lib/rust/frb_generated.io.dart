@@ -25,8 +25,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(
-    dynamic raw,
-  );
+      dynamic raw);
 
   @protected
   RustStreamSink<CallInfo> dco_decode_StreamSink_call_info_Sse(dynamic raw);
@@ -72,13 +71,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -121,21 +118,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  );
+      AnyhowException self, SseSerializer serializer);
 
   @protected
   void sse_encode_StreamSink_account_info_Sse(
-    RustStreamSink<AccountInfo> self,
-    SseSerializer serializer,
-  );
+      RustStreamSink<AccountInfo> self, SseSerializer serializer);
 
   @protected
   void sse_encode_StreamSink_call_info_Sse(
-    RustStreamSink<CallInfo> self,
-    SseSerializer serializer,
-  );
+      RustStreamSink<CallInfo> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -157,15 +148,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  );
+      Uint8List self, SseSerializer serializer);
 
   @protected
   void sse_encode_on_incomming_call(
-    OnIncommingCall self,
-    SseSerializer serializer,
-  );
+      OnIncommingCall self, SseSerializer serializer);
 
   @protected
   void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer);
@@ -191,9 +178,9 @@ class RustLibWire implements BaseWire {
 
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-  _lookup;
+      _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   RustLibWire(ffi.DynamicLibrary dynamicLibrary)
-    : _lookup = dynamicLibrary.lookup;
+      : _lookup = dynamicLibrary.lookup;
 }
