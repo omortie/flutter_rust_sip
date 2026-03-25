@@ -1,5 +1,8 @@
+pub mod helpers;
 pub mod types;
-use std::sync::Arc;
+pub mod dart_types;
+pub mod managers;
+pub mod pj_worker;
 
 use log::debug;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
@@ -7,7 +10,6 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 lazy_static::lazy_static! {
     pub static ref IS_INITIALIZED: std::sync::Mutex<bool> = std::sync::Mutex::new(false);
     static ref WORKER_GUARD: std::sync::Mutex<Option<tracing_appender::non_blocking::WorkerGuard>> = std::sync::Mutex::new(None);
-    pub static ref HTTP_CLIENT: Arc<reqwest::Client> = Arc::new(reqwest::Client::new());
 }
 
 pub(crate) fn init_logger() {
