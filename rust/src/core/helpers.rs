@@ -192,8 +192,8 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         acc_cfg_ref.id = acc_id_pj_str_t;
 
         debug!(
-            "Setting Credentials for Account: {} with username: {} and password: {}",
-            uri, username, password
+            "Setting Credentials for Account: {} with username: {}",
+            uri, username
         );
         let realm: String = REALM_GLOBAL.to_owned();
         let scheme: String = "Digest".to_string();
