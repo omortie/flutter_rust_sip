@@ -29,12 +29,13 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
   Widget build(BuildContext context) {
     ref.listen(sipServiceRegistrationProvider, (_, statusAsync) {
       final status = statusAsync.value;
-      registrationStatusText = switch (status) {
+      setState(() {
+        registrationStatusText = switch (status) {
         200 => 'SIP Account Registered Successfully',
         -1 => 'Not Registered yet (Error code: $status)',
         _ => 'Registration failed... (Status code: $status)',
       };
-
+      });
     });
     
     return Center(
