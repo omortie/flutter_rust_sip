@@ -37,8 +37,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({required RustLibApi api}) {
-    instance.initMockImpl(api: api);
+  static void initMock({
+    required RustLibApi api,
+  }) {
+    instance.initMockImpl(
+      api: api,
+    );
   }
 
   /// Dispose flutter_rust_bridge
@@ -72,18 +76,17 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-        stem: 'flutter_rust_sip',
-        ioDirectory: 'rust/target/release/',
-        webPrefix: 'pkg/',
-      );
+    stem: 'flutter_rust_sip',
+    ioDirectory: 'rust/target/release/',
+    webPrefix: 'pkg/',
+  );
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<int> crateApiSimpleAccountSetup({
-    required String uri,
-    required String username,
-    required String password,
-  });
+  Future<int> crateApiSimpleAccountSetup(
+      {required String uri,
+      required String username,
+      required String password});
 
   Future<int> crateApiSimpleDestroyPjsua();
 
@@ -91,16 +94,13 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiSimpleInitApp();
 
-  Future<int> crateApiSimpleInitPjsua({
-    required int localPort,
-    required OnIncommingCall incomingCallStrategy,
-    required String stunSrv,
-  });
+  Future<int> crateApiSimpleInitPjsua(
+      {required int localPort,
+      required OnIncommingCall incomingCallStrategy,
+      required String stunSrv});
 
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  });
+  Future<int> crateApiSimpleMakeCall(
+      {required String phoneNumber, required String domain});
 
   Future<void> crateApiSimpleMarkCallAlive({required int callId});
 
@@ -118,247 +118,202 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<int> crateApiSimpleAccountSetup({
-    required String uri,
-    required String username,
-    required String password,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(uri, serializer);
-          sse_encode_String(username, serializer);
-          sse_encode_String(password, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleAccountSetupConstMeta,
-        argValues: [uri, username, password],
-        apiImpl: this,
+  Future<int> crateApiSimpleAccountSetup(
+      {required String uri,
+      required String username,
+      required String password}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(uri, serializer);
+        sse_encode_String(username, serializer);
+        sse_encode_String(password, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 1, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_i_32,
+        decodeErrorData: sse_decode_pjsua_error,
       ),
-    );
+      constMeta: kCrateApiSimpleAccountSetupConstMeta,
+      argValues: [uri, username, password],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
-    debugName: "account_setup",
-    argNames: ["uri", "username", "password"],
-  );
+        debugName: "account_setup",
+        argNames: ["uri", "username", "password"],
+      );
 
   @override
   Future<int> crateApiSimpleDestroyPjsua() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 2, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_i_8,
+        decodeErrorData: sse_decode_pjsua_error,
       ),
-    );
+      constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
-  TaskConstMeta get kCrateApiSimpleDestroyPjsuaConstMeta =>
-      const TaskConstMeta(debugName: "destroy_pjsua", argNames: []);
+  TaskConstMeta get kCrateApiSimpleDestroyPjsuaConstMeta => const TaskConstMeta(
+        debugName: "destroy_pjsua",
+        argNames: [],
+      );
 
   @override
   Future<void> crateApiSimpleHangupCall({required int callId}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleHangupCallConstMeta,
-        argValues: [callId],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(callId, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 3, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_pjsua_error,
       ),
-    );
+      constMeta: kCrateApiSimpleHangupCallConstMeta,
+      argValues: [callId],
+      apiImpl: this,
+    ));
   }
 
-  TaskConstMeta get kCrateApiSimpleHangupCallConstMeta =>
-      const TaskConstMeta(debugName: "hangup_call", argNames: ["callId"]);
+  TaskConstMeta get kCrateApiSimpleHangupCallConstMeta => const TaskConstMeta(
+        debugName: "hangup_call",
+        argNames: ["callId"],
+      );
 
   @override
   Future<void> crateApiSimpleInitApp() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiSimpleInitAppConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 4, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiSimpleInitAppConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
-  TaskConstMeta get kCrateApiSimpleInitAppConstMeta =>
-      const TaskConstMeta(debugName: "init_app", argNames: []);
+  TaskConstMeta get kCrateApiSimpleInitAppConstMeta => const TaskConstMeta(
+        debugName: "init_app",
+        argNames: [],
+      );
 
   @override
-  Future<int> crateApiSimpleInitPjsua({
-    required int localPort,
-    required OnIncommingCall incomingCallStrategy,
-    required String stunSrv,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_u_32(localPort, serializer);
-          sse_encode_on_incomming_call(incomingCallStrategy, serializer);
-          sse_encode_String(stunSrv, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleInitPjsuaConstMeta,
-        argValues: [localPort, incomingCallStrategy, stunSrv],
-        apiImpl: this,
+  Future<int> crateApiSimpleInitPjsua(
+      {required int localPort,
+      required OnIncommingCall incomingCallStrategy,
+      required String stunSrv}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_u_32(localPort, serializer);
+        sse_encode_on_incomming_call(incomingCallStrategy, serializer);
+        sse_encode_String(stunSrv, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 5, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_i_8,
+        decodeErrorData: sse_decode_pjsua_error,
       ),
-    );
+      constMeta: kCrateApiSimpleInitPjsuaConstMeta,
+      argValues: [localPort, incomingCallStrategy, stunSrv],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiSimpleInitPjsuaConstMeta => const TaskConstMeta(
-    debugName: "init_pjsua",
-    argNames: ["localPort", "incomingCallStrategy", "stunSrv"],
-  );
+        debugName: "init_pjsua",
+        argNames: ["localPort", "incomingCallStrategy", "stunSrv"],
+      );
 
   @override
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(phoneNumber, serializer);
-          sse_encode_String(domain, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 6,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_32,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
-        constMeta: kCrateApiSimpleMakeCallConstMeta,
-        argValues: [phoneNumber, domain],
-        apiImpl: this,
+  Future<int> crateApiSimpleMakeCall(
+      {required String phoneNumber, required String domain}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(phoneNumber, serializer);
+        sse_encode_String(domain, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 6, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_i_32,
+        decodeErrorData: sse_decode_pjsua_error,
       ),
-    );
+      constMeta: kCrateApiSimpleMakeCallConstMeta,
+      argValues: [phoneNumber, domain],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
-    debugName: "make_call",
-    argNames: ["phoneNumber", "domain"],
-  );
+        debugName: "make_call",
+        argNames: ["phoneNumber", "domain"],
+      );
 
   @override
   Future<void> crateApiSimpleMarkCallAlive({required int callId}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 7,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
-        argValues: [callId],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(callId, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 7, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
+      argValues: [callId],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiSimpleMarkCallAliveConstMeta =>
-      const TaskConstMeta(debugName: "mark_call_alive", argNames: ["callId"]);
+      const TaskConstMeta(
+        debugName: "mark_call_alive",
+        argNames: ["callId"],
+      );
 
   @override
   Stream<AccountInfo> crateApiSimpleRegisterAccountStream() {
     final accountSink = RustStreamSink<AccountInfo>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_StreamSink_account_info_Sse(accountSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 8,
-              port: port_,
-            );
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
-          constMeta: kCrateApiSimpleRegisterAccountStreamConstMeta,
-          argValues: [accountSink],
-          apiImpl: this,
-        ),
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_StreamSink_account_info_Sse(accountSink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 8, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiSimpleRegisterAccountStreamConstMeta,
+      argValues: [accountSink],
+      apiImpl: this,
+    )));
     return accountSink.stream;
   }
 
@@ -371,29 +326,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Stream<CallInfo> crateApiSimpleRegisterCallStream() {
     final callSink = RustStreamSink<CallInfo>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_StreamSink_call_info_Sse(callSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 9,
-              port: port_,
-            );
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
-          constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
-          argValues: [callSink],
-          apiImpl: this,
-        ),
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_StreamSink_call_info_Sse(callSink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 9, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
+      argValues: [callSink],
+      apiImpl: this,
+    )));
     return callSink.stream;
   }
 
@@ -411,8 +358,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(
-    dynamic raw,
-  ) {
+      dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -473,7 +419,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 6:
         return CallState_Disconnected();
       case 7:
-        return CallState_Error(dco_decode_String(raw[1]));
+        return CallState_Error(
+          dco_decode_String(raw[1]),
+        );
       default:
         throw Exception("unreachable");
     }
@@ -508,27 +456,49 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return PJSUAError_CreationError(dco_decode_String(raw[1]));
+        return PJSUAError_CreationError(
+          dco_decode_String(raw[1]),
+        );
       case 1:
-        return PJSUAError_ConfigError(dco_decode_String(raw[1]));
+        return PJSUAError_ConfigError(
+          dco_decode_String(raw[1]),
+        );
       case 2:
-        return PJSUAError_InitializationError(dco_decode_String(raw[1]));
+        return PJSUAError_InitializationError(
+          dco_decode_String(raw[1]),
+        );
       case 3:
-        return PJSUAError_TransportError(dco_decode_String(raw[1]));
+        return PJSUAError_TransportError(
+          dco_decode_String(raw[1]),
+        );
       case 4:
-        return PJSUAError_DTMFError(dco_decode_String(raw[1]));
+        return PJSUAError_DTMFError(
+          dco_decode_String(raw[1]),
+        );
       case 5:
-        return PJSUAError_CallCreationError(dco_decode_String(raw[1]));
+        return PJSUAError_CallCreationError(
+          dco_decode_String(raw[1]),
+        );
       case 6:
-        return PJSUAError_CallStatusUpdateError(dco_decode_String(raw[1]));
+        return PJSUAError_CallStatusUpdateError(
+          dco_decode_String(raw[1]),
+        );
       case 7:
-        return PJSUAError_AccountCreationError(dco_decode_String(raw[1]));
+        return PJSUAError_AccountCreationError(
+          dco_decode_String(raw[1]),
+        );
       case 8:
-        return PJSUAError_PJSUAStartError(dco_decode_String(raw[1]));
+        return PJSUAError_PJSUAStartError(
+          dco_decode_String(raw[1]),
+        );
       case 9:
-        return PJSUAError_PJSUADestroyError(dco_decode_String(raw[1]));
+        return PJSUAError_PJSUADestroyError(
+          dco_decode_String(raw[1]),
+        );
       case 10:
-        return PJSUAError_InputValueError(dco_decode_String(raw[1]));
+        return PJSUAError_InputValueError(
+          dco_decode_String(raw[1]),
+        );
       default:
         throw Exception("unreachable");
     }
@@ -561,16 +531,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
 
   @protected
   RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
@@ -722,45 +690,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  ) {
+      AnyhowException self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
 
   @protected
   void sse_encode_StreamSink_account_info_Sse(
-    RustStreamSink<AccountInfo> self,
-    SseSerializer serializer,
-  ) {
+      RustStreamSink<AccountInfo> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
-      self.setupAndSerialize(
-        codec: SseCodec(
+        self.setupAndSerialize(
+            codec: SseCodec(
           decodeSuccessData: sse_decode_account_info,
           decodeErrorData: sse_decode_AnyhowException,
-        ),
-      ),
-      serializer,
-    );
+        )),
+        serializer);
   }
 
   @protected
   void sse_encode_StreamSink_call_info_Sse(
-    RustStreamSink<CallInfo> self,
-    SseSerializer serializer,
-  ) {
+      RustStreamSink<CallInfo> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
-      self.setupAndSerialize(
-        codec: SseCodec(
+        self.setupAndSerialize(
+            codec: SseCodec(
           decodeSuccessData: sse_decode_call_info,
           decodeErrorData: sse_decode_AnyhowException,
-        ),
-      ),
-      serializer,
-    );
+        )),
+        serializer);
   }
 
   @protected
@@ -822,9 +780,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
+      Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -832,9 +788,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_on_incomming_call(
-    OnIncommingCall self,
-    SseSerializer serializer,
-  ) {
+      OnIncommingCall self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
   }

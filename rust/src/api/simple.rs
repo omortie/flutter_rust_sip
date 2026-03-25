@@ -3,11 +3,7 @@
 use flutter_rust_bridge::frb;
 
 use crate::core::{
-    helpers::*,
-    init_logger,
-    managers::{AccountManager, CallManager},
-    pj_worker::get_pjsip_worker,
-    types::{DartAccountStream, DartCallStream, OnIncommingCall, PJSUAError},
+    helpers::*, init_logger, managers::{AccountManager, CallManager}, pj_worker::get_pjsip_worker, types::{DartAccountStream, DartCallStream, OnIncommingCall, PJSUAError}
 };
 
 #[frb(init)]

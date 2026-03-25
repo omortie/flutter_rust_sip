@@ -14,6 +14,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
   final TextEditingController _passwordController = TextEditingController()..text = 'clientpwd';
   final TextEditingController _sipServerUrlController = TextEditingController()..text = 'localhost';
   final TextEditingController _portController = TextEditingController()..text = '5060';
+  String registrationStatusText = 'Not Registered yet';
 
   @override
   void dispose() {
@@ -26,74 +27,90 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final serviceRegistrationStatus = ref.watch(sipServiceRegistrationProvider);
+    ref.listen(sipServiceRegistrationProvider, (_, statusAsync) {
+      final status = statusAsync.value;
+      setState(() {
+        registrationStatusText = switch (status) {
+        200 => 'SIP Account Registered Successfully',
+        -1 => 'Not Registered yet (Error code: $status)',
+        _ => 'Registration failed... (Status code: $status)',
+      };
+      });
+    });
     
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            switch (serviceRegistrationStatus.value) {
-              200 => const Text(
-                'SIP Account Registered Successfully',
-              ),
-              -1 => Text(
-                'Not Registered yet (Error code: $serviceRegistrationStatus)',
-                style: const TextStyle(fontSize: 18, color: Colors.red),
-              ),
-              _ => Text(
-                'Registration failed... (Status code: $serviceRegistrationStatus)'
-              ),
-            },
-            const Text(
-              'Register SIP Account',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8.0,
+              children: [
+                Text(
+                  registrationStatusText,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Register SIP Account',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                ),
+                TextField(
+                  controller: _sipServerUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'SIP Server URL',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextField(
+                  controller: _portController,
+                  decoration: const InputDecoration(
+                    labelText: 'Port',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    final service = await ref.read(sipServiceProvider.future);
+                    service
+                        .registerAccount(
+                        uri: _sipServerUrlController.text,
+                        username: _usernameController.text,
+                            password: _passwordController.text)
+                        .then((accountId) {
+                      debugPrint('Account registered with ID: $accountId');
+                    }).catchError((e) {
+                      final errorText = 'Failed to register account: $e';
+                      setState(() {
+                        registrationStatusText = errorText;
+                      });
+                      debugPrint('Failed to register account: $e');
+                    });
+                  },
+                  child: const Text('Register'),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _sipServerUrlController,
-              decoration: const InputDecoration(
-                labelText: 'SIP Server URL',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _portController,
-              decoration: const InputDecoration(
-                labelText: 'Port',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () async {
-                final service = await ref.read(sipServiceProvider.future);
-                await service.registerAccount(uri: _sipServerUrlController.text, username: _usernameController.text, password: _passwordController.text);
-              },
-              child: const Text('Register'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -4,8 +4,8 @@ pub mod dart_types;
 pub mod managers;
 pub mod pj_worker;
 
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 use log::debug;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 lazy_static::lazy_static! {
     pub static ref IS_INITIALIZED: std::sync::Mutex<bool> = std::sync::Mutex::new(false);
@@ -13,11 +13,23 @@ lazy_static::lazy_static! {
 }
 
 pub(crate) fn init_logger() {
-    let is_initialized = IS_INITIALIZED.lock().unwrap();
+    let mut is_initialized = IS_INITIALIZED.lock().unwrap();
     if *is_initialized {
         return;
     }
-    let file_appender = tracing_appender::rolling::daily("./logs", "flutter_rust_sip.log");
+
+    // Android currently skips logger backend initialization.
+    #[cfg(target_os = "android")]
+    {
+        flutter_rust_bridge::setup_default_user_utils();
+        *is_initialized = true;
+        return;
+    }
+
+    let log_dir = "./logs";
+    // Try to create the log directory if it doesn't exist
+    let _ = std::fs::create_dir_all(log_dir);
+    let file_appender = tracing_appender::rolling::daily(log_dir, "flutter_realtime_player.log");
     let (non_blocking_file_writer, guard) = tracing_appender::non_blocking(file_appender);
 
     let file_layer = tracing_subscriber::fmt::layer()
@@ -48,5 +60,6 @@ pub(crate) fn init_logger() {
     WORKER_GUARD.lock().unwrap().replace(guard);
     // Default utilities - feel free to custom
     flutter_rust_bridge::setup_default_user_utils();
+    *is_initialized = true;
     debug!("Done initializing");
 }

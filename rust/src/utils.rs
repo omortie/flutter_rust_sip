@@ -1,10 +1,12 @@
 extern crate pjsip as pj;
 
+use log::debug;
+
 use crate::core::types::PJSUAError;
-use std::{ffi::CString, os::raw::c_char};
+use std::{ffi::CString};
 
 pub fn make_pj_str_t(input: String) -> Result<pj::pj_str_t, PJSUAError> {
-    let len = input.len();
+        let len = input.len();
     let input_c_string = CString::new(input.clone());
     match input_c_string {
         Err(_x) => {
@@ -38,13 +40,15 @@ pub fn pj_str_to_string(p: pj::pj_str_t) -> String {
 }
 
 pub fn error_exit(err_msg: &str) {
-    println!("Exiting PJSUA {}", err_msg);
-    let err: *const c_char = CString::new("Error Here")
-        .expect("CString::new failed")
-        .as_ptr();
-    let thisfile = CString::new("main.rs")
-        .expect("CString::new failed")
-        .as_ptr();
+    debug!("Exiting PJSUA {}", err_msg);
+    let err_cstring = CString::new("Error Here")
+        .expect("CString::new failed");
+    let err = err_cstring.as_ptr();
+    
+    let thisfile_cstring = CString::new("main.rs")
+        .expect("CString::new failed");
+    let thisfile = thisfile_cstring.as_ptr();
+    
     unsafe { pj::pjsua_perror(thisfile, err, 2) };
     unsafe { pj::pjsua_destroy() };
     unsafe { pj::exit(1) };

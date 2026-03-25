@@ -61,3 +61,4 @@ coverage/*
 
 # Rust build files
 target/
+example/android/app/src/main/jniLibs/*
