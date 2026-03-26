@@ -1401,8 +1401,8 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
 name = "pjsip-sys"
-version = "0.0.2"
-source = "git+https://github.com/omortie/pjsip-sys.git?branch=4-android-support#e8cd40a593cf42ec2339d043337533654966eeae"
+version = "0.0.3"
+source = "git+https://github.com/omortie/pjsip-sys.git#1679f94dd90caca78a68affa2653960af1364233"
 dependencies = [
  "bindgen",
  "os_info",
