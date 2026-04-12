@@ -759,11 +759,11 @@ dependencies = [
 
 [[package]]
 name = "home"
-version = "0.5.11"
+version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "589533453244b0995c858700322199b2becb13b627df2851f64a2775d024abcf"
+checksum = "cc627f471c528ff0c4a49e1d5e60450c8f6461dd6d10ba9dcd3a61d3dff7728d"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1402,7 +1402,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.3"
-source = "git+https://github.com/omortie/pjsip-sys.git#1679f94dd90caca78a68affa2653960af1364233"
+source = "git+https://github.com/nrbnlulu/pjsip-sys.git?branch=support-more-linux-distros#bb23f05ae3cbef665b1d6269b845531134142516"
 dependencies = [
  "bindgen",
  "os_info",
