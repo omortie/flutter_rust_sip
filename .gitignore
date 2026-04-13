@@ -12,6 +12,7 @@
 migrate_working_dir/
 .fvmrc
 .vscode
+.qwen
 
 # IntelliJ related
 *.iml
