@@ -1622,7 +1622,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 [[package]]
 name = "pjsip-sys"
 version = "0.0.3"
-source = "git+https://github.com/nrbnlulu/pjsip-sys.git?branch=support-more-linux-distros#47f25205234f9b94abd34b9845807eb9cfa4cd5b"
+source = "git+https://github.com/nrbnlulu/pjsip-sys.git?branch=support-more-linux-distros#0584616fc55ecbad34b7dc1d9c34ee24a5573cbf"
 dependencies = [
  "bindgen",
  "os_info",

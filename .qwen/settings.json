@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Users\\dev\\Desktop\\oss/**)"
+    ]
+  },
+  "$version": 3
+}
