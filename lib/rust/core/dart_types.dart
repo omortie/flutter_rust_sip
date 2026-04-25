@@ -12,10 +12,7 @@ class AccountInfo {
   final int accId;
   final int statusCode;
 
-  const AccountInfo({
-    required this.accId,
-    required this.statusCode,
-  });
+  const AccountInfo({required this.accId, required this.statusCode});
 
   @override
   int get hashCode => accId.hashCode ^ statusCode.hashCode;
@@ -64,7 +61,5 @@ sealed class CallState with _$CallState {
   const factory CallState.connecting() = CallState_Connecting;
   const factory CallState.confirmed() = CallState_Confirmed;
   const factory CallState.disconnected() = CallState_Disconnected;
-  const factory CallState.error(
-    String field0,
-  ) = CallState_Error;
+  const factory CallState.error(String field0) = CallState_Error;
 }
