@@ -1,8 +1,11 @@
-## 1.0.1
+# Changelog
+
+## [1.0.1]
 
 * Added pub info
+* Removed not-necessary example from Rust
 
-## 1.0.0
+## [1.0.0]
 
 * Initial release with minimum functionality
 * Minimal Android support

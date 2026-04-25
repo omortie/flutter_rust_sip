@@ -200,19 +200,19 @@ pub fn account_setup(uri: String, username: String, password: String) -> Result<
         let username: String = username;
         let data: String = password;
 
-        let realm_pj_str_t = match (make_pj_str_t(realm)) {
+        let realm_pj_str_t = match make_pj_str_t(realm) {
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        let scheme_pj_str_t = match (make_pj_str_t(scheme)) {
+        let scheme_pj_str_t = match make_pj_str_t(scheme) {
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        let username_pj_str_t = match (make_pj_str_t(username)) {
+        let username_pj_str_t = match make_pj_str_t(username) {
             Err(x) => return Err(x),
             Ok(y) => y,
         };
-        let data_pj_str_t = match (make_pj_str_t(data)) {
+        let data_pj_str_t = match make_pj_str_t(data) {
             Err(x) => return Err(x),
             Ok(y) => y,
         };
