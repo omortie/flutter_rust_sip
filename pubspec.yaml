@@ -2,7 +2,7 @@ name: flutter_rust_sip
 description: "A cross-platform SIP client built over PJSIP project for Flutter using C/Rust FFI."
 repository: https://github.com/omortie/flutter_rust_sip
 home: https://github.com/omortie/flutter_rust_sip
-version: 1.0.1
+version: 1.0.2
 
 topics: 
   - sip

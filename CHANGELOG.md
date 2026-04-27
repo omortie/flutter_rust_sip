@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.2]
+
+* Fixed missing freezed generated files
+
 ## [1.0.1]
 
 * Added pub info
