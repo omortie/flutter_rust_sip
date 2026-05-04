@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0]
+
+* Increase big version to avoid pjsip errors
+
 ## [1.0.2]
 
 * Fixed missing freezed generated files
