@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1]
+
+* Bump dependencies versions
+
 ## [1.1.0]
 
 * Increase big version to avoid pjsip errors
