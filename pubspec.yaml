@@ -2,7 +2,7 @@ name: flutter_rust_sip
 description: "A cross-platform SIP client built over PJSIP project for Flutter using C/Rust FFI."
 repository: https://github.com/omortie/flutter_rust_sip
 home: https://github.com/omortie/flutter_rust_sip
-version: 1.1.0
+version: 1.1.1
 
 topics: 
   - sip
@@ -24,16 +24,16 @@ dependencies:
     sdk: flutter
   flutter_rust_bridge: ^2.11.1
   freezed_annotation: ^3.1.0
-  hooks: ^1.0.3
+  hooks: ^2.0.2
   native_toolchain_rust: ^1.0.3
   rxdart: ^0.28.0
 
 dev_dependencies:
   ffi: ^2.2.0
-  ffigen: ^13.0.0
+  ffigen: ^20.1.1
   freezed: ^3.2.5
   build_runner: ^2.14.1
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   
   flutter_test:
     sdk: flutter
