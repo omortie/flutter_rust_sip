@@ -8,74 +8,58 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'dart_types.freezed.dart';
 
-            
+class AccountInfo {
+  final int accId;
+  final int statusCode;
 
-            
+  const AccountInfo({required this.accId, required this.statusCode});
 
-            class AccountInfo  {
-                final int accId;
-final int statusCode;
+  @override
+  int get hashCode => accId.hashCode ^ statusCode.hashCode;
 
-                const AccountInfo({required this.accId ,required this.statusCode ,});
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountInfo &&
+          runtimeType == other.runtimeType &&
+          accId == other.accId &&
+          statusCode == other.statusCode;
+}
 
-                
-                
+class CallInfo {
+  final int callId;
+  final String callUrl;
+  final CallState state;
 
-                
-        @override
-        int get hashCode => accId.hashCode^statusCode.hashCode;
-        
+  const CallInfo({
+    required this.callId,
+    required this.callUrl,
+    required this.state,
+  });
 
-                
-        @override
-        bool operator ==(Object other) =>
-            identical(this, other) ||
-            other is AccountInfo &&
-                runtimeType == other.runtimeType
-                && accId == other.accId&& statusCode == other.statusCode;
-        
-            }
+  @override
+  int get hashCode => callId.hashCode ^ callUrl.hashCode ^ state.hashCode;
 
-class CallInfo  {
-                final int callId;
-final String callUrl;
-final CallState state;
-
-                const CallInfo({required this.callId ,required this.callUrl ,required this.state ,});
-
-                
-                
-
-                
-        @override
-        int get hashCode => callId.hashCode^callUrl.hashCode^state.hashCode;
-        
-
-                
-        @override
-        bool operator ==(Object other) =>
-            identical(this, other) ||
-            other is CallInfo &&
-                runtimeType == other.runtimeType
-                && callId == other.callId&& callUrl == other.callUrl&& state == other.state;
-        
-            }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallInfo &&
+          runtimeType == other.runtimeType &&
+          callId == other.callId &&
+          callUrl == other.callUrl &&
+          state == other.state;
+}
 
 @freezed
-                sealed class CallState with _$CallState  {
-                    const CallState._();
+sealed class CallState with _$CallState {
+  const CallState._();
 
-                     const factory CallState.null_() = CallState_Null;
- const factory CallState.early() = CallState_Early;
- const factory CallState.incoming() = CallState_Incoming;
- const factory CallState.calling() = CallState_Calling;
- const factory CallState.connecting() = CallState_Connecting;
- const factory CallState.confirmed() = CallState_Confirmed;
- const factory CallState.disconnected() = CallState_Disconnected;
- const factory CallState.error(  String field0,) = CallState_Error;
-
-                    
-
-                    
-                }
-            
+  const factory CallState.null_() = CallState_Null;
+  const factory CallState.early() = CallState_Early;
+  const factory CallState.incoming() = CallState_Incoming;
+  const factory CallState.calling() = CallState_Calling;
+  const factory CallState.connecting() = CallState_Connecting;
+  const factory CallState.confirmed() = CallState_Confirmed;
+  const factory CallState.disconnected() = CallState_Disconnected;
+  const factory CallState.error(String field0) = CallState_Error;
+}

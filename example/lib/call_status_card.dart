@@ -21,7 +21,11 @@ class CallStatusCard extends StatelessWidget {
   final CallInfo callInfo;
   final void Function(int)? onHangup;
 
-  const CallStatusCard({super.key, required this.service, required this.callInfo, this.onHangup});
+  const CallStatusCard(
+      {super.key,
+      required this.service,
+      required this.callInfo,
+      this.onHangup});
 
   @override
   Widget build(BuildContext context) {

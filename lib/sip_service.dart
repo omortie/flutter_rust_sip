@@ -95,7 +95,7 @@ class SIPService {
       return Future.error(initializeErr.toString());
     }
   }
- 
+
   Future<void> dispose() async {
     initialized = false;
     await callStateBroadcast.close();
@@ -136,10 +136,7 @@ class SIPService {
       error = 'SIPService not initialized';
     }
     try {
-      final callId = await makeCall(
-        phoneNumber: phoneNumber,
-        domain: domain,
-      );
+      final callId = await makeCall(phoneNumber: phoneNumber, domain: domain);
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
 
       return callId;

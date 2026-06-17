@@ -15,7 +15,8 @@ class SIPWidgetBuilder extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Center(
-          child: service.when(data: (service) {
+          child: service.when(
+            data: (service) {
               return Column(
                 children: [
                   const Text('SIP Service Initialized'),
@@ -25,11 +26,11 @@ class SIPWidgetBuilder extends ConsumerWidget {
                     const Text('SIP Service not registered yet'),
                 ],
               );
-          }, error: (error, _) {
-            return Text('Error initializing SIP Service: $error');
             },
-            loading: () =>
-                const CircularProgressIndicator(),
+            error: (error, _) {
+              return Text('Error initializing SIP Service: $error');
+            },
+            loading: () => const CircularProgressIndicator(),
           ),
         ),
       ],
