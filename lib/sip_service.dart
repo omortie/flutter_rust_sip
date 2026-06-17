@@ -4,7 +4,6 @@ import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
-import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {
@@ -96,7 +95,7 @@ class SIPService {
       return Future.error(initializeErr.toString());
     }
   }
- 
+
   Future<void> dispose() async {
     initialized = false;
     await callStateBroadcast.close();
@@ -113,11 +112,7 @@ class SIPService {
       if (initialized == false) {
         throw 'SIPService not initialized';
       }
-      final accId = await accountSetup(
-        uri: uri,
-        username: username,
-        password: password,
-      );
+      final accId = await accountSetup(uri: uri, username: username, password: password);
       // save account ID so we check for its registration updates in account stream
       accountID = accId;
       debugPrint('Account registered with ID: $accId');
@@ -137,10 +132,7 @@ class SIPService {
       error = 'SIPService not initialized';
     }
     try {
-      final callId = await makeCall(
-        phoneNumber: phoneNumber,
-        domain: domain,
-      );
+      final callId = await makeCall(phoneNumber: phoneNumber, domain: domain);
       debugPrint('Call initiated to $phoneNumber with call ID: $callId');
 
       return callId;

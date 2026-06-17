@@ -206,6 +206,7 @@ fn wire__crate__api__simple__init_pjsua_impl(
             let api_incoming_call_strategy =
                 <crate::core::types::OnIncommingCall>::sse_decode(&mut deserializer);
             let api_stun_srv = <String>::sse_decode(&mut deserializer);
+            let api_log_level = <crate::core::types::LogLevel>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, crate::core::types::PJSUAError>((move || {
@@ -213,6 +214,7 @@ fn wire__crate__api__simple__init_pjsua_impl(
                         api_local_port,
                         api_incoming_call_strategy,
                         api_stun_srv,
+                        api_log_level,
                     )?;
                     Ok(output_ok)
                 })())
@@ -500,6 +502,20 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for crate::core::types::LogLevel {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::core::types::LogLevel::Error,
+            1 => crate::core::types::LogLevel::Warning,
+            2 => crate::core::types::LogLevel::Info,
+            3 => crate::core::types::LogLevel::Debug,
+            _ => unreachable!("Invalid variant for LogLevel: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::core::types::OnIncommingCall {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -710,6 +726,26 @@ impl flutter_rust_bridge::IntoIntoDart<crate::core::dart_types::CallState>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::core::types::LogLevel {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Error => 0.into_dart(),
+            Self::Warning => 1.into_dart(),
+            Self::Info => 2.into_dart(),
+            Self::Debug => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::core::types::LogLevel {}
+impl flutter_rust_bridge::IntoIntoDart<crate::core::types::LogLevel>
+    for crate::core::types::LogLevel
+{
+    fn into_into_dart(self) -> crate::core::types::LogLevel {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::core::types::OnIncommingCall {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -894,6 +930,24 @@ impl SseEncode for Vec<u8> {
         for item in self {
             <u8>::sse_encode(item, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::core::types::LogLevel {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::core::types::LogLevel::Error => 0,
+                crate::core::types::LogLevel::Warning => 1,
+                crate::core::types::LogLevel::Info => 2,
+                crate::core::types::LogLevel::Debug => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 

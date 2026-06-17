@@ -4,11 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rust_sip/rust/core/types.dart' show OnIncommingCall;
 import 'package:flutter_rust_sip/sip_service.dart';
 
-final sipServiceProvider =
-    FutureProvider<SIPService>((ref) async {
+final sipServiceProvider = FutureProvider<SIPService>((ref) async {
   try {
-    final service = await SIPService.init(
-        localPort: 5062, incomingCallStrategy: OnIncommingCall.autoAnswer);
+    final service =
+        await SIPService.init(localPort: 5062, incomingCallStrategy: OnIncommingCall.autoAnswer);
     return service;
   } catch (e) {
     // Return a failed future instead of crashing

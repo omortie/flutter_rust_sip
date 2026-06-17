@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart'
-    show
-        CallInfo,
-        CallState,
-        CallState_Calling,
-        CallState_Connecting,
-        CallState_Confirmed;
+    show CallInfo, CallState, CallState_Calling, CallState_Connecting, CallState_Confirmed;
 import 'package:flutter_rust_sip/sip_service.dart';
 
 extension CallInfoExtension on CallState {
   bool get isActive {
-    return this is CallState_Calling ||
-        this is CallState_Connecting ||
-        this is CallState_Confirmed;
+    return this is CallState_Calling || this is CallState_Connecting || this is CallState_Confirmed;
   }
 }
 
@@ -60,8 +53,7 @@ class CallStatusCard extends StatelessWidget {
                 Text(
                   callInfo.state.toString(),
                   style: TextStyle(
-                    color:
-                        callInfo.state.isActive ? Colors.green : Colors.black54,
+                    color: callInfo.state.isActive ? Colors.green : Colors.black54,
                     fontSize: 16,
                   ),
                 ),
@@ -88,8 +80,7 @@ class CallStatusCard extends StatelessWidget {
               icon: const Icon(Icons.call_end),
               label: const Text('Hang Up'),
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    callInfo.state.isActive ? Colors.red : Colors.grey,
+                backgroundColor: callInfo.state.isActive ? Colors.red : Colors.grey,
               ),
             ),
           ],

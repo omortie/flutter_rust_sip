@@ -38,6 +38,29 @@ pub enum TransportMode {
 }
 
 #[derive(Debug)]
+pub enum LogLevel {
+    /// Errors only
+    Error,
+    /// Errors and warnings
+    Warning,
+    /// Informational (registration, call setup, etc.)
+    Info,
+    /// Verbose debug output
+    Debug,
+}
+
+impl LogLevel {
+    pub fn as_pj_level(&self) -> u32 {
+        match self {
+            LogLevel::Error => 1,
+            LogLevel::Warning => 2,
+            LogLevel::Info => 3,
+            LogLevel::Debug => 7,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub enum OnIncommingCall {
     AutoAnswer,
     Ignore

@@ -31,11 +31,7 @@ class CallInfo {
   final String callUrl;
   final CallState state;
 
-  const CallInfo({
-    required this.callId,
-    required this.callUrl,
-    required this.state,
-  });
+  const CallInfo({required this.callId, required this.callUrl, required this.state});
 
   @override
   int get hashCode => callId.hashCode ^ callUrl.hashCode ^ state.hashCode;

@@ -31,13 +31,13 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       final status = statusAsync.value;
       setState(() {
         registrationStatusText = switch (status) {
-        200 => 'SIP Account Registered Successfully',
-        -1 => 'Not Registered yet (Error code: $status)',
-        _ => 'Registration failed... (Status code: $status)',
-      };
+          200 => 'SIP Account Registered Successfully',
+          -1 => 'Not Registered yet (Error code: $status)',
+          _ => 'Registration failed... (Status code: $status)',
+        };
       });
     });
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -92,8 +92,8 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                     final service = await ref.read(sipServiceProvider.future);
                     service
                         .registerAccount(
-                        uri: _sipServerUrlController.text,
-                        username: _usernameController.text,
+                            uri: _sipServerUrlController.text,
+                            username: _usernameController.text,
                             password: _passwordController.text)
                         .then((accountId) {
                       debugPrint('Account registered with ID: $accountId');

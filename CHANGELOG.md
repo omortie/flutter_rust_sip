@@ -1,8 +1,9 @@
 # Changelog
 
-## [1.1.1]
+## [1.1.2]
 
 * Bump dependencies versions
+* Added no-op support for web builds
 
 ## [1.1.0]
 
