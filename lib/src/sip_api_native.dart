@@ -31,12 +31,14 @@ class NativeSipApi implements SipApi {
     required int localPort,
     required OnIncommingCall incomingCallStrategy,
     required String stunSrv,
+    LogLevel logLevel = .warning,
   }) async {
     await initialize();
     return rust_api.initPjsua(
       localPort: localPort,
       incomingCallStrategy: incomingCallStrategy,
       stunSrv: stunSrv,
+      logLevel: logLevel,
     );
   }
 

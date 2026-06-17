@@ -133,10 +133,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
+      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.2.1"
   collection:
     dependency: transitive
     description:
@@ -281,10 +281,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
+      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "2.0.2"
   http_multi_server:
     dependency: transitive
     description:
@@ -366,10 +366,10 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: "12956d0ad8390bbcc63ca2e1469c0619946ccb52809807067a7020d57e647aa6"
+      sha256: dc0b7dc7651697ea4ff3e69ef44b0407ea32c487a39fff6a4004fa585e901861
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.18"
+    version: "0.12.19"
   material_color_utilities:
     dependency: transitive
     description:
@@ -382,10 +382,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
+      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.0"
+    version: "1.18.0"
   mime:
     dependency: transitive
     description:
@@ -398,10 +398,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_rust
-      sha256: e53ef1025e2c190333ec61f638513c890c1becf11222e27b115b03bac369c6be
+      sha256: faa57d2258a3b0fd2a634054f54e4496c9fcbd971977e7d2b7e6916d56892857
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4+0"
   package_config:
     dependency: transitive
     description:
@@ -579,10 +579,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "19a78f63e83d3a61f00826d09bc2f60e191bf3504183c001262be6ac75589fb8"
+      sha256: "949a932224383300f01be9221c39180316445ecb8e7547f70a41a35bf421fb9e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.8"
+    version: "0.7.11"
   toml:
     dependency: transitive
     description:

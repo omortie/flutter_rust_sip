@@ -10,7 +10,7 @@ use std::mem::MaybeUninit;
 use log::debug;
 
 use crate::{
-    core::types::{OnIncommingCall, PJSUAError, TransportMode},
+    core::types::{LogLevel, OnIncommingCall, PJSUAError, TransportMode},
     utils::{error_exit, make_pj_str_t},
 };
 
@@ -48,10 +48,11 @@ pub fn initialize_pjsua(
     incommingCallBehaviour: OnIncommingCall,
     port: u32,
     stun_srv: String,
+    log_level: LogLevel,
 ) -> Result<i8, PJSUAError> {
     debug!("initializing PJSIP");
     // INIT
-    init(incommingCallBehaviour, stun_srv)?;
+    init(incommingCallBehaviour, stun_srv, log_level)?;
 
     // ADD UDP TRANSPORT
     add_transport(port, TransportMode::UDP)?;
@@ -63,7 +64,7 @@ pub fn initialize_pjsua(
     Ok(0)
 }
 
-pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Result<i8, PJSUAError> {
+pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String, log_level: LogLevel) -> Result<i8, PJSUAError> {
     // Create PJSUA instance
     let status = unsafe { pj_sys::pjsua_create() };
     if status != pj_sys::pj_constants__PJ_SUCCESS as i32 {
@@ -93,7 +94,7 @@ pub fn init(incomming_call_behaviour: OnIncommingCall, stun_srv: String) -> Resu
     let mut log_cfg = MaybeUninit::<pj_sys::pjsua_logging_config>::zeroed();
     unsafe { pj_sys::pjsua_logging_config_default(log_cfg.as_mut_ptr()); }
     let log_cfg_ref = unsafe { &mut *log_cfg.as_mut_ptr() };
-    log_cfg_ref.console_level = 7;
+    log_cfg_ref.console_level = log_level.as_pj_level();
 
     // pjsua_media_config
     let mut media_cfg = MaybeUninit::<pj_sys::pjsua_media_config>::zeroed();
