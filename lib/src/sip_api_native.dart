@@ -49,11 +49,7 @@ class NativeSipApi implements SipApi {
     required String password,
   }) async {
     await initialize();
-    return rust_api.accountSetup(
-      uri: uri,
-      username: username,
-      password: password,
-    );
+    return rust_api.accountSetup(uri: uri, username: username, password: password);
   }
 
   @override
@@ -75,10 +71,7 @@ class NativeSipApi implements SipApi {
   }
 
   @override
-  Future<int> makeCall({
-    required String phoneNumber,
-    required String domain,
-  }) async {
+  Future<int> makeCall({required String phoneNumber, required String domain}) async {
     await initialize();
     return rust_api.makeCall(phoneNumber: phoneNumber, domain: domain);
   }

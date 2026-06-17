@@ -10,14 +10,10 @@ class LoginWidget extends ConsumerStatefulWidget {
 }
 
 class _LoginWidgetState extends ConsumerState<LoginWidget> {
-  final TextEditingController _usernameController = TextEditingController()
-    ..text = 'client';
-  final TextEditingController _passwordController = TextEditingController()
-    ..text = 'clientpwd';
-  final TextEditingController _sipServerUrlController = TextEditingController()
-    ..text = 'localhost';
-  final TextEditingController _portController = TextEditingController()
-    ..text = '5060';
+  final TextEditingController _usernameController = TextEditingController()..text = 'client';
+  final TextEditingController _passwordController = TextEditingController()..text = 'clientpwd';
+  final TextEditingController _sipServerUrlController = TextEditingController()..text = 'localhost';
+  final TextEditingController _portController = TextEditingController()..text = '5060';
   String registrationStatusText = 'Not Registered yet';
 
   @override

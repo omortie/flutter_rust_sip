@@ -4,10 +4,8 @@ import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:native_toolchain_rust/native_toolchain_rust.dart';
 
-const _pkgConfigSysrootx8664EnvVar =
-    'PKG_CONFIG_SYSROOT_DIR_x86_64_linux_android';
-const _pkgConfigSysrootAarch64EnvVar =
-    'PKG_CONFIG_SYSROOT_DIR_aarch64_linux_android';
+const _pkgConfigSysrootx8664EnvVar = 'PKG_CONFIG_SYSROOT_DIR_x86_64_linux_android';
+const _pkgConfigSysrootAarch64EnvVar = 'PKG_CONFIG_SYSROOT_DIR_aarch64_linux_android';
 const _androidNDKHomeEnvVar = 'ANDROID_NDK_HOME';
 
 class Env {
@@ -19,8 +17,7 @@ class Env {
     // read cwd .env
     _env = Platform.environment.map((key, value) => MapEntry(key, value));
     // find $HOME/frtp_build.env file
-    final home =
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
     final file = File('$home/cross_build.env');
     // coverage:ignore-start
     if (file.existsSync()) {
@@ -28,9 +25,7 @@ class Env {
       for (final line in lines) {
         int index = line.indexOf("=");
         if (index != -1) {
-          _env[line.substring(0, index).trim()] = line
-              .substring(index + 1)
-              .trim();
+          _env[line.substring(0, index).trim()] = line.substring(index + 1).trim();
         }
       }
     }

@@ -9,8 +9,7 @@ import 'core/types.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
-import 'frb_generated.io.dart'
-    if (dart.library.js_interop) 'frb_generated.web.dart';
+import 'frb_generated.io.dart' if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Main entrypoint of the Rust API
@@ -48,12 +47,10 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   static void dispose() => instance.disposeImpl();
 
   @override
-  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor =>
-      RustLibApiImpl.new;
+  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
 
   @override
-  WireConstructor<RustLibWire> get wireConstructor =>
-      RustLibWire.fromExternalLibrary;
+  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
 
   @override
   Future<void> executeRustInitializers() async {
@@ -70,12 +67,11 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   @override
   int get rustContentHash => -175070977;
 
-  static const kDefaultExternalLibraryLoaderConfig =
-      ExternalLibraryLoaderConfig(
-        stem: 'flutter_rust_sip',
-        ioDirectory: 'rust/target/release/',
-        webPrefix: 'pkg/',
-      );
+  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
+    stem: 'flutter_rust_sip',
+    ioDirectory: 'rust/target/release/',
+    webPrefix: 'pkg/',
+  );
 }
 
 abstract class RustLibApi extends BaseApi {
@@ -98,10 +94,7 @@ abstract class RustLibApi extends BaseApi {
     required LogLevel logLevel,
   });
 
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  });
+  Future<int> crateApiSimpleMakeCall({required String phoneNumber, required String domain});
 
   Future<void> crateApiSimpleMarkCallAlive({required int callId});
 
@@ -131,12 +124,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_String(uri, serializer);
           sse_encode_String(username, serializer);
           sse_encode_String(password, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_32,
@@ -149,10 +137,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta => const TaskConstMeta(
-    debugName: "account_setup",
-    argNames: ["uri", "username", "password"],
-  );
+  TaskConstMeta get kCrateApiSimpleAccountSetupConstMeta =>
+      const TaskConstMeta(debugName: "account_setup", argNames: ["uri", "username", "password"]);
 
   @override
   Future<int> crateApiSimpleDestroyPjsua() {
@@ -160,17 +146,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_i_8, decodeErrorData: sse_decode_pjsua_error),
         constMeta: kCrateApiSimpleDestroyPjsuaConstMeta,
         argValues: [],
         apiImpl: this,
@@ -188,12 +166,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -215,17 +188,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
         constMeta: kCrateApiSimpleInitAppConstMeta,
         argValues: [],
         apiImpl: this,
@@ -251,17 +216,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_on_incomming_call(incomingCallStrategy, serializer);
           sse_encode_String(stunSrv, serializer);
           sse_encode_log_level(logLevel, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_i_8,
-          decodeErrorData: sse_decode_pjsua_error,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_i_8, decodeErrorData: sse_decode_pjsua_error),
         constMeta: kCrateApiSimpleInitPjsuaConstMeta,
         argValues: [localPort, incomingCallStrategy, stunSrv, logLevel],
         apiImpl: this,
@@ -275,22 +232,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<int> crateApiSimpleMakeCall({
-    required String phoneNumber,
-    required String domain,
-  }) {
+  Future<int> crateApiSimpleMakeCall({required String phoneNumber, required String domain}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(phoneNumber, serializer);
           sse_encode_String(domain, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 6,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_i_32,
@@ -303,10 +252,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
   }
 
-  TaskConstMeta get kCrateApiSimpleMakeCallConstMeta => const TaskConstMeta(
-    debugName: "make_call",
-    argNames: ["phoneNumber", "domain"],
-  );
+  TaskConstMeta get kCrateApiSimpleMakeCallConstMeta =>
+      const TaskConstMeta(debugName: "make_call", argNames: ["phoneNumber", "domain"]);
 
   @override
   Future<void> crateApiSimpleMarkCallAlive({required int callId}) {
@@ -315,17 +262,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_i_32(callId, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 7,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
         constMeta: kCrateApiSimpleMarkCallAliveConstMeta,
         argValues: [callId],
         apiImpl: this,
@@ -345,17 +284,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
             sse_encode_StreamSink_account_info_Sse(accountSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 8,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8, port: port_);
           },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
+          codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
           constMeta: kCrateApiSimpleRegisterAccountStreamConstMeta,
           argValues: [accountSink],
           apiImpl: this,
@@ -366,10 +297,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSimpleRegisterAccountStreamConstMeta =>
-      const TaskConstMeta(
-        debugName: "register_account_stream",
-        argNames: ["accountSink"],
-      );
+      const TaskConstMeta(debugName: "register_account_stream", argNames: ["accountSink"]);
 
   @override
   Stream<CallInfo> crateApiSimpleRegisterCallStream() {
@@ -380,17 +308,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
             sse_encode_StreamSink_call_info_Sse(callSink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 9,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9, port: port_);
           },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
+          codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
           constMeta: kCrateApiSimpleRegisterCallStreamConstMeta,
           argValues: [callSink],
           apiImpl: this,
@@ -401,10 +321,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   TaskConstMeta get kCrateApiSimpleRegisterCallStreamConstMeta =>
-      const TaskConstMeta(
-        debugName: "register_call_stream",
-        argNames: ["callSink"],
-      );
+      const TaskConstMeta(debugName: "register_call_stream", argNames: ["callSink"]);
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
@@ -413,9 +330,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(
-    dynamic raw,
-  ) {
+  RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -436,20 +351,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   AccountInfo dco_decode_account_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
-    return AccountInfo(
-      accId: dco_decode_i_32(arr[0]),
-      statusCode: dco_decode_i_32(arr[1]),
-    );
+    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return AccountInfo(accId: dco_decode_i_32(arr[0]), statusCode: dco_decode_i_32(arr[1]));
   }
 
   @protected
   CallInfo dco_decode_call_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return CallInfo(
       callId: dco_decode_i_32(arr[0]),
       callUrl: dco_decode_String(arr[1]),
@@ -569,17 +479,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(
-    SseDeserializer deserializer,
-  ) {
+  RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
 
   @protected
-  RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
-    SseDeserializer deserializer,
-  ) {
+  RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
@@ -737,10 +643,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_AnyhowException(AnyhowException self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
@@ -837,10 +740,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -853,10 +753,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_on_incomming_call(
-    OnIncommingCall self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_on_incomming_call(OnIncommingCall self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
   }

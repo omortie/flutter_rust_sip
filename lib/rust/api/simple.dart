@@ -30,8 +30,7 @@ Future<int> accountSetup({
   password: password,
 );
 
-Stream<CallInfo> registerCallStream() =>
-    RustLib.instance.api.crateApiSimpleRegisterCallStream();
+Stream<CallInfo> registerCallStream() => RustLib.instance.api.crateApiSimpleRegisterCallStream();
 
 Stream<AccountInfo> registerAccountStream() =>
     RustLib.instance.api.crateApiSimpleRegisterAccountStream();
@@ -40,10 +39,7 @@ Future<void> markCallAlive({required int callId}) =>
     RustLib.instance.api.crateApiSimpleMarkCallAlive(callId: callId);
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>
-    RustLib.instance.api.crateApiSimpleMakeCall(
-      phoneNumber: phoneNumber,
-      domain: domain,
-    );
+    RustLib.instance.api.crateApiSimpleMakeCall(phoneNumber: phoneNumber, domain: domain);
 
 Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);

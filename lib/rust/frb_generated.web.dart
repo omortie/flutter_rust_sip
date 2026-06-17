@@ -26,9 +26,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
-  RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(
-    dynamic raw,
-  );
+  RustStreamSink<AccountInfo> dco_decode_StreamSink_account_info_Sse(dynamic raw);
 
   @protected
   RustStreamSink<CallInfo> dco_decode_StreamSink_call_info_Sse(dynamic raw);
@@ -76,14 +74,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<AccountInfo> sse_decode_StreamSink_account_info_Sse(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<CallInfo> sse_decode_StreamSink_call_info_Sse(SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -128,10 +122,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
-  void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  );
+  void sse_encode_AnyhowException(AnyhowException self, SseSerializer serializer);
 
   @protected
   void sse_encode_StreamSink_account_info_Sse(
@@ -140,10 +131,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_StreamSink_call_info_Sse(
-    RustStreamSink<CallInfo> self,
-    SseSerializer serializer,
-  );
+  void sse_encode_StreamSink_call_info_Sse(RustStreamSink<CallInfo> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -164,19 +152,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_i_8(int self, SseSerializer serializer);
 
   @protected
-  void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  );
+  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer);
 
   @protected
   void sse_encode_log_level(LogLevel self, SseSerializer serializer);
 
   @protected
-  void sse_encode_on_incomming_call(
-    OnIncommingCall self,
-    SseSerializer serializer,
-  );
+  void sse_encode_on_incomming_call(OnIncommingCall self, SseSerializer serializer);
 
   @protected
   void sse_encode_pjsua_error(PJSUAError self, SseSerializer serializer);

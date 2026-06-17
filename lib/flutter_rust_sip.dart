@@ -31,13 +31,11 @@ Stream<CallInfo> registerCallStream() => sipApi.registerCallStream();
 
 Stream<AccountInfo> registerAccountStream() => sipApi.registerAccountStream();
 
-Future<void> markCallAlive({required int callId}) =>
-    sipApi.markCallAlive(callId: callId);
+Future<void> markCallAlive({required int callId}) => sipApi.markCallAlive(callId: callId);
 
 Future<int> makeCall({required String phoneNumber, required String domain}) =>
     sipApi.makeCall(phoneNumber: phoneNumber, domain: domain);
 
-Future<void> hangupCall({required int callId}) =>
-    sipApi.hangupCall(callId: callId);
+Future<void> hangupCall({required int callId}) => sipApi.hangupCall(callId: callId);
 
 Future<int> destroyPjsua() => sipApi.destroyPjsua();

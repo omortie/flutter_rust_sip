@@ -112,11 +112,7 @@ class SIPService {
       if (initialized == false) {
         throw 'SIPService not initialized';
       }
-      final accId = await accountSetup(
-        uri: uri,
-        username: username,
-        password: password,
-      );
+      final accId = await accountSetup(uri: uri, username: username, password: password);
       // save account ID so we check for its registration updates in account stream
       accountID = accId;
       debugPrint('Account registered with ID: $accId');
