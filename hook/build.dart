@@ -1,5 +1,6 @@
 import 'dart:io' show Platform, File;
 
+import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:native_toolchain_rust/native_toolchain_rust.dart';
 
@@ -61,15 +62,19 @@ class Env {
 }
 
 void main(List<String> args) async {
-    // we need to read an standard env file in a known-well path `$HOME/cross_build.env` to get the env vars for building, 
-  //since the hook is filtering environment variables and there is a known issue about this: https://github.com/dart-lang/native/issues/2623
-  final envFile = Env.instance;
-
-  final ndkHome = envFile.getString(_androidNDKHomeEnvVar);
-  final ndkPrebuiltRoot = '$ndkHome/toolchains/llvm/prebuilt/linux-x86_64';
-  final pkgConfigSysrootDir = '$ndkPrebuiltRoot/sysroot';
-  
   await build(args, (input, output) async {
+    // Web builds do not request code assets, and PJSIP cannot be built for web.
+    if (!input.config.buildCodeAssets) {
+      return;
+    }
+
+    // Read environment variables from `$HOME/cross_build.env` because hooks
+    // filter the process environment: https://github.com/dart-lang/native/issues/2623
+    final envFile = Env.instance;
+    final ndkHome = envFile.getString(_androidNDKHomeEnvVar);
+    final ndkPrebuiltRoot = '$ndkHome/toolchains/llvm/prebuilt/linux-x86_64';
+    final pkgConfigSysrootDir = '$ndkPrebuiltRoot/sysroot';
+
     await RustBuilder(
       assetName: 'flutter_rust_sip',
       cratePath: 'rust',
@@ -77,9 +82,6 @@ void main(List<String> args) async {
         _pkgConfigSysrootx8664EnvVar: pkgConfigSysrootDir,
         _pkgConfigSysrootAarch64EnvVar: pkgConfigSysrootDir,
       },
-    ).run(
-      input: input,
-      output: output,
-    );
+    ).run(input: input, output: output);
   });
 }

@@ -4,7 +4,6 @@ import 'package:flutter_rust_sip/flutter_rust_sip.dart' as frs;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_sip/flutter_rust_sip.dart';
-import 'package:flutter_rust_sip/rust/api/simple.dart';
 import 'package:rxdart/subjects.dart' as rx;
 
 class SIPService {

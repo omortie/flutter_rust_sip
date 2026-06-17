@@ -2,6 +2,9 @@
 
 A cross-platform SIP (Session Initiation Protocol) client built for Flutter using C/Rust FFI.
 
+Web is supported as a compatibility target only. Since PJSIP cannot be
+compiled for web, the public SIP APIs are no-ops when running in a browser.
+
 ## Features
 
 - SIP registration and call handling

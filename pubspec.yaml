@@ -13,13 +13,15 @@ topics:
 platforms:
   linux:
   windows:
-  android:  
+  android:
+  web:
 
 
 environment:
   sdk: ^3.10.0
 
 dependencies:
+  code_assets: ^1.0.0
   flutter:
     sdk: flutter
   flutter_rust_bridge: ^2.11.1
