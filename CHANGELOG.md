@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.3]
+
+* Bump flutter_rust_bridge version
+
 ## [1.1.2]
 
 * Bump dependencies versions
