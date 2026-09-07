@@ -35,7 +35,10 @@ class WebSipApi implements SipApi {
   Future<void> markCallAlive({required int callId}) async {}
 
   @override
-  Future<int> makeCall({required String phoneNumber, required String domain}) async => 0;
+  Future<int> makeCall({
+    required String phoneNumber,
+    required String domain,
+  }) async => 0;
 
   @override
   Future<void> hangupCall({required int callId}) async {}
