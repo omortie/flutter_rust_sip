@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.5]
+
+* Bumped flutter_rust_bridge version to 2.13.0
+
 ## [1.1.4]
 
 * Bundle libc++_shared on Android builds
