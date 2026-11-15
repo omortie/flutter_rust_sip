@@ -56,7 +56,7 @@ Future<int> destroyPjsua() => RustLib.instance.api.crateApiSimpleDestroyPjsua();
 Future<void> setMicrophoneGain({required double gain}) =>
     RustLib.instance.api.crateApiSimpleSetMicrophoneGain(gain: gain);
 
-/// Read the actual capture gain from sound-device conference port zero.
+/// Last gain successfully applied through this API; unity after initialization.
 Future<double> getMicrophoneGain() =>
     RustLib.instance.api.crateApiSimpleGetMicrophoneGain();
 

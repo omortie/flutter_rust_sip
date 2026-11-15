@@ -1,6 +1,11 @@
 // FFI-safe wrappers for PJSUA functions
 
 use flutter_rust_bridge::frb;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+// Keep a primitive-only record of successful adjustments. pjsip-sys bundled
+// binaries and generated port-info layouts can differ in conference capacity.
+static MICROPHONE_GAIN: AtomicU64 = AtomicU64::new(1.0_f64.to_bits());
 
 use crate::core::{
     helpers::*,
@@ -23,6 +28,7 @@ pub fn init_pjsua(
 ) -> Result<i8, PJSUAError> {
     // initialize pjsua
     initialize_pjsua(incoming_call_strategy, local_port, stun_srv, log_level).map(|result| {
+        MICROPHONE_GAIN.store(1.0_f64.to_bits(), Ordering::Relaxed);
         // Start SIP alive tester task to check alive flag periodically as destroy management
         std::thread::spawn(|| crate::core::managers::call_alive_tester_task());
 
@@ -69,19 +75,18 @@ pub fn set_microphone_gain(gain: f64) -> Result<(), PJSUAError> {
     get_pjsip_worker().execute_sync(move || {
         require_audio_running()?;
         let status = unsafe { pjsip::pjsua_conf_adjust_rx_level(0, gain as f32) };
-        check_audio_status(status)
+        check_audio_status(status)?;
+        MICROPHONE_GAIN.store(gain.to_bits(), Ordering::Relaxed);
+        Ok(())
     })
 }
 
-/// Read the actual capture gain from sound-device conference port zero.
+/// Last gain successfully applied through this API; unity after initialization.
 pub fn get_microphone_gain() -> Result<f64, PJSUAError> {
     require_audio_running()?;
     get_pjsip_worker().execute_sync(|| {
         require_audio_running()?;
-        let mut info = std::mem::MaybeUninit::<pjsip::pjsua_conf_port_info>::uninit();
-        let status = unsafe { pjsip::pjsua_conf_get_port_info(0, info.as_mut_ptr()) };
-        check_audio_status(status)?;
-        Ok(unsafe { info.assume_init() }.rx_level_adj as f64)
+        Ok(f64::from_bits(MICROPHONE_GAIN.load(Ordering::Relaxed)))
     })
 }
 
