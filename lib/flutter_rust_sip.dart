@@ -41,3 +41,12 @@ Future<void> hangupCall({required int callId}) =>
     sipApi.hangupCall(callId: callId);
 
 Future<int> destroyPjsua() => sipApi.destroyPjsua();
+
+/// Adjust microphone capture for all calls (0=mute, 1=unity, up to 4).
+Future<void> setMicrophoneGain({required double gain}) =>
+    sipApi.setMicrophoneGain(gain: gain);
+
+Future<double> getMicrophoneGain() => sipApi.getMicrophoneGain();
+
+/// Capture input level, normalized to 0..1. Poll while call media is active.
+Future<double> getMicrophoneLevel() => sipApi.getMicrophoneLevel();

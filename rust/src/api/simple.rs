@@ -3,7 +3,11 @@
 use flutter_rust_bridge::frb;
 
 use crate::core::{
-    helpers::*, init_logger, managers::{AccountManager, CallManager}, pj_worker::get_pjsip_worker, types::{DartAccountStream, DartCallStream, LogLevel, OnIncommingCall, PJSUAError}
+    helpers::*,
+    init_logger,
+    managers::{AccountManager, CallManager},
+    pj_worker::get_pjsip_worker,
+    types::{DartAccountStream, DartCallStream, LogLevel, OnIncommingCall, PJSUAError},
 };
 
 #[frb(init)]
@@ -56,4 +60,90 @@ pub fn hangup_call(call_id: i32) -> Result<(), PJSUAError> {
 
 pub fn destroy_pjsua() -> Result<i8, PJSUAError> {
     get_pjsip_worker().execute_sync(move || crate::core::managers::destroy_pjsua())
+}
+
+/// Capture gain shared by every call. 0 mutes, 1 is unity, 4 is maximum.
+pub fn set_microphone_gain(gain: f64) -> Result<(), PJSUAError> {
+    validate_microphone_gain(gain)?;
+    require_audio_running()?;
+    get_pjsip_worker().execute_sync(move || {
+        require_audio_running()?;
+        let status = unsafe { pjsip::pjsua_conf_adjust_rx_level(0, gain as f32) };
+        check_audio_status(status)
+    })
+}
+
+/// Read the actual capture gain from sound-device conference port zero.
+pub fn get_microphone_gain() -> Result<f64, PJSUAError> {
+    require_audio_running()?;
+    get_pjsip_worker().execute_sync(|| {
+        require_audio_running()?;
+        let mut info = std::mem::MaybeUninit::<pjsip::pjsua_conf_port_info>::uninit();
+        let status = unsafe { pjsip::pjsua_conf_get_port_info(0, info.as_mut_ptr()) };
+        check_audio_status(status)?;
+        Ok(unsafe { info.assume_init() }.rx_level_adj as f64)
+    })
+}
+
+/// Latest microphone input level, normalized to 0..1. Poll during active media
+/// (e.g. every 100 ms). This is capture input, never remote speaker output.
+pub fn get_microphone_level() -> Result<f64, PJSUAError> {
+    require_audio_running()?;
+    get_pjsip_worker().execute_sync(|| {
+        require_audio_running()?;
+        let mut level = 0;
+        let status =
+            unsafe { pjsip::pjsua_conf_get_signal_level(0, std::ptr::null_mut(), &mut level) };
+        check_audio_status(status)?;
+        Ok(f64::from(level.min(255)) / 255.0)
+    })
+}
+
+fn require_audio_running() -> Result<(), PJSUAError> {
+    if unsafe { pjsip::pjsua_get_state() } != pjsip::pjsua_state_PJSUA_STATE_RUNNING {
+        return Err(PJSUAError::InitializationError(
+            "PJSUA is not running".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn check_audio_status(status: i32) -> Result<(), PJSUAError> {
+    if status != 0 {
+        return Err(PJSUAError::InputValueError(format!(
+            "Audio operation failed: {status}"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_microphone_gain(gain: f64) -> Result<(), PJSUAError> {
+    if !gain.is_finite() || !(0.0..=4.0).contains(&gain) {
+        return Err(PJSUAError::InputValueError(
+            "Microphone gain must be finite and between 0 and 4".into(),
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod microphone_tests {
+    use super::*;
+
+    #[test]
+    fn rejects_invalid_gains() {
+        for gain in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, -0.01, 4.01] {
+            assert!(set_microphone_gain(gain).is_err());
+        }
+        for gain in [0.0, 0.5, 1.0, 4.0] {
+            assert!(validate_microphone_gain(gain).is_ok());
+        }
+    }
+
+    #[test]
+    fn audio_access_before_initialization_returns_errors() {
+        assert!(get_microphone_level().is_err());
+        assert!(get_microphone_gain().is_err());
+        assert!(set_microphone_gain(1.0).is_err());
+    }
 }

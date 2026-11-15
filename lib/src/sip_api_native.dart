@@ -90,6 +90,24 @@ class NativeSipApi implements SipApi {
   }
 
   @override
+  Future<void> setMicrophoneGain({required double gain}) async {
+    await initialize();
+    await rust_api.setMicrophoneGain(gain: gain);
+  }
+
+  @override
+  Future<double> getMicrophoneGain() async {
+    await initialize();
+    return rust_api.getMicrophoneGain();
+  }
+
+  @override
+  Future<double> getMicrophoneLevel() async {
+    await initialize();
+    return rust_api.getMicrophoneLevel();
+  }
+
+  @override
   Future<int> destroyPjsua() async {
     await initialize();
     return rust_api.destroyPjsua();

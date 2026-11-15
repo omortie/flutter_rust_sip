@@ -28,5 +28,13 @@ abstract interface class SipApi {
 
   Future<void> hangupCall({required int callId});
 
+  /// Global capture gain: 0 mutes, 1 is unity, maximum 4.
+  Future<void> setMicrophoneGain({required double gain});
+
+  Future<double> getMicrophoneGain();
+
+  /// Normalized capture input level (0..1), distinct from playback.
+  Future<double> getMicrophoneLevel();
+
   Future<int> destroyPjsua();
 }
