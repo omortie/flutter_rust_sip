@@ -44,5 +44,17 @@ class WebSipApi implements SipApi {
   Future<void> hangupCall({required int callId}) async {}
 
   @override
+  Future<void> setMicrophoneGain({required double gain}) async =>
+      throw UnsupportedError('Microphone controls require native SIP');
+
+  @override
+  Future<double> getMicrophoneGain() async =>
+      throw UnsupportedError('Microphone controls require native SIP');
+
+  @override
+  Future<double> getMicrophoneLevel() async =>
+      throw UnsupportedError('Microphone controls require native SIP');
+
+  @override
   Future<int> destroyPjsua() async => 0;
 }

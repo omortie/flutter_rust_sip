@@ -8,6 +8,8 @@ import '../core/types.dart';
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+// These functions are ignored because they are not marked as `pub`: `check_audio_status`, `require_audio_running`, `validate_microphone_gain`
+
 Future<int> initPjsua({
   required int localPort,
   required OnIncommingCall incomingCallStrategy,
@@ -49,3 +51,16 @@ Future<void> hangupCall({required int callId}) =>
     RustLib.instance.api.crateApiSimpleHangupCall(callId: callId);
 
 Future<int> destroyPjsua() => RustLib.instance.api.crateApiSimpleDestroyPjsua();
+
+/// Capture gain shared by every call. 0 mutes, 1 is unity, 4 is maximum.
+Future<void> setMicrophoneGain({required double gain}) =>
+    RustLib.instance.api.crateApiSimpleSetMicrophoneGain(gain: gain);
+
+/// Last gain successfully applied through this API; unity after initialization.
+Future<double> getMicrophoneGain() =>
+    RustLib.instance.api.crateApiSimpleGetMicrophoneGain();
+
+/// Latest microphone input level, normalized to 0..1. Poll during active media
+/// (e.g. every 100 ms). This is capture input, never remote speaker output.
+Future<double> getMicrophoneLevel() =>
+    RustLib.instance.api.crateApiSimpleGetMicrophoneLevel();
