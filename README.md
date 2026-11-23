@@ -65,6 +65,49 @@ ANDROID_NDK_HOME=/home/mortie/Android/Sdk/ndk/29.0.14206865
 
 then just target your Android device and build the example like any other Flutter application
 
+## Regenerating the Rust/Dart bridge
+
+The Rust runtime, Dart runtime, and generator must all use FRB revision
+`d1c1957a045825434c86ef6bc936c3299431c5fb` (`2.14.0-beta.2`) from
+[FRB PR #3527](https://github.com/fzyzcjy/flutter_rust_bridge/pull/3527).
+The Git dependency is intentional until this native-symbol-prefix support is
+released; this checkout is not currently publishable to pub.dev.
+
+With Flutter/Dart on `PATH`, run from the repository root:
+
+```sh
+cargo install flutter_rust_bridge_codegen --locked \
+  --git https://github.com/shri-acha/flutter_rust_bridge \
+  --rev d1c1957a045825434c86ef6bc936c3299431c5fb \
+  --root target/frb-codegen
+flutter pub get
+target/frb-codegen/bin/flutter_rust_bridge_codegen generate \
+  --skip-fvm-install --no-auto-upgrade-dependency
+```
+
+The generator's dependency-version heuristic can warn about these Git pins;
+verify the resolved revision in `Cargo.lock` and both `pubspec.lock` files rather
+than replacing them with registry versions. Dependency checks remain enabled.
+Commit the regenerated Rust and Dart files together. Keep the runtime's default
+codegen-version and content-hash checks enabled; do not bypass mismatches.
+`native_symbol_prefix: flutter_rust_sip_` isolates this library's FRB dispatch and
+content-hash exports from other FRB libraries loaded into the same process. The native asset hook and
+library loader configuration are unchanged; the prefix is not a library filename.
+
+Validate with the toolchain pinned in `rust/rust-toolchain.toml`:
+
+```sh
+cargo +1.93.1 check --locked
+cargo +1.93.1 test --locked
+flutter analyze
+flutter test test/native_bridge_test.dart
+```
+
+The native smoke test exercises the asset hook, strict bridge initialization,
+and error serialization without opening a SIP account or an audio device.
+It requires the platform's PJSIP build dependencies listed above. It does not
+verify live calls or microphone delivery.
+
 ## Project Structure
 
 - `lib/` - Flutter/Dart code
