@@ -1,0 +1,40 @@
+[package]
+name = "flutter_rust_sip_example"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.93"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "flutter_rust_sip_example"
+path = "src/main.rs"
+
+[dependencies]
+flutter-plugin-sdk = { path = "../.dart_tool/flutter_rs/sdk/crates/flutter-plugin-sdk" }
+
+# === BEGIN FLUTTER GENERATED RUST PLUGINS ===
+# === END FLUTTER GENERATED RUST PLUGINS ===
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+flutter-shell-winit = { path = "../.dart_tool/flutter_rs/sdk/crates/flutter-shell-winit" }
+
+[patch.crates-io]
+flutter-plugin-sdk = { path = "../.dart_tool/flutter_rs/sdk/crates/flutter-plugin-sdk" }
+winit-wayland = { path = "../.dart_tool/flutter_rs/sdk/third_party/winit-wayland" }
+android-activity = { git = "https://github.com/nrbnlulu/android-activity", rev = "10cf552eba323e5c9cd26f6e2619d62050f2395c" }
+
+[profile.flutter-profile]
+inherits = "release"
+debug = true
+
+[workspace]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(frb_expand)"] }
+
+[patch."https://github.com/gfx-rs/wgpu.git"]
+wgpu-hal = { path = "../.dart_tool/flutter_rs/sdk/third_party/wgpu-hal" }
