@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.6]
+
+* Updated `pjsip-sys` dependency with support for up to 20 simultaneous calls
+
 ## [1.1.5]
 
 * Bumped flutter_rust_bridge version to 2.13.0
